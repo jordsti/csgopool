@@ -25,16 +25,13 @@
 		</nav>
 		
 		<div class="container">
-			<div class="row">
-				<div class="col-md-6 col-md-offset-1">
-					<h3>CS:Go Pool</h3>
-					<p>Choose your favorite player, follow the game results, get your points and WIN ! or lose of course</p>
-				</div>
-				<div class="col-md-3 col-md-offset-1">
-					<h4>Current Event</h4>
-					{{.CurrentEvent}}
-				</div>
-			</div>
+		  <div class="row">
+		  <strong>Map played </strong>: {{.Map}}
+		  </div>
+		  <div class="row">
+		    <h4>Player stats</h4>
+		    {{.PlayerStats}}
+		  </div>
 		</div>
 		
 	</body>

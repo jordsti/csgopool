@@ -10,6 +10,7 @@ func InitTeams(path string) []*csgoscrapper.Team {
 	teams := csgoscrapper.LoadTeams(path)
 	
 	if len(teams) == 0 {
+		fmt.Println("CS:GO Pool running for the first time !")
 		fmt.Println("Team not found! Fetching teams from HLTV.org")
 		
 		p := csgoscrapper.GetTeamsPage()
@@ -22,7 +23,7 @@ func InitTeams(path string) []*csgoscrapper.Team {
 			t.LoadTeam()
 		}
 		
-		fmt.Printf("%d teams loaded !", len(teams))
+		fmt.Printf("%d teams loaded !\n", len(teams))
 		
 		csgoscrapper.SaveTeams(teams, path)
 	}
@@ -41,12 +42,23 @@ func InitEvents(path string) []*csgoscrapper.Event {
 	
 		pc, _ := page.LoadPage()
 		
-		evts := pc.ParseEvents()
+		events = pc.ParseEvents()
 		
-		for _, e := range evts {
+		for _, e := range events {
 			fmt.Printf("%d, %s\n", e.EventId, e.Name)
-			e.LoadAllMatches()
+			//e.LoadAllMatches()
 		}
+	} else {
+		//updating
+		
+		fmt.Println("Updating events and matches from HLTV.org")
+		
+		page := csgoscrapper.GetEventsPage()
+		
+		pc, _ := page.LoadPage()
+		
+		events = pc.UpdateEvents(events)
+		
 	}
 	
 	csgoscrapper.SaveEvents(events, path)
