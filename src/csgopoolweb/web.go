@@ -51,5 +51,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/viewmatch/", ViewMatchHandler)
 	http.HandleFunc("/events/", EventsHandler)
 	http.HandleFunc("/viewevent/", ViewEventHandler)
+	http.HandleFunc("/teams/", TeamsHandler)
+	http.HandleFunc("/viewteam/", ViewTeamHandler)
 	http.ListenAndServe(":8080", nil)
 }
