@@ -71,13 +71,13 @@ func SaveTeams(teams []*Team, path string) {
 	b, err := json.MarshalIndent(teams, "", "	")
 	
 	if err != nil {
-		fmt.Println("Error while saving teams [1]...")
+		log.Error("Error while saving teams [1]...")
 	}
 	
 	err = ioutil.WriteFile(path, b, 0644)
 	
 	if err != nil {
-		fmt.Println("Error while saving teams [2]...")
+		log.Error("Error while saving teams [2]...")
 	}
 }
 
@@ -87,14 +87,13 @@ func LoadTeams(path string) []*Team {
 	data, err := ioutil.ReadFile(path)
 	
 	if err != nil {
-		fmt.Println("Error while reading teams [1]...")
+		log.Error("Error while reading teams [1]...")
 	}
 	
 	err = json.Unmarshal(data, &teams)
 	
 	if err != nil {
-		fmt.Println("Error while reading teams [2]...")
-		fmt.Println(err)
+		log.Error("Error while reading teams [2]...")
 	}
 	
 	return teams
@@ -104,16 +103,17 @@ func LoadTeams(path string) []*Team {
 func (t *Team) LoadTeam() {
 	if t.Name == "NotSet" {
 		purl := GetTeamPage(t.TeamId)
-		
 		page, err := purl.LoadPage()
 		
+		log.Info(fmt.Sprintf("Team [%d], Status [%d]", t.TeamId, page.Status))		
+
 		if err != nil {
-			fmt.Println("Error while loading page")
+			log.Info("Error while loading page")
 		}
 		
 		re := regexp.MustCompile("Team stats: ([a-zA-Z0-9 \\-\\.!]+) <span")
 		rs := re.FindAllStringSubmatch(page.Content, -1)
-		
+		//ioutil.WriteFile(fmt.Sprintf("team-%d.html", t.TeamId), []byte(page.Content), 0644)
 		t.Name = rs[0][1]
 		
 		//parsing initial stats

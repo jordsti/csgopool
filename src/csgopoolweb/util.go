@@ -20,7 +20,7 @@ func (w *WebServerState) GetTeamById(id int) *csgoscrapper.Team {
 	if team == nil {
 		
 		//w.AddMissingTeam(id)
-		fmt.Printf("Team [%d] not found, fetching this team!\n", id)
+		state.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", id))
 	
 		newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: id}
 		newTeam.LoadTeam()

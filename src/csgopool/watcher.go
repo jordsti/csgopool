@@ -7,6 +7,7 @@ import (
 )
 
 
+var watcher *WatcherState
 
 type GameData struct {
 	Events []*csgoscrapper.Event
@@ -19,7 +20,7 @@ type WatcherState struct {
 	DataPath string
 	Data GameData
 	Running bool
-	
+	Users Users
 }
 
 
@@ -28,6 +29,7 @@ func NewWatcher(dataPath string) *WatcherState {
 	
 	state := &WatcherState{DataPath: dataPath}
 	state.Running = false
+	watcher = state
 	return state
 }
 
@@ -82,6 +84,9 @@ func (w *WatcherState) LoadData() {
 		w.Data.MissingTeams = []int{}
 		
 	}
+	
+	users := &w.Users
+	users.LoadUsers(w.DataPath + "users.json")
 	
 	w.Running = false
 }

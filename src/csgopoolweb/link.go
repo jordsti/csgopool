@@ -2,6 +2,7 @@ package csgopoolweb
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type Parameter struct {
@@ -19,7 +20,11 @@ func (l *Link) AddParameter(name string, value string) {
 	
 	p := Parameter{Name: name, Value: value}
 	l.Params = append(l.Params, p)
-	
+}
+
+func (l *Link) AddInt(name string, value int) {
+   
+  l.AddParameter(name, strconv.Itoa(value))
 }
 
 func (l *Link) GetHTML() string {

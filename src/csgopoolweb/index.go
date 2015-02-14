@@ -8,21 +8,16 @@ import (
 	"strconv"
 )
 
-type IndexPage struct {
-	Title string
-	Brand string
-	Menu template.HTML
-	CurrentEvent template.HTML
-}
-
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	
-	t, err := template.ParseFiles(rootPath + "index.html")
+	session := state.HandleSession(w, r)
+
+	t, err := MakeTemplate("index.html")
 	if err != nil {
 		fmt.Println(err)
 	}
 	
-	m := GetMenu()
+	m := GetMenu(session)
 	
 	curevent := ""
 	
@@ -48,7 +43,18 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		curevent = "<em>No event found !</em>"
 	}
 	
-	p := &IndexPage{Title: "CS Go Pool Home", Brand: "CS:GO Pool", Menu:template.HTML(m.GetHTML()), CurrentEvent:template.HTML(curevent)}
+	p := &Page{}
+	p.Title = "CS:GO Pool Home"
+	p.Brand = "CS:GO Pool"
+	p.Menu = template.HTML(m.GetHTML())
+	p.LeftSide = template.HTML(curevent)
+	
+	if !session.IsLogged() {
+		p.AddLogin(session)
+	} else {
+		p.RightSide = GetUserMenu()
+	}
+	
 	t.Execute(w, p)
 	
 }

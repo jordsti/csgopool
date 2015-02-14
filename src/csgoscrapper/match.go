@@ -4,8 +4,6 @@ import (
 	"regexp"
 	"strconv"
 	"fmt"
-	"io/ioutil"
-	"os"
 )
 
 type MatchTeam struct {
@@ -32,7 +30,7 @@ type MatchDate struct {
 }
 
 func (md MatchDate) String() string {
-	return fmt.Sprintf("%2d/%2d %d", md.Day, md.Month, md.Year)
+	return fmt.Sprintf("%02d/%02d %d", md.Day, md.Month, md.Year)
 }
 
 type Match struct {
@@ -45,6 +43,15 @@ type Match struct {
 	PlayerStats []MatchPlayerStat
 }
 
+func (m *Match) IsPlayerIn(playerId int) bool {
+  for _, pl := range m.PlayerStats {
+    if pl.PlayerId == playerId {
+      return true
+    }
+    
+  }
+  return false
+}
 
 func ParseDate(datestr string) MatchDate {
 	
@@ -76,6 +83,7 @@ func (m *Match) GetMatchStats() {
 	page := GetMatchPage(m.MatchId)
 	pc, _ := page.LoadPage()
 	
+	log.Info(fmt.Sprintf("Match [%d], Status [%d]", m.MatchId, pc.Status))
 	// 1 -> Flag
 	// 2 -> player id
 	// 3 -> player name
@@ -123,8 +131,8 @@ func (m *Match) GetMatchStats() {
 	}
 	
 	if len(m.PlayerStats) < 10 {
-		fmt.Printf("Error with match[%d], only %d players, missings player !\n", m.MatchId, len(m.PlayerStats))
+		log.Error(fmt.Sprintf("match[%d], only %d players, missings player !", m.MatchId, len(m.PlayerStats)))
 		//output 
-		ioutil.WriteFile(os.TempDir() + "/gopool/" + strconv.Itoa(m.MatchId) + ".log", []byte(pc.Content), 0644)
+		//ioutil.WriteFile(os.TempDir() + "/gopool/" + strconv.Itoa(m.MatchId) + ".log", []byte(pc.Content), 0644)
 	}
 }

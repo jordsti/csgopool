@@ -9,9 +9,7 @@ import (
 )
 
 type MatchPage struct {
-	Title string
-	Brand string
-	Event string
+	Page
 	Menu template.HTML
 	Map string
 	PlayerStats template.HTML
@@ -19,7 +17,9 @@ type MatchPage struct {
 
 func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	
-	t, err := template.ParseFiles(rootPath + "viewmatch.html")
+	session := state.HandleSession(w, r)
+	
+	t, err := MakeTemplate("viewmatch.html")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -38,7 +38,7 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	t2 := state.GetTeamById(match.Team2.TeamId)
 	
 	if match == nil {
-		fmt.Println("MATCH NOT FOUND!")
+		state.Log.Error(fmt.Sprintf("Match [%d] not found", match.MatchId))
 	}
 	
 	//generating stats
@@ -59,6 +59,7 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 		if pl != nil {
 			playerLink := &Link{Caption:pl.Name, Url:"/viewplayer/"}
 			playerLink.AddParameter("id", strconv.Itoa(pl.PlayerId))
+			playerLink.AddParameter("teamid", strconv.Itoa(team.TeamId))
 			
 			pStats = pStats + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", playerLink.GetHTML(), teamLink.GetHTML(), ps.Frags, ps.Headshots, ps.Assists, ps.Deaths, ps.KDRatio, ps.KDDelta)
 		}
@@ -72,7 +73,7 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	p.Title = fmt.Sprintf("CS:GO Pool - Match : %s versus %s", t1.Name, t2.Name)
 	p.PlayerStats = template.HTML(pStats)
 	p.Map = match.Map
-	p.Menu = template.HTML(GetMenu().GetHTML())
+	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	
 	t.Execute(w, p)
 

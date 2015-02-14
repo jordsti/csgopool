@@ -80,7 +80,7 @@ func (p PageContent) ParseEvents() []*Event {
 		if len(e.Matches) > 0 {
 			events = append(events, e)
 		} else {
-			fmt.Println("Breaking events parsing")
+			log.Info("Breaking events parsing")
 			break
 		}
 	}
@@ -102,14 +102,14 @@ func (p PageContent) UpdateEvents(events []*Event) []*Event {
 			//updating the matches
 			e := GetEventById(events, int(e_id))
 			if e != nil {
-				fmt.Printf("Update event [%d]\n", e.EventId)
+				log.Info(fmt.Sprintf("Update event [%d]", e.EventId))
 				e.UpdateMatches()
 			} else {
-				fmt.Printf("Fatal error event [%d] not found \n", int(e_id))
+				log.Error(fmt.Sprintf("Fatal error event [%d] not found", int(e_id)))
 			}
 			
 		} else {
-			fmt.Printf("Adding a new event [%d] \n", int(e_id))
+			log.Info(fmt.Sprintf("Adding a new event [%d]", int(e_id)))
 			
 			e := &Event{EventId: int(e_id), Name: e_name}
 		
@@ -118,7 +118,7 @@ func (p PageContent) UpdateEvents(events []*Event) []*Event {
 			if len(e.Matches) > 0 {
 				events = append(events, e)
 			} else {
-				fmt.Println("Breaking events parsing")
+				log.Info("Breaking events parsing")
 				break
 			}
 		}
@@ -133,6 +133,8 @@ func (e *Event) UpdateMatches() {
 	page := GetEventMatches(e.EventId)
 	pc, _ := page.LoadPage()
 	
+	log.Info(fmt.Sprintf("Update Event [%d], Status [%d]", e.EventId, pc.Status))
+	
 	//parsing all matches
 	//match id, event id, date, team id 1, event id, flag1, team name 1, score 1, team id 2, event id, flag 2, team name 2, score 2, map
 	re := regexp.MustCompile("<a href=\"/\\?pageid=188&amp;matchid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:10%;float:left;;font-weight:normal;\">([0-9/ ]+)</div></a><a href=\"/\\?pageid=179&amp;teamid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:25%;float:left;;font-weight:normal;\"><img style=\"vertical-align:-20%;\" src=\"(.+)\" alt=\"\" height=\"12\" width=\"18\" class=\"flagFix\"/> (.+) \\(([0-9]+)\\)</div></a><a href=\"/\\?pageid=179&amp;teamid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:25%;float:left;;font-weight:normal;\"><img style=\"vertical-align:-20%;\" src=\"(.+)\" alt=\"\" height=\"12\" width=\"18\" class=\"flagFix\"/> (.+) \\(([0-9]+)\\)</div></a><div class=\"covSmallHeadline\" style=\"font-weight:normal;width:10%;float:left;text-align:center;font-weight:normal;color:black;\">([a-z0-9]+)</div><a href=\"/\\?pageid=188&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:30%;float:left;font-weight:normal;\"><img style=\"vertical-align: -1px;\" src=\"http://static.hltv.org//images/mod_csgo.png\" title=\"Counter-Strike: Global Offensive\"> <span title=\"(.+)\">(.+)</span></div></a>")
@@ -143,11 +145,11 @@ func (e *Event) UpdateMatches() {
 		m_id, _ := strconv.ParseInt(m[1], 10, 32)
 		if e.MatchExists(int(m_id)) {
 			
-			fmt.Printf("Match [%d] already exists in the event [%d]\n", m_id, e.EventId)
+			log.Info(fmt.Sprintf("Match [%d] already exists in the event [%d]", m_id, e.EventId))
 			
 		} else {
 			
-			fmt.Printf("Adding match [%d] to the event [%d]\n", m_id, e.EventId)
+			log.Info(fmt.Sprintf("Adding match [%d] to the event [%d]", m_id, e.EventId))
 			date := m[3]
 			t_1, _ := strconv.ParseInt(m[4], 10, 32)
 			ts_1, _ := strconv.ParseInt(m[8], 10, 32)
@@ -161,7 +163,7 @@ func (e *Event) UpdateMatches() {
 			
 			if match.Date.Year < 2015 {
 				//skipping this match, too old
-				fmt.Printf("Skipping match[%d], was too old, year %d\n", match.MatchId, match.Date.Year)
+				log.Info(fmt.Sprintf("Skipping match[%d], was too old, year %d\n", match.MatchId, match.Date.Year))
 			} else {
 			
 				match.Team1.TeamId = int(t_1)
@@ -195,7 +197,7 @@ func (e *Event) LoadAllMatches() {
 	
 	page := GetEventMatches(e.EventId)
 	pc, _ := page.LoadPage()
-	
+	log.Info(fmt.Sprintf("Fetching Event [%d], Status [%d]", e.EventId, pc.Status))
 	//parsing all matches
 	//match id, event id, date, team id 1, event id, flag1, team name 1, score 1, team id 2, event id, flag 2, team name 2, score 2, map
 	re := regexp.MustCompile("<a href=\"/\\?pageid=188&amp;matchid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:10%;float:left;;font-weight:normal;\">([0-9/ ]+)</div></a><a href=\"/\\?pageid=179&amp;teamid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:25%;float:left;;font-weight:normal;\"><img style=\"vertical-align:-20%;\" src=\"(.+)\" alt=\"\" height=\"12\" width=\"18\" class=\"flagFix\"/> (.+) \\(([0-9]+)\\)</div></a><a href=\"/\\?pageid=179&amp;teamid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:25%;float:left;;font-weight:normal;\"><img style=\"vertical-align:-20%;\" src=\"(.+)\" alt=\"\" height=\"12\" width=\"18\" class=\"flagFix\"/> (.+) \\(([0-9]+)\\)</div></a><div class=\"covSmallHeadline\" style=\"font-weight:normal;width:10%;float:left;text-align:center;font-weight:normal;color:black;\">([a-z0-9]+)</div><a href=\"/\\?pageid=188&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:30%;float:left;font-weight:normal;\"><img style=\"vertical-align: -1px;\" src=\"http://static.hltv.org//images/mod_csgo.png\" title=\"Counter-Strike: Global Offensive\"> <span title=\"(.+)\">(.+)</span></div></a>")
@@ -217,7 +219,7 @@ func (e *Event) LoadAllMatches() {
 		
 		if match.Date.Year < 2015 {
 			//skipping this match, too old
-			fmt.Printf("Skipping match[%d], was too old, year %d\n", match.MatchId, match.Date.Year)
+			log.Info(fmt.Sprintf("Skipping match[%d], was too old, year %d", match.MatchId, match.Date.Year))
 		} else {
 		
 		match.Team1.TeamId = int(t_1)
@@ -238,13 +240,13 @@ func (e *Event) LoadAllMatches() {
 func SaveEvents(events []*Event, path string) {
 	b, err := json.MarshalIndent(events, "", "	")
 	if err != nil {
-		fmt.Println("Error while saving events [1]")
+		log.Error("Error while saving events [1]")
 	}
 	
 	err = ioutil.WriteFile(path, b, 0644)
 	
 	if err != nil {
-		fmt.Println("Error while saving events [2]")
+		log.Error("Error while saving events [2]")
 	}
 }
 
@@ -254,14 +256,14 @@ func LoadEvents(path string) []*Event {
 	data, err := ioutil.ReadFile(path)
 	
 	if err != nil {
-		fmt.Println("Error while reading events [1]")
+		log.Error("Error while reading events [1]")
 	}
 	
 	err = json.Unmarshal(data, &events)
 	
 	if err != nil {
-		fmt.Println("Error while reading events [2]")
-		fmt.Println(err)
+		log.Error("Error while reading events [2]")
+		//fmt.Println(err)
 	}
 	
 	return events

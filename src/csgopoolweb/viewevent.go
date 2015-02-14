@@ -8,16 +8,16 @@ import (
 )
 
 type ViewEventPage struct {
-	Title string
-	Brand string
+	Page
 	EventName string
-	Menu template.HTML
 	Matches template.HTML
 }
 
 func ViewEventHandler(w http.ResponseWriter, r *http.Request) {
 	
-	t, err := template.ParseFiles(rootPath + "viewevent.html")
+	session := state.HandleSession(w, r)
+
+	t, err := MakeTemplate("viewevent.html")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -55,7 +55,7 @@ func ViewEventHandler(w http.ResponseWriter, r *http.Request) {
 	
 	p.Brand = "CS:GO Pool"
 	p.Title = "CS:GO Pool - Last Events"
-	p.Menu = template.HTML(GetMenu().GetHTML())
+	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.EventName = event.Name
 	p.Matches = template.HTML(matches_html)
 	

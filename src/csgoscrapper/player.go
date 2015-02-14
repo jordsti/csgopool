@@ -8,7 +8,7 @@ import (
 
 type PlayerStat struct {
 	Frags int
-	Headshot float32
+	Headshots float32
 	Deaths int
 	KDRatio float32
 	MapsPlayed int
@@ -25,6 +25,17 @@ type Player struct {
 	Stats PlayerStat
 }
 
+func PlayerExistsIn(players []Player, id int) bool {
+	
+	for _, pl := range players {
+		if pl.PlayerId == id {
+			return true
+		}
+	}
+	
+	return false
+}
+
 func (p PageContent) ParsePlayer() []Player {
 	
 	players := []Player{}
@@ -37,10 +48,14 @@ func (p PageContent) ParsePlayer() []Player {
 		p_id, _ := strconv.ParseInt(p[1], 10, 32)
 		player := Player{Name: p[2], PlayerId: int(p_id)}
 		
-		pl := &player
-		pl.LoadStats()
-		
-		players = append(players, player)
+		if !PlayerExistsIn(players, player.PlayerId) {
+			pl := &player
+			pl.LoadStats()
+			
+			players = append(players, player)
+		} else {
+			log.Info(fmt.Sprintf("Player [%d] already exists, skipping...", player.PlayerId))
+		}
 	}
 	
 	return players
@@ -52,9 +67,15 @@ func (p *Player) LoadStats() {
 	page := GetPlayerPage(p.PlayerId)
 	content, _ := page.LoadPage()
 	
+	log.Info(fmt.Sprintf("Player [%d], Status [%d]", p.PlayerId, content.Status))
+
+	if content.Status != 200 {
+		log.Error(fmt.Sprintf("Player[%d] page return status %d, new attempt", p.PlayerId, content.Status))
+	}
+	
 	if len(p.Name) == 0 {
 		//parsing name too
-		fmt.Printf("Parsing name for player [%d]\n", p.PlayerId)
+		log.Info(fmt.Sprintf("Parsing name for player [%d]", p.PlayerId))
 		ren := regexp.MustCompile("Player stats: ([a-zA-Z0-9\\.\\-_ ]+) <span class=\"tab_spacer\">")
 		rsn := ren.FindAllStringSubmatch(content.Content, -1)
 		p.Name = rsn[0][1]
@@ -74,7 +95,7 @@ func (p *Player) LoadStats() {
 	
 	headshots, _ := strconv.ParseFloat(rs[0][1], 32)
 	
-	p.Stats.Headshot = float32(headshots)
+	p.Stats.Headshots = float32(headshots)
 	
 	//Total deaths
 	re = regexp.MustCompile("<div class=\"covSmallHeadline\" style=\"font-weight:normal;width:185px;float:left;text-align:left;font-weight:bold\">Total deaths</div><div class=\"covSmallHeadline\" style=\"font-weight:normal;width:100px;float:left;text-align:right;color:black\">([0-9]+)</div>")

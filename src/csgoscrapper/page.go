@@ -19,6 +19,7 @@ type PageURL struct {
 type PageContent struct {
 	URL PageURL
 	Content string
+	Status int
 }
 
 func GetMatchPage(matchId int) PageURL {
@@ -91,7 +92,7 @@ func (p PageURL) LoadPage() (PageContent, error) {
 		}
 		
 		
-		content := PageContent{URL: p, Content: string(body)}
+		content := PageContent{URL: p, Content: string(body), Status: resp.StatusCode}
 		
 		return content, nil
 	}

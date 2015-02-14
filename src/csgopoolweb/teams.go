@@ -8,16 +8,15 @@ import (
 )
 
 type TeamsPage struct {
-	Title string
-	Brand string
+	Page
 	Teams template.HTML
-	Menu template.HTML
-	
 }
 
 func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	
-	t, err := template.ParseFiles(rootPath + "teams.html")
+	session := state.HandleSession(w, r)
+	
+	t, err := MakeTemplate("teams.html")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -37,8 +36,12 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	
 	p.Brand = "CS:GO Pool"
 	p.Title = "CS:GO Pool - Teams"
-	p.Menu = template.HTML(GetMenu().GetHTML())
+	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Teams = template.HTML(teams_html)
+	
+	if !session.IsLogged() {
+		p.AddLogin(session)
+	}
 	
 	t.Execute(w, p)
 }
