@@ -7,6 +7,12 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"encoding/hex"
+	"crypto/rand"
+)
+
+const (
+	UserRank = 1
+	PoolMaster = 10
 )
 
 type UserConstraint struct {
@@ -20,12 +26,21 @@ type User struct {
 	Name string
 	Password string
 	Email string
+	Rank int
 }
 
 type Users struct {
 	Users []User
 	CurrentId int
 	Constraints UserConstraint
+}
+
+func (u User) IsPoolMaster() bool {
+	if u.Rank >= PoolMaster {
+		return true
+	}
+	
+	return false
 }
 
 func (u *Users) Login(username string, password string) (*User, error) {
@@ -49,7 +64,7 @@ func (u *Users) Login(username string, password string) (*User, error) {
 	
 }
 
-func (u *Users) CreateUser(username string, password string, email string) (*User, error) {
+func (u *Users) CreateUser(username string, password string, email string, rank int) (*User, error) {
 	
 	//username unique check
 	user := u.GetUserByName(username)
@@ -69,7 +84,7 @@ func (u *Users) CreateUser(username string, password string, email string) (*Use
 	pwd, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	pw_str := hex.EncodeToString(pwd)
 	
-	nuser := User{Name: username, Password: pw_str, Email:email, Id:u.CurrentId}
+	nuser := User{Name: username, Password: pw_str, Email:email, Id:u.CurrentId, Rank:rank}
 	
 	u.Users = append(u.Users, nuser)
 	
@@ -89,6 +104,7 @@ func (u *Users) GetUserByName(username string) *User {
 	
 	return nil
 }
+
 
 func (u *Users) GetUserByEmail(email string) *User {
 		for _, user := range u.Users {
@@ -113,6 +129,20 @@ func (u *Users) SaveUsers(path string) {
 	if err != nil {
 		fmt.Println("Error while saving users [2]")
 	}
+}
+
+func RandomString(length int) string {
+	chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0987654321"
+	
+	var bytes = make([]byte, length)
+	rand.Read(bytes)
+	
+	for k, v := range bytes {
+		bytes[k] = chars[v%byte(len(chars))]
+	}
+	
+	return string(bytes)
+	
 }
 
 func (u *Users) LoadUsers(path string) {

@@ -4,6 +4,7 @@ import (
 	//"html/template"
 	"net/http"
 	"fmt"
+	"csgopool"
 )
 
 
@@ -22,7 +23,7 @@ func CreateAccountHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	if pwd == pwd2 {
-		u, err := state.Users.CreateUser(username, pwd, email)
+		u, err := state.Users.CreateUser(username, pwd, email, csgopool.UserRank)
 		
 		if err != nil {
 			session.SetField("message", fmt.Sprintf("%s", err))

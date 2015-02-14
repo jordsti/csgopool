@@ -71,6 +71,20 @@ func (p *Player) LoadStats() {
 
 	if content.Status != 200 {
 		log.Error(fmt.Sprintf("Player[%d] page return status %d, new attempt", p.PlayerId, content.Status))
+		attempts := 0
+		max_attempts := 10 //put this in settings todo
+		
+		for content.Status != 200 {
+			
+			content, _ = page.LoadPage()
+			log.Info(fmt.Sprintf("Player [%d], Status [%d], attempt %d", p.PlayerId, content.Status, attempts))
+			attempts += 1
+			if attempts >= max_attempts {
+				log.Error(fmt.Sprintf("Player[%d] max attemps hit !, skipping", p.PlayerId))
+				return
+			}
+		}
+		
 	}
 	
 	if len(p.Name) == 0 {

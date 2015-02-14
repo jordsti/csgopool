@@ -36,14 +36,14 @@ If it's the first run time, all the stats from HLTV will be fetched. This can ta
 ### To Do
 
 This is the TODO list for the near future
-  
+  - User password modification
   - User constraint serialization and implementation (password min char, username min and max)
   - Maybe a settings file could be nice
   - Pool
     - Player selection (How player will be selected and constraint)
     - Points attribution per game performance
-  - Web Interface
   - User space
-    - Login, Create Account, Dashboard, My Pool
+    - Dashboard, My Pool
   - JSON Data or in a Database ?
   - Handle Orphan player
+  - Pool Master and pool creation page

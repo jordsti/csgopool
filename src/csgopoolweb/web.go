@@ -62,12 +62,16 @@ func GetMenu(s *Session) Menu {
 	
 	i = MenuItem{MenuId: 2, LinkName: "Teams", Link:"/teams/"}
 	m.Items = append(m.Items, i)
+		
+	i = MenuItem{MenuId: 3, LinkName: "Players", Link:"/players/"}
+	m.Items = append(m.Items, i)
 	
-	i = MenuItem{MenuId: 3, LinkName: "Ranking", Link:"/ranking/"}
+	
+	i = MenuItem{MenuId: 4, LinkName: "Ranking", Link:"/ranking/"}
 	m.Items = append(m.Items, i)
 	
 	if s.IsLogged() {
-		i = MenuItem{MenuId: 4, LinkName: "Log out", Link:"/logout/?out"}
+		i = MenuItem{MenuId: 5, LinkName: "Log out", Link:"/logout/?out"}
 		m.Items = append(m.Items, i)
 	}
 	
@@ -81,11 +85,16 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/events/", EventsHandler)
 	http.HandleFunc("/viewevent/", ViewEventHandler)
 	http.HandleFunc("/teams/", TeamsHandler)
+	http.HandleFunc("/players/", PlayersHandler)
 	http.HandleFunc("/viewteam/", ViewTeamHandler)
 	http.HandleFunc("/accountform/", AccountFormHandler)
 	http.HandleFunc("/createaccount/", CreateAccountHandler)
 	http.HandleFunc("/login/", LoginHandler)
 	http.HandleFunc("/logout/", LogoutHandler)
 	http.HandleFunc("/", IndexHandler)
+	
+	//image serving
+	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir(rootPath + "/images/"))))
+	
 	http.ListenAndServe(fmt.Sprintf(":%d", w.Port), nil)
 }

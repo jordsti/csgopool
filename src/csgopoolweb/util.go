@@ -39,15 +39,3 @@ func (w *WebServerState) GetMatchById(id int) *csgoscrapper.Match {
 	match := csgoscrapper.GetMatchById(w.Data.Events, id)
 	return match
 }
-
-func (w *WebServerState) AddMissingTeam(teamId int) {
-	
-	for _, id := range w.Data.MissingTeams {
-		if id == teamId {
-			return
-		}
-	}
-	
-	w.Data.MissingTeams = append(w.Data.MissingTeams, teamId)
-	
-}
