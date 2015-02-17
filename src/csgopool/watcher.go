@@ -3,6 +3,7 @@ package csgopool
 import (
 	"fmt"
 	"csgoscrapper"
+	"csgodb"
 	"time"
 )
 
@@ -38,6 +39,19 @@ func (w *WatcherState) LoadData() {
 	
 	w.Running = true
 	
+	//init database
+	
+	csgodb.Db.Username = "csgopool"
+	csgodb.Db.Password = "test"
+	csgodb.Db.Name = "csgopool"
+	csgodb.Db.Address = "localhost:3306"
+	
+	db, err := csgodb.Db.Open()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	csgodb.InitTables(db)
+	
 	team_path := w.DataPath + "/teams.json"
 	
 	teams := InitTeams(team_path)
@@ -49,6 +63,8 @@ func (w *WatcherState) LoadData() {
 			fmt.Printf("	%s, %d\n", p.Name, p.Stats.Frags)
 		}
 	}*/
+	
+	//database import test
 	
 	w.Log.Info(fmt.Sprintf("Teams count : %d", len(teams)))
 	
@@ -83,6 +99,25 @@ func (w *WatcherState) LoadData() {
 			}
 		}
 	}
+	
+	csgodb.ImportTeams(db, w.Data.Teams)
+	
+	for _, t := range w.Data.Teams {
+		
+		csgodb.ImportPlayers(db, t.Players)
+		for _, p := range t.Players {
+			csgodb.AddPlayer(db, t.TeamId, p.PlayerId)
+		}
+		
+	}
+
+	for _, evt := range events {
+		if len(evt.Matches) > 0 {
+			csgodb.ImportMatches(db, evt.Matches)
+		}
+	}
+	
+	db.Close()
 	
 	csgoscrapper.SaveTeams(w.Data.Teams, team_path)
 	

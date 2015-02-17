@@ -40,7 +40,7 @@ type Match struct {
 	Team2 MatchTeam
 	Map string
 	EventId int
-	PlayerStats []MatchPlayerStat
+	PlayerStats []*MatchPlayerStat
 }
 
 func (m *Match) IsPlayerIn(playerId int) bool {
@@ -124,7 +124,7 @@ func (m *Match) GetMatchStats() {
 		
 		rating, _ := strconv.ParseFloat(s[15], 32)
 		
-		stat := MatchPlayerStat{int(p_id), int(t_id), int(frags), int(headshots), int(assists), int(deaths), float32(kdr), int(kdrDelta), float32(rating)}
+		stat := &MatchPlayerStat{int(p_id), int(t_id), int(frags), int(headshots), int(assists), int(deaths), float32(kdr), int(kdrDelta), float32(rating)}
 		
 		m.PlayerStats = append(m.PlayerStats, stat)
 		
