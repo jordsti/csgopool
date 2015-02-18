@@ -39,8 +39,9 @@ func ViewEventHandler(w http.ResponseWriter, r *http.Request) {
 		t1 := csgodb.GetTeamById(db, m.Team1.TeamId)
 		t2 := csgodb.GetTeamById(db, m.Team2.TeamId)
 		
+		dateStr := fmt.Sprintf("%d-%02d-%02d", m.Date.Year(), m.Date.Month(), m.Date.Day())
 		
-		mLink := &Link{Caption: m.Date.String(), Url: "/viewmatch/"}
+		mLink := &Link{Caption: dateStr, Url: "/viewmatch/"}
 		mLink.AddParameter("id", strconv.Itoa(m.MatchId))
 		
 		t1cap := fmt.Sprintf("%s (%d)", t1.Name, m.Team1.Score)

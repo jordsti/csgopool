@@ -3,6 +3,7 @@ import (
 	"database/sql"
 	"csgoscrapper"
 	"fmt"
+	"time"
 )
 
 type Event struct {
@@ -10,6 +11,7 @@ type Event struct {
 	Name string
 	Matches []*Match
 	MatchesCount int
+	LastChange time.Time
 }
 
 func IsEventIn(events []*Event, eventId int) bool {
@@ -20,6 +22,16 @@ func IsEventIn(events []*Event, eventId int) bool {
 	}
 	
 	return false
+}
+
+
+func (e *Event) Tick(db *sql.DB) {
+	
+	last_change := time.Now()
+	
+	query := "UPDATE events SET last_change = ? WHERE event_id = ?"
+	db.Exec(query, last_change, e.EventId)
+	
 }
 
 func IsEventExists(db *sql.DB, eventId int) bool {
@@ -43,7 +55,7 @@ func IsEventExists(db *sql.DB, eventId int) bool {
 func GetLastEvent(db *sql.DB) *Event {
 	
 	event := &Event{EventId: 0}
-	query := "SELECT event_id, event_name FROM events ORDER BY event_id DESC LIMIT 1"
+	query := "SELECT event_id, event_name FROM events ORDER BY last_change, event_id DESC LIMIT 1"
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {

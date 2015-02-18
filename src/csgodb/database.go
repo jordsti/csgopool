@@ -96,6 +96,7 @@ func InitTables(db *sql.DB) {
 	req = "CREATE TABLE IF NOT EXISTS `events` ("
 	req += "`event_id` int(255) NOT NULL,"
 	req += "`event_name` varchar(255) NOT NULL,"
+	req += "`last_change` DATE NOT NULL,"
 	req += "PRIMARY KEY (`event_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"fmt"
 	"strconv"
+	"csgodb"
 	//"csgoscrapper"
 )
 
@@ -28,19 +29,28 @@ func ViewTeamHandler(w http.ResponseWriter, r *http.Request) {
 	
 	teamId := int(m_id)
 	
-	team := state.GetTeamById(teamId)
+	db, _ := csgodb.Db.Open()
 	
+	team_ := csgodb.GetTeamById(db, teamId)
+	if team_.TeamId == 0 {
+		//error here!
+		return
+	}
 	
+	team := team_.P()
+	team.FetchPlayers(db)
 	pStats := ""
 	for _, pl := range team.Players {
 		playerLink := &Link{Caption: pl.Name, Url:"/viewplayer/"}
-		playerLink.AddParameter("id", strconv.Itoa(pl.PlayerId))
-		playerLink.AddParameter("teamid", strconv.Itoa(team.TeamId))
+		playerLink.AddInt("id", pl.PlayerId)
+		playerLink.AddInt("teamid", team.TeamId)
 		
-		pStats = pStats + fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%0.2f</td><td>%d</td><td>%.2f</td><td>%d</td><td>%d</td><td>%.2f</td><td>%.2f</td><td>%.2f</td></tr>", playerLink.GetHTML(), pl.Stats.Frags, pl.Stats.Headshots, pl.Stats.Deaths, pl.Stats.KDRatio, pl.Stats.MapsPlayed, pl.Stats.RoundsPlayed, pl.Stats.AvgFragsPerRound, pl.Stats.AvgAssistsPerRound, pl.Stats.AvgDeathsPerRound)
+		pStats = pStats + fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%0.2f</td><td>%d</td><td>%.2f</td><td>%d</td><td>%d</td><td>%.2f</td></tr>", playerLink.GetHTML(), pl.Stat.Frags, pl.Stat.Headshots, pl.Stat.Deaths, pl.Stat.AvgKDRatio, pl.Stat.MatchesPlayed, pl.Stat.AvgFrags, pl.Stat.AvgKDDelta)
 		
 	}
 	
+	
+	db.Close()
 	
 	p := &TeamPage{}
 	

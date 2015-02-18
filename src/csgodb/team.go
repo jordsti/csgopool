@@ -14,20 +14,21 @@ type Team struct {
 	Players []*Player
 }
 
-type TeamPlus struct {
+type TeamP struct {
 	Team
+	Players []*PlayerWithStat
 	PlayersCount int
 	MatchesCount int
 }
 
-func GetTeamsWithCount(db *sql.DB) []*TeamPlus {
-	teams := []*TeamPlus{}
+func GetTeamsWithCount(db *sql.DB) []*TeamP {
+	teams := []*TeamP{}
 	query := "SELECT t.team_id, t.team_name, COUNT(pt.player_id), (SELECT COUNT(m.match_id) FROM matches m WHERE m.team1_id = t.team_id OR m.team2_id = t.team_id) as played_matches FROM teams t JOIN players_teams pt ON pt.team_id = t.team_id GROUP BY t.team_id"
 	
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {
-		tp := &TeamPlus{}
+		tp := &TeamP{}
 		rows.Scan(&tp.TeamId, &tp.Name, &tp.PlayersCount, &tp.MatchesCount)
 		teams = append(teams, tp)
 	}
@@ -35,9 +36,18 @@ func GetTeamsWithCount(db *sql.DB) []*TeamPlus {
 	return teams
 }
 
-func (t *Team) FetchPlayers(db *sql.DB) {
+func (t *Team) P() *TeamP {
+	team := &TeamP{}
 	
-	t.Players = GetPlayersByTeamId(db, t.TeamId)
+	team.TeamId = t.TeamId
+	team.Name = t.Name
+	
+	return team
+}
+
+func (t *TeamP) FetchPlayers(db *sql.DB) {
+	
+	t.Players = GetPlayersWithStatByTeamId(db, t.TeamId)
 }
 
 func AddPlayerToTeam(db *sql.DB, teamId int, playerId int) {

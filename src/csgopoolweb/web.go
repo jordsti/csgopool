@@ -94,7 +94,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/", IndexHandler)
 	
 	//image serving
-	//http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir(rootPath + "/images/"))))
+	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir(rootPath + "/images/"))))
 
 	
 	http.ListenAndServe(fmt.Sprintf(":%d", w.Port), nil)

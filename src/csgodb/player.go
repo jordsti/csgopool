@@ -5,9 +5,26 @@ import (
 	"csgoscrapper"
 )
 
+type GeneralStat struct {
+	MatchesPlayed int
+	Frags int
+	Headshots int
+	Assists int
+	Deaths int
+	AvgKDRatio float32
+	AvgKDDelta float32
+	AvgFrags float32
+	AvgHeadshots float32
+}
+
 type Player struct {
 	PlayerId int
 	Name string
+}
+
+type PlayerWithStat struct {
+	Player
+	Stat GeneralStat
 }
 
 func GetAllPlayers(db *sql.DB) []*Player {
@@ -28,16 +45,21 @@ func GetAllPlayers(db *sql.DB) []*Player {
 	
 }
 
-func GetPlayersByTeamId(db *sql.DB, teamId int) []*Player {
-	players := []*Player{}
+func GetPlayersWithStatByTeamId(db *sql.DB, teamId int) []*PlayerWithStat {
+	players := []*PlayerWithStat{}
 	
-	query := "SELECT p.player_id, p.player_name FROM players p JOIN players_teams pt ON pt.player_id = p.player_id WHERE pt.team_id = ?"
+	query := "SELECT p.player_id, p.player_name, COUNT(ms.match_stat_id), SUM(ms.frags), "
+	query += "SUM(ms.headshots), SUM(ms.assists), SUM(ms.deaths), AVG(ms.kdratio), AVG(ms.kddelta), AVG(ms.frags), AVG(ms.headshots)"
+	query += "FROM players p "
+	query += "JOIN players_teams pt ON pt.player_id = p.player_id "
+	query += "JOIN matches_stats ms ON ms.player_id = p.player_id AND ms.team_id = pt.team_id "
+	query += "WHERE pt.team_id = ? GROUP BY player_id"
 	
 	rows, _ := db.Query(query, teamId)
 	
 	for rows.Next() {
-		pl := &Player{}
-		rows.Scan(&pl.PlayerId, &pl.Name)
+		pl := &PlayerWithStat{}
+		rows.Scan(&pl.PlayerId, &pl.Name, &pl.Stat.MatchesPlayed, &pl.Stat.Frags, &pl.Stat.Headshots, &pl.Stat.Assists, &pl.Stat.Deaths, &pl.Stat.AvgKDRatio, &pl.Stat.AvgKDDelta, &pl.Stat.AvgFrags, &pl.Stat.AvgHeadshots)
 		players = append(players, pl)
 	}
 	
