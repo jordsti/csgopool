@@ -3,6 +3,7 @@ package csgopoolweb
 import (
 	//"html/template"
 	"net/http"
+	"csgodb"
 )
 
 
@@ -18,7 +19,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	user, err := state.Users.Login(username, pwd)
+	db, _ := csgodb.Db.Open()
+	
+	user, err := csgodb.Login(db, username, pwd)
 	
 	if err != nil {
 		//fmt.Println("Login error")
@@ -27,6 +30,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		//fmt.Printf("Login success [%s]\n", user.Name)
 		session.UserId = user.Id
 	}
+	
+	db.Close()
 	
 	http.Redirect(w, r, "/", 301)
 }

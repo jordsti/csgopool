@@ -83,6 +83,11 @@ func (m *Match) GetMatchStats() {
 	page := GetMatchPage(m.MatchId)
 	pc, _ := page.LoadPage()
 	
+	for pc.Status != 200 {
+		log.Error(fmt.Sprintf("Match [%d], Status [%d], new attempt", m.MatchId, pc.Status))
+		pc, _ = page.LoadPage()
+	}
+	
 	log.Info(fmt.Sprintf("Match [%d], Status [%d]", m.MatchId, pc.Status))
 	// 1 -> Flag
 	// 2 -> player id

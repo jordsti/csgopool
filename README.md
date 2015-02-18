@@ -11,7 +11,10 @@ Our goal is to make a website with a CS:GO Pro players pool. Like for many sport
 
 The projet is coded in Go langage, so you need to get golang package.
 
-  - You need to get our only dependency first : golang.org/x/crypto/bcrypt
+  - You need to get our dependencies first : 
+	
+	- golang.org/x/crypto/bcrypt
+	- github.com/go-sql-driver/mysql
 
 You start the CS:GO Pool by running csgopoolmain. You need to pass two arguments for CSGO Pool to work
 
@@ -44,6 +47,6 @@ This is the TODO list for the near future
     - Points attribution per game performance
   - User space
     - Dashboard, My Pool
-  - JSON Data or in a Database ?
+  - JSON Data or in a Database ? -> MySQL migration in progress
   - Handle Orphan player
   - Pool Master and pool creation page

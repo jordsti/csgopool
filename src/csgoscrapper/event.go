@@ -62,6 +62,29 @@ func GetLastEvent(events []*Event) *Event {
 	return curEvent
 }
 
+func (p PageContent) ParseEventsWithoutMatches() []*Event {
+	events := []*Event{}
+	
+	re := regexp.MustCompile("<a href=\"/\\?pageid=183&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:50%;float:left;\"><img style=\"vertical-align: -1px;\" src=\"http://static.hltv.org//images/mod_csgo.png\" title=\"Counter-Strike: Global Offensive\"> (.+)</div></a>")
+	rs := re.FindAllStringSubmatch(p.Content, -1)
+	
+	for _, evt := range rs {
+		
+		e_id, _ := strconv.ParseInt(evt[1], 10, 32)
+		e_name := evt[2]
+		
+		e := &Event{EventId: int(e_id), Name: e_name}
+		
+		//e.LoadAllMatches()
+		
+
+		events = append(events, e)
+
+	}
+	
+	return events
+}
+
 func (p PageContent) ParseEvents() []*Event {
 	events := []*Event{}
 	
@@ -86,6 +109,44 @@ func (p PageContent) ParseEvents() []*Event {
 	}
 	
 	return events
+}
+
+func (p PageContent) ParseMatches() []*Match {
+	//parsing all matches
+	//match id, event id, date, team id 1, event id, flag1, team name 1, score 1, team id 2, event id, flag 2, team name 2, score 2, map
+	matches := []*Match{}
+	
+	re := regexp.MustCompile("<a href=\"/\\?pageid=188&amp;matchid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:10%;float:left;;font-weight:normal;\">([0-9/ ]+)</div></a><a href=\"/\\?pageid=179&amp;teamid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:25%;float:left;;font-weight:normal;\"><img style=\"vertical-align:-20%;\" src=\"(.+)\" alt=\"\" height=\"12\" width=\"18\" class=\"flagFix\"/> (.+) \\(([0-9]+)\\)</div></a><a href=\"/\\?pageid=179&amp;teamid=([0-9]+)&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:25%;float:left;;font-weight:normal;\"><img style=\"vertical-align:-20%;\" src=\"(.+)\" alt=\"\" height=\"12\" width=\"18\" class=\"flagFix\"/> (.+) \\(([0-9]+)\\)</div></a><div class=\"covSmallHeadline\" style=\"font-weight:normal;width:10%;float:left;text-align:center;font-weight:normal;color:black;\">([a-z0-9]+)</div><a href=\"/\\?pageid=188&amp;eventid=([0-9]+)&amp;gameid=2\"><div class=\"covSmallHeadline\" style=\"width:30%;float:left;font-weight:normal;\"><img style=\"vertical-align: -1px;\" src=\"http://static.hltv.org//images/mod_csgo.png\" title=\"Counter-Strike: Global Offensive\"> <span title=\"(.+)\">(.+)</span></div></a>")
+	rs := re.FindAllStringSubmatch(p.Content, -1)
+	
+	for _, m := range rs {
+		
+		m_id, _ := strconv.ParseInt(m[1], 10, 32)
+
+		log.Info(fmt.Sprintf("Parsing match [%d]", m_id))
+
+		date := m[3]
+		t_1, _ := strconv.ParseInt(m[4], 10, 32)
+		ts_1, _ := strconv.ParseInt(m[8], 10, 32)
+		
+		t_2, _ := strconv.ParseInt(m[9], 10, 32)
+		ts_2, _ := strconv.ParseInt(m[13], 10, 32)
+		
+		gameMap := m[14]
+		
+		match := &Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap, EventId: p.URL.EventId}
+		
+		match.Team1.TeamId = int(t_1)
+		match.Team1.Score = int(ts_1)
+		
+		match.Team2.TeamId = int(t_2)
+		match.Team2.Score = int(ts_2)
+		
+		
+		matches = append(matches, match)
+	}
+	
+	return matches
 }
 
 func (p PageContent) UpdateEvents(events []*Event) []*Event {

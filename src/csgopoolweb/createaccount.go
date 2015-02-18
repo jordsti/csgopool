@@ -4,7 +4,7 @@ import (
 	//"html/template"
 	"net/http"
 	"fmt"
-	"csgopool"
+	"csgodb"
 )
 
 
@@ -22,13 +22,15 @@ func CreateAccountHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	db, _ := csgodb.Db.Open()
+	
 	if pwd == pwd2 {
-		u, err := state.Users.CreateUser(username, pwd, email, csgopool.UserRank)
+		err := csgodb.CreateUser(db, username, pwd, email, csgodb.UserRank)
 		
 		if err != nil {
 			session.SetField("message", fmt.Sprintf("%s", err))
 		} else {
-			state.Log.Info(fmt.Sprintf("User %s created", u.Name))
+			state.Log.Info(fmt.Sprintf("User %s created", username))
 			session.SetField("message", "Account created with success")
 		}
 	} else {

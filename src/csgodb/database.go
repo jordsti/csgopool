@@ -3,6 +3,8 @@ package csgodb
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"encoding/json"
+	"io/ioutil"
 	"fmt"
 )
 
@@ -14,6 +16,37 @@ type Database struct {
 	Password string
 	Address string
 	Name string
+}
+
+func (d *Database) LoadConfig(path string) {
+	b, err := ioutil.ReadFile(path)
+	
+	if err != nil {
+		fmt.Println("Error while loading database config [1]")
+		return
+	}
+	
+	err = json.Unmarshal(b, d)
+	
+	if err != nil {
+		fmt.Println("Error while loading database config [2]")
+	}
+}
+
+func (d *Database) SaveConfig(path string) {
+	
+	b, err := json.MarshalIndent(d, "", "	")
+	
+	if err != nil {
+		fmt.Println("Error while saving database config [1]")
+		return
+	}
+	
+	err = ioutil.WriteFile(path, b, 0644)
+	
+	if err != nil {
+		fmt.Println("Error while saving database config [2]")
+	}
 }
 
 
@@ -94,6 +127,17 @@ func InitTables(db *sql.DB) {
 	req += "`kdratio` float NOT NULL,"
 	req += "`kddelta` int(25) NOT NULL,"
 	req += "PRIMARY KEY (`match_stat_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	
+	req = "CREATE TABLE IF NOT EXISTS `users` ("
+	req += "`user_id` int(255) NOT NULL AUTO_INCREMENT,"
+	req += "`username` varchar(255) NOT NULL,"
+	req += "`password` varchar(255) NOT NULL,"
+	req += "`email` varchar(255) NOT NULL,"
+	req += "`rank`int(25) NOT NULL,"
+	req += "PRIMARY KEY(`user_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)

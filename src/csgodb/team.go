@@ -3,6 +3,7 @@ package csgodb
 import (
 	"csgoscrapper"
 	"database/sql"
+	"fmt"
 )
 
 
@@ -10,11 +11,36 @@ type Team struct {
 	TeamId int
 	Name string
 	
-	Players []Player
+	Players []*Player
 }
 
+type TeamPlus struct {
+	Team
+	PlayersCount int
+	MatchesCount int
+}
 
-func AddPlayer(db *sql.DB, teamId int, playerId int) {
+func GetTeamsWithCount(db *sql.DB) []*TeamPlus {
+	teams := []*TeamPlus{}
+	query := "SELECT t.team_id, t.team_name, COUNT(pt.player_id), (SELECT COUNT(m.match_id) FROM matches m WHERE m.team1_id = t.team_id OR m.team2_id = t.team_id) as played_matches FROM teams t JOIN players_teams pt ON pt.team_id = t.team_id GROUP BY t.team_id"
+	
+	rows, _ := db.Query(query)
+	
+	for rows.Next() {
+		tp := &TeamPlus{}
+		rows.Scan(&tp.TeamId, &tp.Name, &tp.PlayersCount, &tp.MatchesCount)
+		teams = append(teams, tp)
+	}
+	
+	return teams
+}
+
+func (t *Team) FetchPlayers(db *sql.DB) {
+	
+	t.Players = GetPlayersByTeamId(db, t.TeamId)
+}
+
+func AddPlayerToTeam(db *sql.DB, teamId int, playerId int) {
 	query := "INSERT INTO players_teams (team_id, player_id) VALUES (?, ?)"
 	
 	db.Exec(query, teamId, playerId)
@@ -59,7 +85,11 @@ func GetTeamById(db *sql.DB, teamId int) Team {
 	
 	team := Team{TeamId: 0, Name:""}
 	
-	rows, _ := db.Query("SELECT team_id, team_name FROM teams WHERE team_id = ?")
+	rows, err := db.Query("SELECT team_id, team_name FROM teams WHERE team_id = ?", teamId)
+	
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
 		
 	for rows.Next() {
 		rows.Scan(&team.TeamId, &team.Name)

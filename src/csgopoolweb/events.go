@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"fmt"
 	"strconv"
+	"csgodb"
 )
 
 type EventsPage struct {
@@ -21,15 +22,16 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	
-	
+	db, _ := csgodb.Db.Open()
+	events := csgodb.GetAllEvents(db)
 	evts_html := ""
 	
-	for _, evt := range state.Data.Events {
+	for _, evt := range events {
 		
 		evtLink := &Link{Caption: evt.Name, Url: "/viewevent/"}
 		evtLink.AddParameter("id", strconv.Itoa(evt.EventId))
 		
-		evts_html = evts_html + fmt.Sprintf("<tr><td>%s</td><td>%d</td></tr>", evtLink.GetHTML(), len(evt.Matches))
+		evts_html = evts_html + fmt.Sprintf("<tr><td>%s</td><td>%d</td></tr>", evtLink.GetHTML(), evt.MatchesCount)
 	}
 	
 	p := &EventsPage{}

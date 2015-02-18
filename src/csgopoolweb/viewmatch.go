@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"fmt"
 	"strconv"
-	"csgoscrapper"
+
+	"csgodb"
 )
 
 type MatchPage struct {
@@ -24,7 +25,7 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	
-	
+	db, _ := csgodb.Db.Open()
 	
 	
 	_m_id := r.FormValue("id")
@@ -32,10 +33,11 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	
 	matchId := int(m_id)
 	
-	match := state.GetMatchById(matchId)
+	match := csgodb.GetMatchById(db, matchId)
+	match.FetchStats(db)
 	
-	t1 := state.GetTeamById(match.Team1.TeamId)
-	t2 := state.GetTeamById(match.Team2.TeamId)
+	t1 := csgodb.GetTeamById(db, match.Team1.TeamId)
+	t2 := csgodb.GetTeamById(db, match.Team2.TeamId)
 	
 	if match == nil {
 		state.Log.Error(fmt.Sprintf("Match [%d] not found", match.MatchId))
@@ -44,28 +46,26 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	//generating stats
 	pStats := `<table class="table table-striped"><thead><tr><th>Player</th><th>Team</th><th>Frags</th><th>Headshots</th><th>Assists</th><th>Deaths</th><th>K/D</th><th>K/D Delta</th></tr></thead><tbody>`
 	for _, ps := range match.PlayerStats {
-		pl := &csgoscrapper.Player{}
+
 		team := t1
-		if ps.TeamId == t1.TeamId {
-			pl = t1.GetPlayerById(ps.PlayerId)
-		} else {
-			pl = t2.GetPlayerById(ps.PlayerId)
+		if ps.TeamId == t2.TeamId {
 			team = t2
 		}
 		
 		teamLink := &Link{Caption: team.Name, Url:"/viewteam/"}
 		teamLink.AddParameter("id", strconv.Itoa(team.TeamId))
+
+		playerLink := &Link{Caption:ps.PlayerName, Url:"/viewplayer/"}
+		playerLink.AddParameter("id", strconv.Itoa(ps.PlayerId))
+		playerLink.AddParameter("teamid", strconv.Itoa(team.TeamId))
 		
-		if pl != nil {
-			playerLink := &Link{Caption:pl.Name, Url:"/viewplayer/"}
-			playerLink.AddParameter("id", strconv.Itoa(pl.PlayerId))
-			playerLink.AddParameter("teamid", strconv.Itoa(team.TeamId))
-			
-			pStats = pStats + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", playerLink.GetHTML(), teamLink.GetHTML(), ps.Frags, ps.Headshots, ps.Assists, ps.Deaths, ps.KDRatio, ps.KDDelta)
-		}
+		pStats = pStats + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", playerLink.GetHTML(), teamLink.GetHTML(), ps.Frags, ps.Headshots, ps.Assists, ps.Deaths, ps.KDRatio, ps.KDDelta)
+	
 	}
 	
 	pStats = pStats + "</tbody></table>"
+	
+	db.Close()
 	
 	p := &MatchPage{}
 	

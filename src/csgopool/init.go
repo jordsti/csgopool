@@ -5,50 +5,45 @@ import (
 	"csgoscrapper"
 )
 
-func InitTeams(path string) []*csgoscrapper.Team {
+func InitTeams() []*csgoscrapper.Team {
 	
-	teams := csgoscrapper.LoadTeams(path)
+	teams := []*csgoscrapper.Team{}
 	
-	if len(teams) == 0 {
-		fmt.Println("CS:GO Pool running for the first time !")
-		fmt.Println("Team not found! Fetching teams from HLTV.org")
-		
-		p := csgoscrapper.GetTeamsPage()
-		
-		content, _ := p.LoadPage()
-		
-		teams = content.ParseTeams()
-		
-		for _, t := range teams {
-			t.LoadTeam()
-		}
-		
-		fmt.Printf("%d teams loaded !\n", len(teams))
-		
-		csgoscrapper.SaveTeams(teams, path)
+	fmt.Println("Team initial import, fetching teams from HLTV.org")
+	
+	p := csgoscrapper.GetTeamsPage()
+	
+	content, _ := p.LoadPage()
+	
+	teams = content.ParseTeams()
+	
+	for _, t := range teams {
+		t.LoadTeam()
 	}
-	
+	//todo log
+	fmt.Printf("%d teams loaded !\n", len(teams))
+		
 	return teams
 	
 }  
 
-func InitEvents(path string) []*csgoscrapper.Event {
-	events := csgoscrapper.LoadEvents(path)
+func InitEvents() []*csgoscrapper.Event {
+	events := []*csgoscrapper.Event{}
 	
-	if len(events) == 0 {
-		fmt.Println("Events not found! Fetching events from HLTV.org")
-		
-		page := csgoscrapper.GetEventsPage()
+
+	fmt.Println("Events initial import, fetching events from HLTV.org")
 	
-		pc, _ := page.LoadPage()
-		
-		events = pc.ParseEvents()
-		
-		for _, e := range events {
-			fmt.Printf("%d, %s\n", e.EventId, e.Name)
-			//e.LoadAllMatches()
-		}
-	} else {
+	page := csgoscrapper.GetEventsPage()
+
+	pc, _ := page.LoadPage()
+	
+	events = pc.ParseEvents()
+	
+	for _, e := range events {
+		fmt.Printf("%d, %s\n", e.EventId, e.Name)
+		//e.LoadAllMatches()
+	}
+	/*} else {
 		//updating
 		
 		fmt.Println("Updating events and matches from HLTV.org")
@@ -59,9 +54,8 @@ func InitEvents(path string) []*csgoscrapper.Event {
 		
 		events = pc.UpdateEvents(events)
 		
-	}
+	}*/
 	
-	csgoscrapper.SaveEvents(events, path)
 	
 	return events
 	

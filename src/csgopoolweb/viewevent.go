@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"fmt"
 	"strconv"
+	"csgodb"
 )
 
 type ViewEventPage struct {
@@ -25,14 +26,18 @@ func ViewEventHandler(w http.ResponseWriter, r *http.Request) {
 	_evt_id, _ := strconv.ParseInt(r.FormValue("id"), 10, 32)
 	evt_id := int(_evt_id)
 	
-	event := state.GetEventById(evt_id)
+	db, _ := csgodb.Db.Open()
+	
+	event := csgodb.GetEventById(db, evt_id)
+	event.Matches = csgodb.GetMatchesByEventId(db, event.EventId)
+	
 	//nil checkup todo	
 	matches_html := ""
 	
 	for _, m := range event.Matches {
 		
-		t1 := state.GetTeamById(m.Team1.TeamId)
-		t2 := state.GetTeamById(m.Team2.TeamId)
+		t1 := csgodb.GetTeamById(db, m.Team1.TeamId)
+		t2 := csgodb.GetTeamById(db, m.Team2.TeamId)
 		
 		
 		mLink := &Link{Caption: m.Date.String(), Url: "/viewmatch/"}
@@ -50,7 +55,9 @@ func ViewEventHandler(w http.ResponseWriter, r *http.Request) {
 		matches_html = matches_html + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", mLink.GetHTML() , t1Link.GetHTML(), t2Link.GetHTML(), m.Map)
 		
 	}
-
+	
+	db.Close()
+	
 	p := &ViewEventPage{}
 	
 	p.Brand = "CS:GO Pool"

@@ -14,9 +14,9 @@ var webroot string
 var webport int
 
 func initArgs() {
-	flag.StringVar(&datapath, "data", os.TempDir() , "Path of the Stored GameData")
+	flag.StringVar(&datapath, "data", os.TempDir() , "Path of the Stored Configuration and Data")
 	flag.StringVar(&webroot, "web", os.TempDir(), "Path of the WebRoot, containing the HTML Page Template")
-	flag.IntVar(&webport, "port", 8080, "Listening port on the web service")
+	flag.IntVar(&webport, "port", 8000, "Listening port on the web service")
 }
 
 func main() {
