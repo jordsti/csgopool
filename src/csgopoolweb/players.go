@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"fmt"
+	"csgodb"
 )
 
 type PlayersPage struct {
@@ -20,23 +21,19 @@ func PlayersHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
+	db, _ := csgodb.Db.Open()
+	players := csgodb.GetAllPlayersWithStat(db)
 	players_html := ""
 	
-	
-	
-	
-	for _, t := range state.Data.Teams {
-
-
-		for _, p := range t.Players {
-			playerLink := &Link{Caption: p.Name, Url:"/viewplayer/"}
-			playerLink.AddInt("id", p.PlayerId)
-			playerLink.AddInt("teamid", t.TeamId)
-
-			players_html = players_html + fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%.2f</td><td>%d</td><td>%.2f</td><td>%d</td><td>%d</td><td>%.2f</td><td>%.2f</td><td>%.2f</td></tr>", playerLink.GetHTML(), p.Stats.Frags, p.Stats.Headshots, p.Stats.Deaths, p.Stats.KDRatio, p.Stats.MapsPlayed, p.Stats.RoundsPlayed, p.Stats.AvgFragsPerRound, p.Stats.AvgAssistsPerRound, p.Stats.AvgDeathsPerRound)
-		}
+	for _, pl := range players {
+		playerLink := &Link{Caption: pl.Name, Url:"/viewplayer/"}
+		playerLink.AddInt("id", pl.PlayerId)
+		
+		players_html += fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", playerLink.GetHTML(), pl.Stat.Frags, pl.Stat.Headshots, pl.Stat.Deaths, pl.Stat.AvgKDRatio, pl.Stat.MatchesPlayed)
 	}
-
+	
+	db.Close()
+	
 	p := &PlayersPage{}
 	
 	p.Brand = "CS:GO Pool"

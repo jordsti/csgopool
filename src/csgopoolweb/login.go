@@ -29,6 +29,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		//fmt.Printf("Login success [%s]\n", user.Name)
 		session.UserId = user.Id
+		session.User = user
 	}
 	
 	db.Close()

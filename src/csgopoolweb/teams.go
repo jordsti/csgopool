@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"fmt"
-	"strconv"
+	"csgodb"
 )
 
 type TeamsPage struct {
@@ -23,13 +23,18 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	teams_html := ""
 	
-	for _, t := range state.Data.Teams {
-		
-		teamLink := &Link{Caption: t.Name, Url: "/viewteam/"}
-		teamLink.AddParameter("id", strconv.Itoa(t.TeamId))
-		
-		teams_html = teams_html + fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%.2f</td></tr>", teamLink.GetHTML(), t.Stats.Wins, t.Stats.Draws, t.Stats.Losses, t.Stats.Frags, t.Stats.Deaths, t.Stats.RoundsPlayed, t.Stats.KDRatio)
-		
+	db, _ := csgodb.Db.Open()
+	
+	teams :=  csgodb.GetTeamsWithCount(db)
+	db.Close()
+	
+	for _, t := range teams {
+		if t.MatchesCount > 0 {
+			teamLink := &Link{Caption: t.Name, Url: "/viewteam/"}
+			teamLink.AddInt("id", t.TeamId)
+			
+			teams_html += fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td></tr>", teamLink.GetHTML(), t.PlayersCount, t.MatchesCount)
+		}
 	}
 
 	p := &TeamsPage{}

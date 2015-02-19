@@ -87,8 +87,11 @@ func InitTables(db *sql.DB) {
 	_, err = db.Exec(req)
 	
 	req = "CREATE TABLE IF NOT EXISTS `players_teams` ("
+	req += "`link_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`player_id` int(255) NOT NULL,"
-	req += "`team_id` int(255) NOT NULL"
+	req += "`team_id` int(255) NOT NULL,"
+	req += "UNIQUE KEY `players_teams_constraint` (`player_id`, `team_id`),"
+	req += "PRIMARY KEY (`link_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
@@ -96,7 +99,7 @@ func InitTables(db *sql.DB) {
 	req = "CREATE TABLE IF NOT EXISTS `events` ("
 	req += "`event_id` int(255) NOT NULL,"
 	req += "`event_name` varchar(255) NOT NULL,"
-	req += "`last_change` DATE NOT NULL,"
+	req += "`last_change` DATETIME NOT NULL,"
 	req += "PRIMARY KEY (`event_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
@@ -139,6 +142,35 @@ func InitTables(db *sql.DB) {
 	req += "`email` varchar(255) NOT NULL,"
 	req += "`rank`int(25) NOT NULL,"
 	req += "PRIMARY KEY(`user_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	
+	req = "CREATE TABLE IF NOT EXISTS `divisions` ("
+	req += "`division_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`division_name` varchar(255) NOT NULL, "
+	req += "PRIMARY KEY(`division_id`) "
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	
+	req = "CREATE TABLE IF NOT EXISTS `divisions_players` ( "
+	req += "`link_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`division_id` int(255) NOT NULL, "
+	req += "`player_id` int(255) NOT NULL,"
+	req += "UNIQUE KEY `divisions_players_constraint` (`division_id`, `player_id`),"
+	req += "PRIMARY KEY (`link_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	
+	req = "CREATE TABLE IF NOT EXISTS `users_pools` ( "
+	req += "`pool_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`division_id` int(255) NOT NULL, "
+	req += "`user_id` int(255) NOT NULL, "
+	req += "`player_id` int(255) NOT NULL, "
+	req += "UNIQUE KEY `users_pools_constraint` (`division_id`, `user_id`),"
+	req += "PRIMARY KEY (`pool_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)

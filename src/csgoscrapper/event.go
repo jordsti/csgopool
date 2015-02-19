@@ -221,8 +221,8 @@ func (e *Event) UpdateMatches() {
 			gameMap := m[14]
 			
 			match := Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap, EventId: e.EventId}
-			
-			if match.Date.Year < 2015 {
+			//todo global to edit this
+			if match.Date.Year < State.MinYear {
 				//skipping this match, too old
 				log.Info(fmt.Sprintf("Skipping match[%d], was too old, year %d\n", match.MatchId, match.Date.Year))
 			} else {
@@ -277,8 +277,8 @@ func (e *Event) LoadAllMatches() {
 		gameMap := m[14]
 		
 		match := Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap, EventId: e.EventId}
-		
-		if match.Date.Year < 2015 {
+		//todo global to edit this
+		if match.Date.Year < State.MinYear {
 			//skipping this match, too old
 			log.Info(fmt.Sprintf("Skipping match[%d], was too old, year %d", match.MatchId, match.Date.Year))
 		} else {

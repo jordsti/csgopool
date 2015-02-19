@@ -33,7 +33,7 @@ type Users struct {
 	Constraints UserConstraint
 }
 
-func (u User) IsPoolMaster() bool {
+func (u *User) IsPoolMaster() bool {
 	if u.Rank >= PoolMaster {
 		return true
 	}

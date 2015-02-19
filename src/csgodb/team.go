@@ -21,9 +21,33 @@ type TeamP struct {
 	MatchesCount int
 }
 
+func GetTeamMatches(db *sql.DB, teamId int) []*Match {
+	matches := []*Match{}
+	
+	query := "SELECT m.match_id, m.team1_id, t1.team_name, m.team1_score, m.team2_id, t2.team_name, m.team2_score, m.map, m.match_date "
+	query += "FROM matches m "
+	query += "JOIN teams t1 ON t1.team_id = m.team1_id "
+	query += "JOIN teams t2 ON t2.team_id = m.team2_id "
+	query += "WHERE m.team1_id = ? OR m.team2_id = ? ORDER BY m.match_date DESC"
+	
+	rows, err := db.Query(query, teamId, teamId)
+	
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	
+	for rows.Next() {
+		match := &Match{}
+		rows.Scan(&match.MatchId, &match.Team1.TeamId, &match.Team1.Name, &match.Team1.Score, &match.Team2.TeamId, &match.Team2.Name, &match.Team2.Score, &match.Map, &match.Date)
+		matches = append(matches, match)
+	}
+	
+	return matches
+}
+
 func GetTeamsWithCount(db *sql.DB) []*TeamP {
 	teams := []*TeamP{}
-	query := "SELECT t.team_id, t.team_name, COUNT(pt.player_id), (SELECT COUNT(m.match_id) FROM matches m WHERE m.team1_id = t.team_id OR m.team2_id = t.team_id) as played_matches FROM teams t JOIN players_teams pt ON pt.team_id = t.team_id GROUP BY t.team_id"
+	query := "SELECT t.team_id, t.team_name, COUNT(pt.player_id), (SELECT COUNT(m.match_id) FROM matches m WHERE m.team1_id = t.team_id OR m.team2_id = t.team_id) as played_matches FROM teams t JOIN players_teams pt ON pt.team_id = t.team_id GROUP BY team_id ORDER BY played_matches DESC"
 	
 	rows, _ := db.Query(query)
 	

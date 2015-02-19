@@ -5,23 +5,25 @@ import (
 	"net/http"
 	"fmt"
 	"strconv"
+	"csgodb"
 	//"csgoscrapper"
 )
 
 type PlayerPage struct {
 	Page
 	PlayerName string
-	TeamName template.HTML
 	Matches template.HTML
 	Frags string
 	Headshots string
 	Deaths string
 	KDRatio string
-	MapsPlayed string
+	MatchesPlayed string
 	RoundsPlayed string
-	AvgFragsPerRound string
-	AvgAssistsPerRound string
+	AvgFrags string
+	AvgKDDelta string
 	AvgDeathsPerRound string
+	
+	TeamsStats template.HTML
 }
 
 func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,68 +36,67 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	
-	
+	db, _ := csgodb.Db.Open()
 	
 	_m_id := r.FormValue("id")
-	_t_id := r.FormValue("teamid")
 	m_id, _ := strconv.ParseInt(_m_id, 10, 32)
-	t_id, _ := strconv.ParseInt(_t_id, 10, 32)
-	
+
 	playerId := int(m_id)
-	teamId := int(t_id)
 	
-	team := state.GetTeamById(teamId)
-	player := team.GetPlayerById(playerId)
+	player := csgodb.GetPlayerWithStatById(db, playerId)
 	
-	match_html := ""
+	teams_html := ""
 	
-	for _, evt := range state.Data.Events {
-	  
-	    evtLink := &Link{Caption: evt.Name, Url:"/viewevent/"}
-	    evtLink.AddInt("id", evt.EventId)
-	  
-	  for _, m := range evt.Matches {
-	    
-	    if m.IsPlayerIn(player.PlayerId) {
-	      //add match
-	      t1 := state.GetTeamById(m.Team1.TeamId)
-	      t2 := state.GetTeamById(m.Team2.TeamId)
-	      
-	      matchName := fmt.Sprintf("%s - %s (%d) vs %s (%d)", m.Date.String(), t1.Name, m.Team1.Score, t2.Name, m.Team2.Score)
-	      
-	      mLink := &Link{Caption: matchName, Url:"/viewmatch/" }
-	      mLink.AddParameter("id", strconv.Itoa(m.MatchId))
-	      
-	      match_html = match_html + fmt.Sprintf("%s %s %s<br />", mLink.GetHTML(), m.Map, evtLink.GetHTML())
-	    }
-	    
-	  }
-	  
+	teamsStats := csgodb.GetPlayerTeamStats(db, playerId)
+	
+	for _, t := range teamsStats {
+		
+		teamLink := &Link{Caption:t.Name, Url:"/viewteam/"}
+		teamLink.AddInt("id", t.TeamId)
+		
+		teams_html += fmt.Sprintf("<tr><td>%s</td><td>%d</td></tr>", teamLink.GetHTML(), t.MatchesCount)
 	}
 	
-	teamLink := &Link{Caption: team.Name, Url:"/viewteam/"}
-	teamLink.AddInt("id", team.TeamId)
+	matchStats := csgodb.GetPlayerMatchStats(db, playerId)
+	
+	matches_html := ""
+	
+	for _, ms := range matchStats {
+		team1Link := &Link{Caption: fmt.Sprintf("%s (%d)", ms.Team1.Name, ms.TeamScore1), Url:"/viewteam/"}
+		team1Link.AddInt("id", ms.Team1.TeamId)
+		
+		team2Link := &Link{Caption: fmt.Sprintf("%s (%d)", ms.Team2.Name, ms.TeamScore2), Url:"/viewteam/"}
+		team2Link.AddInt("id", ms.Team2.TeamId)
+		
+		matchLink := &Link{Caption: fmt.Sprintf("%d-%02d-%02d", ms.Date.Year(), ms.Date.Month(), ms.Date.Day()), Url:"/viewmatch/"}
+		matchLink.AddInt("id", ms.MatchId)
+		
+		matches_html += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%.2f</td></tr>", matchLink.GetHTML(), team1Link.GetHTML(), team2Link.GetHTML(), ms.Frags, ms.Headshots, ms.KDRatio)
+	}
+	
+	db.Close()
 	
 	p := &PlayerPage{}
 	
 	p.Brand = "CS:GO Pool"
-	p.Title = fmt.Sprintf("CS:GO Pool - Team : %s", team.Name)
+	p.Title = fmt.Sprintf("CS:GO Pool - Player : %s", player.Name)
 	p.PlayerName = player.Name
-	p.TeamName = template.HTML(teamLink.GetHTML())
+
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
-	p.Matches = template.HTML(match_html)
+	p.Matches = template.HTML(matches_html)
 	
-	p.Frags = fmt.Sprintf("%d", player.Stats.Frags)
-	p.Headshots = fmt.Sprintf("%.2f", player.Stats.Headshots)
-	p.Deaths = fmt.Sprintf("%d", player.Stats.Deaths)
-	p.KDRatio = fmt.Sprintf("%.2f", player.Stats.KDRatio)
-	p.MapsPlayed = fmt.Sprintf("%d", player.Stats.MapsPlayed)
-	p.RoundsPlayed = fmt.Sprintf("%d", player.Stats.RoundsPlayed)
 	
-	p.AvgFragsPerRound = fmt.Sprintf("%.2f", player.Stats.AvgFragsPerRound)
-	p.AvgAssistsPerRound = fmt.Sprintf("%.2f", player.Stats.AvgAssistsPerRound)
-	p.AvgDeathsPerRound = fmt.Sprintf("%.2f", player.Stats.AvgDeathsPerRound)
+	p.Frags = fmt.Sprintf("%d", player.Stat.Frags)
+	p.Headshots = fmt.Sprintf("%d", player.Stat.Headshots)
+	p.Deaths = fmt.Sprintf("%d", player.Stat.Deaths)
+	p.KDRatio = fmt.Sprintf("%.2f", player.Stat.AvgKDRatio)
+	p.MatchesPlayed = fmt.Sprintf("%d", player.Stat.MatchesPlayed)
 	
+	p.AvgFrags = fmt.Sprintf("%.2f", player.Stat.AvgFrags)
+	p.AvgKDDelta = fmt.Sprintf("%.2f", player.Stat.AvgKDDelta)
+	
+	p.TeamsStats = template.HTML(teams_html)
+
 	t.Execute(w, p)
 
 

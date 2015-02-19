@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"crypto/rand"
 	"net/http"
+	"csgodb"
 	"strconv"
 	"fmt"
 )
@@ -17,6 +18,7 @@ type SessionField struct {
 type Session struct {
 	Id string
 	UserId int
+	User *csgodb.User
 	Fields []*SessionField
 }
 

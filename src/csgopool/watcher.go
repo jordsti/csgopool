@@ -21,17 +21,25 @@ type WatcherState struct {
 	
 	DataPath string
 	Data GameData //to remove mysql is used instead todo
+	RefreshTime string
 	Running bool
+	ImportSnapshot bool
+	GenerateSnapshot bool
+	SnapshotUrl string
 	Users Users
 	Log *csgoscrapper.LoggerState
 }
 
 
 
-func NewWatcher(dataPath string) *WatcherState {
+func NewWatcher(dataPath string, snapshotUrl string, importSnapshot bool, generateSnapshot bool) *WatcherState {
 	
 	state := &WatcherState{DataPath: dataPath}
 	state.Running = false
+	state.ImportSnapshot = importSnapshot
+	state.GenerateSnapshot = generateSnapshot
+	state.SnapshotUrl = snapshotUrl
+	state.RefreshTime = "30m"
 	state.Log = &csgoscrapper.LoggerState{LogPath: dataPath+"/watcher.log", Level:3}
 	watcher = state
 	return state
@@ -121,10 +129,24 @@ func (w *WatcherState) LoadData() {
 	
 	teams := csgodb.GetAllTeams(db)
 	
+	if w.GenerateSnapshot {
+		w.Log.Info("Generating a Snapshot...")
+		snapshot := csgodb.GenerateSnapshot(db)
+		snap_path := w.DataPath + "/snapshot.json"
+		snapshot.Save(snap_path)
+	}
+	
 	if len(teams) == 0 {
 		w.Log.Info("No team found !")
 		w.Log.Info("Starting initial import...")
-		w.InitialImport(db)
+
+		if w.ImportSnapshot {
+			snapshot := &csgodb.Snapshot{}
+			snapshot.ImportFromURL(db, w.SnapshotUrl)
+		} else {
+			w.InitialImport(db)
+		}
+		
 	}
 	
 
@@ -146,7 +168,7 @@ func (w *WatcherState) LoadData() {
 
 func (w *WatcherState) StartBot()  {
 	//rework this!
-	d := time.Minute * 5
+	d, _ := time.ParseDuration(w.RefreshTime)
 
 	w.Log.Info("Starting watcher Bot")
 	for {
@@ -296,12 +318,17 @@ func (w *WatcherState) StartBot()  {
 					}
 					//importing matches
 					csgodb.ImportMatches(db, n_matches)
+					
+					
 				} else {
 					w.Log.Info("0 matches found, probably a too old event..")
 					break
 				}
 			}
-			
+
+		}
+		
+		if len(new_events) > 0 {
 			csgodb.ImportEvents(db, new_events)
 		}
 		

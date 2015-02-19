@@ -1,15 +1,40 @@
 <h3>{{.PlayerName}}</h3>
 <p>
-  <strong>Team</strong> : {{.TeamName}} <br />
   <strong>Frags</strong> : {{.Frags}} <br />
   <strong>Headshots</strong> : {{.Headshots}} <br />
   <strong>Deaths</strong> : {{.Deaths}} <br />
   <strong>K/D</strong> : {{.KDRatio}} <br />
-  <strong>Maps Played</strong> : {{.MapsPlayed}} <br />
+  <strong>Maps Played</strong> : {{.MatchesPlayed}} <br />
   <strong>Rounds Played</strong> : {{.RoundsPlayed}} <br />
-  <strong>Average Frags per round</strong> : {{.AvgFragsPerRound}} <br />
-  <strong>Average Assists per round</strong> : {{.AvgAssistsPerRound}} <br />
-  <strong>Average Deaths per round</strong> : {{.AvgDeathsPerRound}} <br />
+  <strong>Average Frags per matches</strong> : {{.AvgFrags}} <br />
+  <strong>Average K/D Delta per matches</strong> : {{.AvgKDDelta}} <br />
 </p>
+<h4>Team(s)</h4>
+	<table class="table table-striped">
+		<thead>
+		<tr>
+			<th>Team Name</th>
+			<th>Matches Played</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{.TeamsStats}}
+		</tbody>
+	</table>
 <h4>Last Matches</h4>
-{{.Matches}}
+	<table class="table table-striped">
+		<thead>
+		<tr>
+			<th>Date</th>
+			<th>Team 1</th>
+			<th>Team 2</th>
+			<th>Frags</th>
+			<th>Headshots</th>
+			<th>K/D</th>
+		</tr>
+		</thead>
+		<tbody>
+		{{.Matches}}
+		</tbody>
+	</table>
+	

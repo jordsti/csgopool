@@ -71,6 +71,12 @@ func GetMenu(s *Session) Menu {
 	m.Items = append(m.Items, i)
 	
 	if s.IsLogged() {
+		
+		if s.User.IsPoolMaster() {
+			i = MenuItem{MenuId: 6, LinkName: "Pool Admin", Link:"/adminpool/?action=menu"}
+			m.Items = append(m.Items, i)
+		}
+		
 		i = MenuItem{MenuId: 5, LinkName: "Log out", Link:"/logout/?out"}
 		m.Items = append(m.Items, i)
 	}
@@ -80,6 +86,8 @@ func GetMenu(s *Session) Menu {
 
 func (w *WebServerState) Serve() {
 	rootPath = w.RootPath
+	http.HandleFunc("/", IndexHandler)
+	http.HandleFunc("/adminpool/", AdminPoolHandler)
 	http.HandleFunc("/viewmatch/", ViewMatchHandler)
 	http.HandleFunc("/viewplayer/", ViewPlayerHandler)
 	http.HandleFunc("/events/", EventsHandler)
@@ -91,7 +99,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/createaccount/", CreateAccountHandler)
 	http.HandleFunc("/login/", LoginHandler)
 	http.HandleFunc("/logout/", LogoutHandler)
-	http.HandleFunc("/", IndexHandler)
+	
 	
 	//image serving
 	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir(rootPath + "/images/"))))

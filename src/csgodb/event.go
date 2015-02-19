@@ -24,6 +24,12 @@ func IsEventIn(events []*Event, eventId int) bool {
 	return false
 }
 
+func TickEvent(db *sql.DB, eventId int) {
+	last_change := time.Now()
+	
+	query := "UPDATE events SET last_change = ? WHERE event_id = ?"
+	db.Exec(query, last_change, eventId)
+}
 
 func (e *Event) Tick(db *sql.DB) {
 	
@@ -55,7 +61,7 @@ func IsEventExists(db *sql.DB, eventId int) bool {
 func GetLastEvent(db *sql.DB) *Event {
 	
 	event := &Event{EventId: 0}
-	query := "SELECT event_id, event_name FROM events ORDER BY last_change, event_id DESC LIMIT 1"
+	query := "SELECT event_id, event_name FROM events ORDER BY last_change DESC, event_id DESC LIMIT 1"
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {
@@ -90,7 +96,7 @@ func GetAllEvents(db *sql.DB) []*Event {
 	
 	events := []*Event{}
 	
-	query := "SELECT e.event_id, e.event_name, COUNT(m.match_id) FROM events e JOIN matches m ON m.event_id = e.event_id GROUP BY e.event_id ORDER BY event_id DESC"
+	query := "SELECT e.event_id, e.event_name, COUNT(m.match_id) FROM events e JOIN matches m ON m.event_id = e.event_id GROUP BY e.event_id ORDER BY e.last_change DESC, event_id DESC"
 	
 	rows, _ := db.Query(query)
 	

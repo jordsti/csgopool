@@ -1,9 +1,10 @@
 package csgopoolweb
-
+/*
 import (
 	"csgoscrapper"
 	"fmt"
 )
+//can be remove
 
 func (w *WebServerState) GetEventById(id int) *csgoscrapper.Event {
 	
@@ -38,4 +39,4 @@ func (w *WebServerState) GetTeamById(id int) *csgoscrapper.Team {
 func (w *WebServerState) GetMatchById(id int) *csgoscrapper.Match {
 	match := csgoscrapper.GetMatchById(w.Data.Events, id)
 	return match
-}
+}*/

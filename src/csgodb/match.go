@@ -9,6 +9,7 @@ import (
 
 type MatchTeam struct {
 	TeamId int
+	Name string
 	Score int
 }
 
