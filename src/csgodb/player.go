@@ -100,10 +100,9 @@ func GetPlayerTeamStats(db *sql.DB, playerId int) []*PlayerTeamStat {
 	
 	teams := []*PlayerTeamStat{}
 	
-	query := "SELECT t.team_id, t.team_name, COUNT(ms.match_stat_id) FROM players_teams pt "
-	query += "JOIN matches_stats ms ON ms.player_id = pt.player_id "
-	query += "JOIN teams t ON t.team_id = ms.team_id  "
-	query += "WHERE pt.player_id = ? GROUP BY team_id "
+	query := "SELECT t.team_id, t.team_name, COUNT(ms.match_stat_id) FROM matches_stats ms "
+	query += "JOIN teams t ON t.team_id = ms.team_id "
+	query += "WHERE ms.player_id = ? GROUP BY team_id "
 	
 	rows, _ := db.Query(query, playerId)
 	
