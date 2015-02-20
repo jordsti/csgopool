@@ -16,6 +16,7 @@ type Database struct {
 	Password string
 	Address string
 	Name string
+	Location string
 }
 
 func (d *Database) LoadConfig(path string) {
@@ -31,6 +32,7 @@ func (d *Database) LoadConfig(path string) {
 	if err != nil {
 		fmt.Println("Error while loading database config [2]")
 	}
+	
 }
 
 func (d *Database) SaveConfig(path string) {
@@ -55,9 +57,9 @@ func (d *Database) GetDSN() string {
 	dsn := ""
 	
 	if len(d.Password) > 0 {
-		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", d.Username, d.Password, d.Address, d.Name)
+		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true&loc=%s", d.Username, d.Password, d.Address, d.Name, d.Location)
 	} else {
-		dsn = fmt.Sprintf("%s@%s/%s?parseTime=true", d.Username, d.Address, d.Name)
+		dsn = fmt.Sprintf("%s@%s/%s?parseTime=true&loc=%s", d.Username, d.Address, d.Name, d.Location)
 	}
 	
 	return dsn
@@ -171,6 +173,14 @@ func InitTables(db *sql.DB) {
 	req += "`player_id` int(255) NOT NULL, "
 	req += "UNIQUE KEY `users_pools_constraint` (`division_id`, `user_id`),"
 	req += "PRIMARY KEY (`pool_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	
+	req = "CREATE TABLE IF NOT EXISTS `watcher_update` ( "
+	req += "`update_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`update_time` DATETIME NOT NULL, "
+	req += "PRIMARY KEY(`update_id`) "
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)

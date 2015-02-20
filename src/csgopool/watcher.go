@@ -107,11 +107,11 @@ func (w *WatcherState) InitialImport(db *sql.DB) {
 func (w *WatcherState) LoadData() {
 	
 	w.Running = true
-	
+	//csgodb.Db.Location = "US%2FEastern"
 	//init database
 	//todo
 	//config file
-	
+
 	db_path := w.DataPath + "/db.json"
 	csgodb.Db.LoadConfig(db_path)
 	
@@ -167,14 +167,10 @@ func (w *WatcherState) LoadData() {
 }
 
 func (w *WatcherState) StartBot()  {
-	//rework this!
 	d, _ := time.ParseDuration(w.RefreshTime)
 
 	w.Log.Info("Starting watcher Bot")
 	for {
-		w.Log.Info(fmt.Sprintf("Sleeping %f minutes...", d.Minutes()))
-		time.Sleep(d)
-		
 		w.Running = true
 		
 		//updating last events
@@ -332,9 +328,14 @@ func (w *WatcherState) StartBot()  {
 			csgodb.ImportEvents(db, new_events)
 		}
 		
+		csgodb.InsertWatcherUpdate(db)
+		
 		db.Close()
 		
 		w.Running = false
+		
+		w.Log.Info(fmt.Sprintf("Sleeping %f minutes...", d.Minutes()))
+		time.Sleep(d)
 	}
 	
 }

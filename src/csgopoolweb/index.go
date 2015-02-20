@@ -6,7 +6,14 @@ import (
 	"fmt"
 	"csgodb"
 	"strconv"
+	"time"
 )
+
+type IndexPage struct {
+	Page
+	LastUpdate string
+	ServerTime string
+}
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	
@@ -25,7 +32,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	
 	event := csgodb.GetLastEvent(db)
 	matches := csgodb.GetMatchesByEventId(db, event.EventId)
-	
+	last_update := csgodb.GetLastUpdate(db)
 	if event != nil {
 		matches_html := "<ul>"
 		
@@ -48,11 +55,15 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	
 	db.Close()
 	
-	p := &Page{}
+	p := &IndexPage{}
 	p.Title = "CS:GO Pool Home"
 	p.Brand = "CS:GO Pool"
 	p.Menu = template.HTML(m.GetHTML())
 	p.LeftSide = template.HTML(curevent)
+	p.LastUpdate = fmt.Sprintf("%02d:%02d", last_update.Time.Hour(), last_update.Time.Minute())
+	
+	servertime := time.Now()
+	p.ServerTime = fmt.Sprintf("%02d:%02d", servertime.Hour(), servertime.Minute())
 	
 	if !session.IsLogged() {
 		p.AddLogin(session)
