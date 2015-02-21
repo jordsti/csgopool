@@ -1,4 +1,4 @@
-# csgopool
+## csgopool
 A CS:GO Pro Players Pool
 
 ### Purpose
@@ -21,7 +21,7 @@ You start the CS:GO Pool by running csgopoolmain. You need to pass two arguments
   -data=/path/to/desired/data/folder
   -web=/path/to/html/file
  
-If it's the first run time, csgopool will fetch the current default Snapshot that is located in the repository. But you can specified the Snapŝhot URL if you want a custom Snapshot.
+If it's the first run time, csgopool will fetch the current default Snapshot that is located in the repository. But you can specified the SnapÅ�hot URL if you want a custom Snapshot.
 
 ### csgopoolmain
 This is the launcher of the csgopool.
@@ -60,6 +60,8 @@ You can specify many settings with application switch
 ### To Do
 
 This is the TODO list for the near future
+
+  - Database configuration interface if none found could be nice
   - User password modification
   - User constraint serialization and implementation (password min char, username min and max)
   - Maybe a settings file could be nice

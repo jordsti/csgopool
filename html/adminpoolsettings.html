@@ -1,0 +1,30 @@
+<div class="container">
+	<form method="POST" action="/adminpool/?action=settings&save=yes">
+		<h4>Pool Settings</h4>
+		<div class="radio">
+			<label>
+			<input type="radio" name="pool_on" id="pool_on" value="false">
+			Pool Off
+			</label>
+		</div>
+		<div class="radio">
+			<label>
+			<input type="radio" name="pool_on" id="pool_on" value="true">
+			Pool On
+			</label>
+		</div>
+		<div class="radio">
+			<label>
+			<input type="radio" name="autoadd" id="autoadd" value="true">
+			Auto Add Matches to pool
+			</label>
+		</div>
+		<div class="radio">
+			<label>
+			<input type="radio" name="autoadd" id="autoadd" value="false">
+			Manual matches selection
+			</label>
+		</div>
+		<button type="submit" class="btn btn-default">Save</button>
+	</form>
+</div>

@@ -116,6 +116,7 @@ func InitTables(db *sql.DB) {
 	req += "`map` varchar(255) NOT NULL,"
 	req += "`event_id` int(255) NOT NULL,"
 	req += "`match_date` DATE NOT NULL,"
+	req += "`pool_status` int(255) NOT NULL, "
 	req += "PRIMARY KEY (`match_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
@@ -181,6 +182,17 @@ func InitTables(db *sql.DB) {
 	req += "`update_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`update_time` DATETIME NOT NULL, "
 	req += "PRIMARY KEY(`update_id`) "
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	
+	req = "CREATE TABLE IF NOT EXISTS `players_points` ( "
+	req += "`point_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`player_id` int(255) NOT NULL, "
+	req += "`match_id` int(255) NOT NULL, "
+	req += "`points` int(255) NOT NULL, "
+	req += "UNIQUE KEY `players_points_constraint` (`player_id`, `match_id`),"
+	req += "PRIMARY KEY(`point_id`) " 
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)

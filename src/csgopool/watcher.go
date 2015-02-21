@@ -27,6 +27,7 @@ type WatcherState struct {
 	GenerateSnapshot bool
 	SnapshotUrl string
 	Users Users
+	NoUpdate bool
 	Log *csgoscrapper.LoggerState
 }
 
@@ -41,7 +42,11 @@ func NewWatcher(dataPath string, snapshotUrl string, importSnapshot bool, genera
 	state.SnapshotUrl = snapshotUrl
 	state.RefreshTime = "30m"
 	state.Log = &csgoscrapper.LoggerState{LogPath: dataPath+"/watcher.log", Level:3}
+	state.NoUpdate = false
 	watcher = state
+	
+	NewPoolState(dataPath + "/settings.json")
+	
 	return state
 }
 
@@ -171,169 +176,180 @@ func (w *WatcherState) StartBot()  {
 
 	w.Log.Info("Starting watcher Bot")
 	for {
-		w.Running = true
-		
-		//updating last events
-		
-		db, _ := csgodb.Db.Open()
-		
-		lastEvent := csgodb.GetLastEvent(db)
-		players := csgodb.GetAllPlayers(db)
-		events := csgodb.GetAllEvents(db)
-		//check the last 5 events if possible
-
-		for key, evt := range events {
-			if key <  5 {
-					w.Log.Info(fmt.Sprintf("Update event [%d]-%s", evt.EventId, evt.Name))
-					matches := csgodb.GetMatchesByEventId(db, evt.EventId)
-					teams := []*csgoscrapper.Team{}
-					
-					url := csgoscrapper.GetEventMatches(evt.EventId)
-					//todo
-					//error handling
-					pc, _ := url.LoadPage()
-					
-					event_matches := pc.ParseMatches()
-					new_matches := []*csgoscrapper.Match{}
-					
-					for _, m := range event_matches {
-						
-						if !csgodb.IsMatchIn(matches, m.MatchId) {
-							w.Log.Info(fmt.Sprintf("Match [%d] not in event [%d], retrieving player stats", m.MatchId, evt.EventId))
-							m.GetMatchStats()
-							
-							new_matches = append(new_matches, m)
-						}
-						
-					}
-					
-					//missing teams
-					for _, m := range new_matches {
-					team1 := csgodb.GetTeamById(db, m.Team1.TeamId)
-					team2 := csgodb.GetTeamById(db, m.Team2.TeamId)
-					
-						if team1.TeamId == 0 {
-							w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team1.TeamId))
-							newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team1.TeamId}
-							newTeam.LoadTeam()
-							teams = append(teams, newTeam)	
-						}
-						
-						if team2.TeamId == 0 {
-							w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team2.TeamId))
-							newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team2.TeamId}
-							newTeam.LoadTeam()
-							teams = append(teams, newTeam)	
-						}
-					
-					}
-					
-					//importing teams
-					csgodb.ImportTeams(db, teams)
-					for _, t := range teams {
-						
-						for _, pl := range t.Players {
-							if !csgodb.IsPlayerIn(players, pl.PlayerId) {
-								csgodb.ImportPlayer(db, pl)
-							}
-						}
-		
-						for _, p := range t.Players {
-							csgodb.AddPlayerToTeam(db, t.TeamId, p.PlayerId)
-						}
-						
-					}
-					//importing matches
-					csgodb.ImportMatches(db, new_matches)
-					
-					if len(new_matches) > 0 {
-						evt.Tick(db)
-					}
-			} else { break }
-		}
-		//checking for new events
-		
-		w.Log.Debug(fmt.Sprintf("events : %d", len(events)))
-		url := csgoscrapper.GetEventsPage()
-		teams := []*csgoscrapper.Team{}
-		
-		pc, _ := url.LoadPage()
-		
-		n_events := pc.ParseEventsWithoutMatches()
-		new_events := []*csgoscrapper.Event{}
-		//reloading
-		players = csgodb.GetAllPlayers(db)
-
-		for _, evt := range n_events {
-			
-			if !csgodb.IsEventIn(events, evt.EventId) && evt.EventId > lastEvent.EventId {
-				w.Log.Info(fmt.Sprintf("Event [%d] not in database", evt.EventId))
-				evt.LoadAllMatches()
+		if !w.NoUpdate {
 				
-				if len(evt.Matches) > 0 {
-					new_events = append(new_events, evt)
-					
-					for _, m := range evt.Matches {
+			w.Running = true
+			
+			//updating last events
+			
+			db, _ := csgodb.Db.Open()
+			
+			lastEvent := csgodb.GetLastEvent(db)
+			players := csgodb.GetAllPlayers(db)
+			events := csgodb.GetAllEvents(db)
+			//check the last 5 events if possible
+	
+			for key, evt := range events {
+				if key <  5 {
+						w.Log.Info(fmt.Sprintf("Update event [%d]-%s", evt.EventId, evt.Name))
+						matches := csgodb.GetMatchesByEventId(db, evt.EventId)
+						teams := []*csgoscrapper.Team{}
+						
+						url := csgoscrapper.GetEventMatches(evt.EventId)
+						//todo
+						//error handling
+						pc, _ := url.LoadPage()
+						
+						event_matches := pc.ParseMatches()
+						new_matches := []*csgoscrapper.Match{}
+						
+						for _, m := range event_matches {
+							
+							if !csgodb.IsMatchIn(matches, m.MatchId) {
+								w.Log.Info(fmt.Sprintf("Match [%d] not in event [%d], retrieving player stats", m.MatchId, evt.EventId))
+								m.GetMatchStats()
+								
+								new_matches = append(new_matches, m)
+							}
+							
+						}
+						
+						//missing teams
+						for _, m := range new_matches {
 						team1 := csgodb.GetTeamById(db, m.Team1.TeamId)
 						team2 := csgodb.GetTeamById(db, m.Team2.TeamId)
-				
-						if team1.TeamId == 0 {
-							w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team1.TeamId))
-							newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team1.TeamId}
-							newTeam.LoadTeam()
-							teams = append(teams, newTeam)	
+						
+							if team1.TeamId == 0 {
+								w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team1.TeamId))
+								newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team1.TeamId}
+								newTeam.LoadTeam()
+								teams = append(teams, newTeam)	
+							}
+							
+							if team2.TeamId == 0 {
+								w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team2.TeamId))
+								newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team2.TeamId}
+								newTeam.LoadTeam()
+								teams = append(teams, newTeam)	
+							}
+						
 						}
 						
-						if team2.TeamId == 0 {
-							w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team2.TeamId))
-							newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team2.TeamId}
-							newTeam.LoadTeam()
-							teams = append(teams, newTeam)	
+						//importing teams
+						csgodb.ImportTeams(db, teams)
+						for _, t := range teams {
+							
+							for _, pl := range t.Players {
+								if !csgodb.IsPlayerIn(players, pl.PlayerId) {
+									csgodb.ImportPlayer(db, pl)
+								}
+							}
+			
+							for _, p := range t.Players {
+								csgodb.AddPlayerToTeam(db, t.TeamId, p.PlayerId)
+							}
+							
 						}
-					}
-					
-					n_matches := []*csgoscrapper.Match{}
-					
-					for _, m := range evt.Matches {
-						n_matches = append(n_matches, &m)
-					}
-					
-					csgodb.ImportTeams(db, teams)
-					
-					for _, t := range teams {
-						for _, pl := range t.Players {
-							if csgodb.IsPlayerIn(players, pl.PlayerId) {
-								csgodb.ImportPlayer(db, pl)
+						//importing matches
+						csgodb.ImportMatches(db, new_matches)
+						
+						//if pool is running and auto add matches is on
+						if Pool.Settings.PoolOn && Pool.Settings.AutoAddMatches {
+							for _, m := range new_matches {
+								csgodb.UpdateMatchPoolStatus(db, m.MatchId, 1)
+								//attribute points
+								AttributePoints(db, m.MatchId)
 							}
 						}
-	
-						for _, p := range t.Players {
-							csgodb.AddPlayerToTeam(db, t.TeamId, p.PlayerId)
+						
+						if len(new_matches) > 0 {
+							evt.Tick(db)
 						}
-					
-					}
-					//importing matches
-					csgodb.ImportMatches(db, n_matches)
-					
-					
-				} else {
-					w.Log.Info("0 matches found, probably a too old event..")
-					break
-				}
+				} else { break }
 			}
-
+			//checking for new events
+			
+			w.Log.Debug(fmt.Sprintf("events : %d", len(events)))
+			url := csgoscrapper.GetEventsPage()
+			teams := []*csgoscrapper.Team{}
+			
+			pc, _ := url.LoadPage()
+			
+			n_events := pc.ParseEventsWithoutMatches()
+			new_events := []*csgoscrapper.Event{}
+			//reloading
+			players = csgodb.GetAllPlayers(db)
+	
+			for _, evt := range n_events {
+				
+				if !csgodb.IsEventIn(events, evt.EventId) && evt.EventId > lastEvent.EventId {
+					w.Log.Info(fmt.Sprintf("Event [%d] not in database", evt.EventId))
+					evt.LoadAllMatches()
+					
+					if len(evt.Matches) > 0 {
+						new_events = append(new_events, evt)
+						
+						for _, m := range evt.Matches {
+							team1 := csgodb.GetTeamById(db, m.Team1.TeamId)
+							team2 := csgodb.GetTeamById(db, m.Team2.TeamId)
+					
+							if team1.TeamId == 0 {
+								w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team1.TeamId))
+								newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team1.TeamId}
+								newTeam.LoadTeam()
+								teams = append(teams, newTeam)	
+							}
+							
+							if team2.TeamId == 0 {
+								w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team2.TeamId))
+								newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team2.TeamId}
+								newTeam.LoadTeam()
+								teams = append(teams, newTeam)	
+							}
+						}
+						
+						n_matches := []*csgoscrapper.Match{}
+						
+						for _, m := range evt.Matches {
+							n_matches = append(n_matches, &m)
+						}
+						
+						csgodb.ImportTeams(db, teams)
+						
+						for _, t := range teams {
+							for _, pl := range t.Players {
+								if csgodb.IsPlayerIn(players, pl.PlayerId) {
+									csgodb.ImportPlayer(db, pl)
+								}
+							}
+		
+							for _, p := range t.Players {
+								csgodb.AddPlayerToTeam(db, t.TeamId, p.PlayerId)
+							}
+						
+						}
+						//importing matches
+						csgodb.ImportMatches(db, n_matches)
+						
+						
+					} else {
+						w.Log.Info("0 matches found, probably a too old event..")
+						break
+					}
+				}
+	
+			}
+			
+			if len(new_events) > 0 {
+				csgodb.ImportEvents(db, new_events)
+			}
+			
+			csgodb.InsertWatcherUpdate(db)
+			
+			db.Close()
+			
+			w.Running = false
 		}
-		
-		if len(new_events) > 0 {
-			csgodb.ImportEvents(db, new_events)
-		}
-		
-		csgodb.InsertWatcherUpdate(db)
-		
-		db.Close()
-		
-		w.Running = false
-		
 		w.Log.Info(fmt.Sprintf("Sleeping %f minutes...", d.Minutes()))
 		time.Sleep(d)
 	}

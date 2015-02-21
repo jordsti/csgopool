@@ -18,6 +18,7 @@ var snapshot bool
 var snapshotUrl string
 var refreshTime string
 var minYear int
+var noUpdate bool
 
 func initArgs() {
 	flag.StringVar(&datapath, "data", os.TempDir() , "Path of the Stored Configuration and Data")
@@ -28,6 +29,7 @@ func initArgs() {
 	flag.BoolVar(&snapshot, "snapshot", false, "Generate a snapshot")
 	flag.StringVar(&refreshTime, "refresh", "30m", "Time between each HLTV update")
 	flag.IntVar(&minYear, "minyear", time.Now().Year(), "Minimum year to parse, before this year, matches will be ignored")
+	flag.BoolVar(&noUpdate, "noupdate", false, "Don't update stats")
 }
 
 func main() {
@@ -49,6 +51,7 @@ func main() {
 	watcher := csgopool.NewWatcher(datapath, snapshotUrl, importSnapshot, snapshot)
 	watcher.RefreshTime = refreshTime
 	watcher.LoadData()
+	watcher.NoUpdate = noUpdate
 	go watcher.StartBot()
 	//starting web here atm
 	

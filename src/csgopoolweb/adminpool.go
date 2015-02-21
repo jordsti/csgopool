@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"csgodb"
+	"csgopool"
+	
 )
 
 type AdminPoolPage struct {
@@ -222,6 +224,21 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		db.Close()
 		
 		p.Content = "<p>Pool generated with success !</p>"
+	} else if action == "settings" {
+		save := r.FormValue("save")
+		
+		if save == "yes" {
+			//persist setting and parse form here
+			csgopool.Pool.Settings.PoolOn = ParseBool(r.FormValue("pool_on"))
+			csgopool.Pool.Settings.AutoAddMatches = ParseBool(r.FormValue("autoadd"))
+			
+			csgopool.Pool.SaveSetting(csgopool.Pool.Path)
+			
+			p.Content = template.HTML(`<h4>Settings saved!</h4>`)
+			
+		} else {
+			p.Content = template.HTML(ReadFile("adminpoolsettings.html"))
+		}
 	}
 
 	p.Brand = "CS:GO Pool"
@@ -229,4 +246,11 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Message = template.HTML(msgHtml)
 	t.Execute(w, p)
+}
+
+func ParseBool(str string) bool {
+	if str == "true" {
+		return true
+	}
+	return false
 }
