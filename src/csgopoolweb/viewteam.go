@@ -77,6 +77,7 @@ func ViewTeamHandler(w http.ResponseWriter, r *http.Request) {
 	p.TeamName = team.Name
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Matches = template.HTML(matches_html)
+	p.GenerateRightSide(session)
 	t.Execute(w, p)
 
 

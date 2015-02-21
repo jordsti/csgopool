@@ -42,6 +42,7 @@ type Page struct {
 	Message template.HTML
 }
 
+
 func (p *Page) AddLogin(s *Session) {
 	if s.IsFieldExists("message") {
 		field := s.PopField("message")
@@ -49,6 +50,22 @@ func (p *Page) AddLogin(s *Session) {
 	}
 	
 	p.RightSide = GetLoginForm()
+}
+
+func (p *Page) GenerateRightSide(s *Session) {
+	
+	if s.IsLogged() {
+		p.RightSide = GetUserMenu()
+		
+	} else {
+		if s.IsFieldExists("message") {
+			field := s.PopField("message")
+			p.Message = template.HTML(field.Value)
+		}
+		
+		p.AddLogin(s)
+	}
+	
 }
 
 func GetMenu(s *Session) Menu {
@@ -99,6 +116,8 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/createaccount/", CreateAccountHandler)
 	http.HandleFunc("/login/", LoginHandler)
 	http.HandleFunc("/logout/", LogoutHandler)
+	http.HandleFunc("/userpool/", UserPoolHandler)
+	http.HandleFunc("/createpool/", CreatePoolHandler)
 	
 	
 	//image serving

@@ -56,7 +56,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	db.Close()
 	
 	p := &IndexPage{}
-	p.Title = "CS:GO Pool Home"
+	p.Title = "CS:GO Pool - Home"
 	p.Brand = "CS:GO Pool"
 	p.Menu = template.HTML(m.GetHTML())
 	p.LeftSide = template.HTML(curevent)
@@ -65,11 +65,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	servertime := time.Now()
 	p.ServerTime = fmt.Sprintf("%02d:%02d", servertime.Hour(), servertime.Minute())
 	
-	if !session.IsLogged() {
-		p.AddLogin(session)
-	} else {
-		p.RightSide = GetUserMenu()
-	}
+	p.GenerateRightSide(session)
 	
 	t.Execute(w, p)
 	

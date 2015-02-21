@@ -40,7 +40,7 @@ func PlayersHandler(w http.ResponseWriter, r *http.Request) {
 	p.Title = "CS:GO Pool - Players"
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Players = template.HTML(players_html)
-	
+	p.GenerateRightSide(session)
 	if !session.IsLogged() {
 		p.AddLogin(session)
 	}

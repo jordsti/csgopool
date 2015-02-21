@@ -66,6 +66,6 @@ func ViewEventHandler(w http.ResponseWriter, r *http.Request) {
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.EventName = event.Name
 	p.Matches = template.HTML(matches_html)
-	
+	p.GenerateRightSide(session)
 	t.Execute(w, p)
 }

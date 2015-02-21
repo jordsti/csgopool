@@ -59,74 +59,169 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 	} else if action == "createpool" {
 		p.Content = template.HTML(ReadFile("createpool.html"))
 	} else if action == "createdivision" {
-		_nb_div := r.FormValue("nbdiv")
-		_tmp, _ := strconv.ParseInt(_nb_div, 10, 32)
-		nb_div := int(_tmp)
-		it := 0
-		div_html := `<h4>Divisions</h4><form method="POST" action="/adminpool/?action=submitdiv">`
 		
-		for ; it < nb_div ; it++ {
-
-			div_html += fmt.Sprintf(`<div class="form-group"><h5>Division %d</h5>`, it+1)
-			div_html += fmt.Sprintf(`<div class="form-group"><label for="div_%d_name">Division Name</label><input class="form-control" type="text" name="div_%d_name" id="div_%d_name" value="Division %d"/></div>`, it, it, it, it + 1 )
-			div_html += fmt.Sprintf(`<div class="form-group"><label for="div_%d_players">Players</label><input class="form-control" type="text" name="div_%d_players" id="div_%d_players" /></div>`, it, it, it )
-			div_html += `</div>`
+		db, _ := csgodb.Db.Open()
+		
+		dcount := csgodb.DivisionCount(db)
+		
+		db.Close()
+		
+		if dcount == 0 {
+			_nb_div := r.FormValue("nbdiv")
+			_tmp, _ := strconv.ParseInt(_nb_div, 10, 32)
+			nb_div := int(_tmp)
+			it := 0
+			div_html := `<h4>Divisions</h4><form method="POST" action="/adminpool/?action=submitdiv">`
 			
+			for ; it < nb_div ; it++ {
+	
+				div_html += fmt.Sprintf(`<div class="form-group"><h5>Division %d</h5>`, it+1)
+				div_html += fmt.Sprintf(`<div class="form-group"><label for="div_%d_name">Division Name</label><input class="form-control" type="text" name="div_%d_name" id="div_%d_name" value="Division %d"/></div>`, it, it, it, it + 1 )
+				div_html += fmt.Sprintf(`<div class="form-group"><label for="div_%d_players">Players</label><input class="form-control" type="text" name="div_%d_players" id="div_%d_players" /></div>`, it, it, it )
+				div_html += `</div>`
+				
+			}
+			
+			div_html += fmt.Sprintf(`<input type="hidden" name="nbdiv" id="nbdiv»" value="%d" />`, nb_div)
+			div_html += `<button class="btn btn-default" type="submit">Create Pool</button>`
+			div_html += `</form>`
+			
+			p.Content = template.HTML(div_html)
+		} else {
+			adminLink := &Link{Caption: "Back", Url:"/adminpool/"}
+			adminLink.AddParameter("action", "menu")
+			
+			div_html := fmt.Sprintf(`<h4>Divions</h4><p>A Pool is already existing, clear it before <br />%s</p>`, adminLink.GetHTML())
+			p.Content = template.HTML(div_html)
 		}
-		
-		div_html += fmt.Sprintf(`<input type="hidden" name="nbdiv" id="nbdiv»" value="%d" />`, nb_div)
-		div_html += `<button class="btn btn-default" type="submit">Create Pool</button>`
-		div_html += `</form>`
-		
-		p.Content = template.HTML(div_html)
 	} else if action == "submitdiv" {
 		_nb_div := r.FormValue("nbdiv")
 		_tmp, _ := strconv.ParseInt(_nb_div, 10, 32)
 		nb_div := int(_tmp)
 		
 		div_html := "<h4>Divisions</h4>"
-		div_html += `<div>`
 		
 		db, _ := csgodb.Db.Open()
-		csgodb.ClearPool(db)
-		for it := 0; it < nb_div; it++ {
-			div_name_f := fmt.Sprintf("div_%d_name", it)
-			div_players_f := fmt.Sprintf("div_%d_players", it)
-			
-			div_name := r.FormValue(div_name_f)
-			players := r.FormValue(div_players_f)
-			pl_id := strings.Split(players, ";")
-			
-			div_html += fmt.Sprintf(`<div><h5>%s</h5>Players<br /><ul>`, div_name)
-			division := csgodb.AddDivision(db, div_name)
-			for _, p_id := range pl_id {
-				_p_id, _ := strconv.ParseInt(p_id, 10, 32)
-				ip_id := int(_p_id)
+		dcount := csgodb.DivisionCount(db)
+		
+		if dcount == 0 {
+			div_html += `<div>`
+			for it := 0; it < nb_div; it++ {
+				div_name_f := fmt.Sprintf("div_%d_name", it)
+				div_players_f := fmt.Sprintf("div_%d_players", it)
 				
-				if ip_id != 0 {
-					player := csgodb.GetPlayerById(db, ip_id)
+				div_name := r.FormValue(div_name_f)
+				players := r.FormValue(div_players_f)
+				pl_id := strings.Split(players, ";")
+				
+				div_html += fmt.Sprintf(`<div><h5>%s</h5>Players<br /><ul>`, div_name)
+				division := csgodb.AddDivision(db, div_name)
+				for _, p_id := range pl_id {
+					_p_id, _ := strconv.ParseInt(p_id, 10, 32)
+					ip_id := int(_p_id)
 					
-					if player != nil {
-					division.AddPlayer(db, player.PlayerId)
-					pLink := &Link{Caption: player.Name, Url:"/viewplayer/"}
-					pLink.AddInt("id", ip_id)
-					div_html += fmt.Sprintf("<li>%s</li>", pLink.GetHTML())
-					
-					} else {
-						div_html += fmt.Sprintf("<li>%d</li>", ip_id)
+					if ip_id != 0 {
+						player := csgodb.GetPlayerById(db, ip_id)
+						
+						if player != nil {
+						division.AddPlayer(db, player.PlayerId)
+						pLink := &Link{Caption: player.Name, Url:"/viewplayer/"}
+						pLink.AddInt("id", ip_id)
+						div_html += fmt.Sprintf("<li>%s</li>", pLink.GetHTML())
+						
+						} else {
+							div_html += fmt.Sprintf("<li>%d</li>", ip_id)
+						}
 					}
 				}
+				div_html += `</ul></div>`
+	
 			}
-			div_html += `</ul></div>`
-
+			
+			div_html += `</div>`
+		} else {
+			
+			adminLink := &Link{Caption: "Back", Url:"/adminpool/"}
+			adminLink.AddParameter("action", "menu")
+			
+			div_html += fmt.Sprintf(`<p>A Pool is already existing, clear it before <br />%s</p>`, adminLink.GetHTML())
 		}
-		
-		div_html += `</div>`
-		
 		db.Close()
 		p.Content = template.HTML(div_html)
 		
 		
+	} else if action == "clearpool" {
+		
+		clear_html := `<h4>Clear current Pool</h4>`
+		sure := r.FormValue("sure")
+		if sure == "yes" {
+			db, _ := csgodb.Db.Open()
+			csgodb.ClearPool(db)
+			db.Close()
+			
+			clear_html += `<h4>Pool Cleared !</h4>`
+			
+		} else {
+			clearLink := &Link{Caption: "Yes", Url:"/adminpool/"}
+			clearLink.AddParameter("action", "clearpool")
+			clearLink.AddParameter("sure", "yes")
+			
+			adminLink := &Link{Caption: "No", Url:"/adminpool/"}
+			adminLink.AddParameter("action", "menu")
+			
+			clear_html += fmt.Sprintf(`<p>Are you sure you want to clear the current pool ? <br /> %s - %s</p>`, clearLink.GetHTML(), adminLink.GetHTML())
+		}
+		
+		p.Content = template.HTML(clear_html)
+	} else if action == "autogenerateform" {
+		p.Content = template.HTML(ReadFile("autocreatepool.html"))
+	} else if action == "autocreatedivision" {
+		db, _ := csgodb.Db.Open()
+		dcount := csgodb.DivisionCount(db)
+		
+		_nb_div := r.FormValue("nbdiv")
+		_tmp, _ := strconv.ParseInt(_nb_div, 10, 32)
+		nb_div := int(_tmp)
+		
+		_nb_player := r.FormValue("nb_player")
+		_tmp, _ = strconv.ParseInt(_nb_player, 10, 32)
+		nb_player := int(_tmp)
+		
+		//custom query sometime, or radio button
+		//todo, to be analyze
+		
+		pid := 0
+		players_id := []int{}
+		query := "SELECT ms.player_id "
+		query += "FROM matches_stats ms "
+		query += "JOIN players p ON p.player_id = ms.player_id "
+		query += "GROUP BY player_id "
+		query += "ORDER BY SUM(ms.frags) DESC, AVG(ms.kdratio) DESC "
+		
+		rows, _ := db.Query(query)
+		for rows.Next() {
+			cur_pid := 0
+			rows.Scan(&cur_pid)
+			players_id = append(players_id, cur_pid)
+		}
+		
+		//not enough players error
+		//todo
+		
+		if dcount == 0  {
+			for di := 0; di < nb_div; di++ {
+				d_name := fmt.Sprintf("Division %d", di+1)
+				div := csgodb.AddDivision(db, d_name)
+				for pi := 0; pi < nb_player; pi++ {
+					div.AddPlayer(db, players_id[pid])
+					pid++
+				}
+			}
+		} 
+		
+		db.Close()
+		
+		p.Content = "<p>Pool generated with success !</p>"
 	}
 
 	p.Brand = "CS:GO Pool"

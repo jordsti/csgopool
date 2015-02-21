@@ -13,6 +13,7 @@ type Parameter struct {
 type Link struct {
 	Caption string
 	Url string
+	Target string
 	Params []Parameter
 }
 
@@ -43,5 +44,11 @@ func (l *Link) GetHTML() string {
 		
 	}
 	
-	return fmt.Sprintf(`<a href="%s">%s</a>`, full_url, l.Caption)
+	target := ""
+	
+	if len(l.Target) > 0 {
+		target = fmt.Sprintf(` target="%s"`, l.Target)
+	}
+	
+	return fmt.Sprintf(`<a href="%s"%s>%s</a>`, full_url, target, l.Caption)
 }

@@ -43,7 +43,7 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	p.Title = "CS:GO Pool - Teams"
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Teams = template.HTML(teams_html)
-	
+	p.GenerateRightSide(session)
 	if !session.IsLogged() {
 		p.AddLogin(session)
 	}

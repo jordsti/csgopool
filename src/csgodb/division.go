@@ -11,11 +11,37 @@ type Division struct {
 }
 
 func ClearPool(db *sql.DB) {
-	query := "DELETE FROM divisions_players"
+	query := "DELETE FROM users_pools"
+	db.Exec(query)
+	
+	query = "DELETE FROM divisions_players"
 	db.Exec(query)
 	
 	query = "DELETE FROM divisions"
 	db.Exec(query)
+}
+
+func DivisionById(divisions []*Division, divisionId int) *Division {
+	
+	for _, div := range divisions {
+		if div.DivisionId == divisionId {
+			return div
+		}
+	}
+	
+	return nil
+}
+
+func DivisionCount(db *sql.DB) int {
+	
+	query := "SELECT division_id FROM divisions"
+	rows, _ := db.Query(query)
+	it := 0
+	for rows.Next() {
+		it++
+	}
+	
+	return it
 }
 
 func GetLastDivisionId(db *sql.DB) int {
@@ -59,6 +85,59 @@ func GetAllDivisions(db *sql.DB) []*Division {
 	}
 	
 	return divs
+}
+
+func GetAllDivisionsWithPlayer(db *sql.DB) []*Division {
+	
+	divs := []*Division{}
+	
+	query := "SELECT dp.division_id, dp.player_id, d.division_name, p.player_name FROM divisions_players dp "
+	query += "JOIN players p ON p.player_id = dp.player_id "
+	query += "JOIN divisions d ON d.division_id = dp.division_id "
+	query += "ORDER BY d.division_id "
+	
+	rows, _ := db.Query(query)
+	
+	currentDiv := &Division{DivisionId: 0}
+	
+	divs = append(divs, currentDiv)
+	
+	for rows.Next() {
+		d_id := 0
+		d_name := ""
+		pl := &Player{}
+		rows.Scan(&d_id, &pl.PlayerId, &d_name, &pl.Name)
+		
+		if d_id != currentDiv.DivisionId {
+			if currentDiv.DivisionId == 0 {
+				//first division
+				currentDiv.DivisionId = d_id
+				currentDiv.Name = d_name
+				
+			} else {
+				//pushing new division throw the slice
+				//and create a new one
+				currentDiv = &Division{DivisionId: d_id, Name: d_name}
+				divs = append(divs, currentDiv)
+			}
+		}
+		
+		currentDiv.Players = append(currentDiv.Players, pl)
+		
+	}
+	
+	return divs
+}
+
+func (d *Division) IsPlayerIn(playerId int) bool {
+	
+	for _, pl := range d.Players {
+		if pl.PlayerId == playerId {
+			return true
+		}
+	}
+	
+	return false
 }
 
 func (d *Division) AddPlayer(db *sql.DB, playerId int) {

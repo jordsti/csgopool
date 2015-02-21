@@ -19,6 +19,16 @@ type MetaPool struct {
 	//points !?
 }
 
+func InsertPoolChoices(db *sql.DB, choices []*UserPool) {
+	
+	query := "INSERT INTO users_pools (division_id, user_id, player_id) VALUES (?, ?, ?)"
+	
+	for _, choice := range choices {
+		db.Exec(query, choice.DivisionId, choice.UserId, choice.PlayerId)
+	}
+	
+}
+
 func GetMetaPoolsByUser(db *sql.DB, userId int) []*MetaPool {
 	
 	pools := []*MetaPool{}

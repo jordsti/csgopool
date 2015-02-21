@@ -40,6 +40,6 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	p.Title = "CS:GO Pool - Last Events"
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Events = template.HTML(evts_html)
-	
+	p.GenerateRightSide(session)
 	t.Execute(w, p)
 }

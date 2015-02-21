@@ -18,10 +18,31 @@ The projet is coded in Go langage, so you need to get golang package.
 
 You start the CS:GO Pool by running csgopoolmain. You need to pass two arguments for CSGO Pool to work
 
-  -data /path/to/desired/data/folder
-  -web /path/to/html/file
+  -data=/path/to/desired/data/folder
+  -web=/path/to/html/file
  
-If it's the first run time, all the stats from HLTV will be fetched. This can take about 2 minutes.
+If it's the first run time, csgopool will fetch the current default Snapshot that is located in the repository. But you can specified the Snapŝhot URL if you want a custom Snapshot.
+
+### csgopoolmain
+This is the launcher of the csgopool.
+You can specify many settings with application switch
+
+  - data=[path/to/data] : Working folder of the application, contains some configuration file
+  - web=[path/to/html/file] : Where the HTML Template are located
+  - port=[##] : Listening port of the Web Server
+  - import=[true|false] : Allow import from a Snapshot, true by default
+  - snapurl=[http://url.json] : Url of the Snapshot
+  - snapshot=[true|false] : If its true, generate a Snapshot of the current stats into data path
+  - refresh=[##m] : Time between HLTV stats update
+  - minyear=2015 : Ignore matches before this year, default value is the current year
+  
+
+### Modules summary
+  
+  - csgopool : This is the Watcher and the module will attribute points to users pool when new match will be added.
+  - csgodb : This is the Database persistance module
+  - csgopoolweb : This module handle web request
+  - csgopoolscrapper : This module fetch Stats from hltv.org
   
 ### What is done
 
@@ -45,8 +66,6 @@ This is the TODO list for the near future
   - Pool
     - Player selection (How player will be selected and constraint)
     - Points attribution per game performance
-  - User space
-    - Dashboard, My Pool
-  - JSON Data or in a Database ? -> MySQL migration in progress
-  - Handle Orphan player
-  - Pool Master and pool creation page
+  - Handle Orphan player (there is still orphan player in matches_stats (snapshot-current)
+  - User Pool Submission
+  - User Main page (Dashboard with last matches stats and points attribution)

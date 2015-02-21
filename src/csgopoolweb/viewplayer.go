@@ -96,7 +96,7 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	p.AvgKDDelta = fmt.Sprintf("%.2f", player.Stat.AvgKDDelta)
 	
 	p.TeamsStats = template.HTML(teams_html)
-
+	p.GenerateRightSide(session)
 	t.Execute(w, p)
 
 

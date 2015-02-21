@@ -73,7 +73,7 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	p.PlayerStats = template.HTML(pStats)
 	p.Map = match.Map
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
-	
+	p.GenerateRightSide(session)
 	t.Execute(w, p)
 
 
