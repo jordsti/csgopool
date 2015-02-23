@@ -25,7 +25,7 @@ func initArgs() {
 	flag.StringVar(&webroot, "web", os.TempDir(), "Path of the WebRoot, containing the HTML Page Template")
 	flag.IntVar(&webport, "port", 8000, "Listening port on the web service")
 	flag.BoolVar(&importSnapshot, "import", true, "Import from a snapshot")
-	flag.StringVar(&snapshotUrl, "snapurl", "https://raw.githubusercontent.com/jordsti/csgopool/master/snapshots/snapshot-current.json", "Snapshot Url")
+	flag.StringVar(&snapshotUrl, "snapurl", "https://csgopool.com/snapshots/snapshot-current.json", "Snapshot Url")
 	flag.BoolVar(&snapshot, "snapshot", false, "Generate a snapshot")
 	flag.StringVar(&refreshTime, "refresh", "30m", "Time between each HLTV update")
 	flag.IntVar(&minYear, "minyear", time.Now().Year(), "Minimum year to parse, before this year, matches will be ignored")

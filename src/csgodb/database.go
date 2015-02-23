@@ -59,7 +59,7 @@ func (d *Database) GetDSN() string {
 	if len(d.Password) > 0 {
 		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true&loc=%s", d.Username, d.Password, d.Address, d.Name, d.Location)
 	} else {
-		dsn = fmt.Sprintf("%s@%s/%s?parseTime=true&loc=%s", d.Username, d.Address, d.Name, d.Location)
+		dsn = fmt.Sprintf("%s@tcp(%s)/%s?parseTime=true&loc=%s", d.Username, d.Address, d.Name, d.Location)
 	}
 	
 	return dsn
