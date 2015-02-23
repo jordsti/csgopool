@@ -12,21 +12,15 @@ import (
 
 var watcher *WatcherState
 
-type GameData struct {
-	Events []*csgoscrapper.Event
-	Teams []*csgoscrapper.Team
-}
 
 type WatcherState struct {
 	
 	DataPath string
-	Data GameData //to remove mysql is used instead todo
 	RefreshTime string
 	Running bool
 	ImportSnapshot bool
 	GenerateSnapshot bool
 	SnapshotUrl string
-	Users Users
 	NoUpdate bool
 	Log *csgoscrapper.LoggerState
 }
@@ -158,7 +152,7 @@ func (w *WatcherState) LoadData() {
 	if csgodb.UsersCount(db) == 0 {
 		w.Log.Info("No user found, Creating default PoolMaster Account")
 		
-		passwd := RandomString(12)
+		passwd := csgodb.RandomString(12)
 		
 		csgodb.CreateUser(db, "poolmaster", passwd, "poolmaster@localhost", PoolMaster)
 		
@@ -183,8 +177,7 @@ func (w *WatcherState) StartBot()  {
 			//updating last events
 			
 			db, _ := csgodb.Db.Open()
-			
-			lastEvent := csgodb.GetLastEvent(db)
+			last_event := csgodb.GetLastEvent(db)
 			players := csgodb.GetAllPlayers(db)
 			events := csgodb.GetAllEvents(db)
 			//check the last 5 events if possible
@@ -295,17 +288,22 @@ func (w *WatcherState) StartBot()  {
 			new_events := []*csgoscrapper.Event{}
 			//reloading
 			players = csgodb.GetAllPlayers(db)
-	
+
 			for _, evt := range n_events {
-				
-				if !csgodb.IsEventIn(events, evt.EventId) && evt.EventId > lastEvent.EventId {
+				if !csgodb.IsEventIn(events, evt.EventId) && evt.EventId > last_event.EventId - 20 {
 					w.Log.Info(fmt.Sprintf("Event [%d] not in database", evt.EventId))
-					evt.LoadAllMatches()
+					//evt.LoadAllMatches()
 					
-					if len(evt.Matches) > 0 {
+					url := csgoscrapper.GetEventMatches(evt.EventId)
+					//todo
+					//error handling
+					pc, _ := url.LoadPage()
+					n_matches := pc.ParseMatches()
+					
+					if len(n_matches) > 0 {
 						new_events = append(new_events, evt)
 						
-						for _, m := range evt.Matches {
+						for _, m := range n_matches {
 							team1 := csgodb.GetTeamById(db, m.Team1.TeamId)
 							team2 := csgodb.GetTeamById(db, m.Team2.TeamId)
 					
@@ -324,10 +322,11 @@ func (w *WatcherState) StartBot()  {
 							}
 						}
 						
-						n_matches := []*csgoscrapper.Match{}
-						
-						for _, m := range evt.Matches {
-							n_matches = append(n_matches, &m)
+						for _, m := range n_matches {
+							//w.Log.Debug(fmt.Sprintf("Match [%d]", m.MatchId))
+							m.GetMatchStats()
+							
+							//n_matches = append(n_matches, m)
 						}
 						
 						csgodb.ImportTeams(db, teams)
@@ -370,6 +369,7 @@ func (w *WatcherState) StartBot()  {
 							}
 						}
 						
+						
 					} else {
 						w.Log.Info("0 matches found, probably a too old event..")
 						break
@@ -380,6 +380,11 @@ func (w *WatcherState) StartBot()  {
 			
 			if len(new_events) > 0 {
 				csgodb.ImportEvents(db, new_events)
+				
+				for _, evt := range new_events {
+					csgodb.TickEvent(db, evt.EventId)
+				}
+				
 			}
 			
 			csgodb.InsertWatcherUpdate(db)

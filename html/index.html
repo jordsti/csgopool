@@ -4,11 +4,21 @@
 
 <div class="container">
 	<div class="row">
-		<div class="col-sm-5">
-		{{.Content}}
+		<h3>Last match points</h3>
+		<div class="col-sm-6">
+		{{.LastMatch}}
 		</div>
 	</div>
+	<div class="row">
+		<h3>Players per division</h3>
+		<div class="col-sm-6">
+		{{.Divisions}}
+		</div>
+	</div>
+	<br />
 </div>
 
-<em>Last matches update was at {{.LastUpdate}}</em><br />
-<em>Current server time : {{.ServerTime}}</em>
+<div class="server_info">
+	<em>Last matches update was at {{.LastUpdate}}</em><br />
+	<em>Current server time : {{.ServerTime}}</em>
+</div>

@@ -113,17 +113,15 @@ func ImportEvents(db *sql.DB, events []*csgoscrapper.Event) {
 	
 	for _, evt := range events {
 		
-			if len(evt.Matches) > 0 {
-			
-			query := "INSERT INTO events (event_id, event_name) VALUES (?, ?)"
-			
-			_, err := db.Query(query, evt.EventId, evt.Name)
-			
-	
-			if err != nil {
-				fmt.Printf("SQL Error: %v\n", err)
-			}
+		query := "INSERT INTO events (event_id, event_name) VALUES (?, ?)"
+		
+		_, err := db.Query(query, evt.EventId, evt.Name)
+		
+
+		if err != nil {
+			fmt.Printf("SQL Error: %v\n", err)
 		}
+		
 	}
 	
 }

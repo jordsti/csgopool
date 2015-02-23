@@ -73,8 +73,22 @@ func (p *PoolState) LoadSetting(path string) {
 func AttributePoints(db *sql.DB, matchId int) {
 	
 	match := csgodb.GetMatchById(db, matchId)
+	
 	if match != nil {
 		match.FetchStats(db)
+		
+		winId := 0
+		tie := false
+		
+		if match.Team1.Score == match.Team2.Score {
+			//tie
+			tie = true
+		} else if match.Team1.Score > match.Team2.Score {
+			//team1 win
+			winId = match.Team1.TeamId
+		} else {
+			winId = match.Team2.TeamId
+		}
 		
 		for _, ps := range match.PlayerStats {
 			/*
@@ -95,7 +109,7 @@ func AttributePoints(db *sql.DB, matchId int) {
 			
 			points := 0
 			
-			points = (ps.Frags * 2 + ps.Headshots * 2 + ps.Assists/2) - ps.Deaths
+			points += (ps.Frags * 2 + ps.Headshots * 2 + ps.Assists/2) - ps.Deaths
 			
 			//kdddelta bonus if positive
 			kddelta := ps.KDDelta * 3
@@ -106,6 +120,13 @@ func AttributePoints(db *sql.DB, matchId int) {
 			
 			if points < 0 {
 				points = 0
+			}
+			
+			//win or tie points awards
+			if tie {
+				points += 10
+			} else if ps.TeamId == winId {
+				points += 20
 			}
 			
 			csgodb.AddPoint(db, match.MatchId, ps.PlayerId, points)

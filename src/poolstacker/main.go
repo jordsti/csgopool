@@ -20,7 +20,7 @@ var db *csgodb.Database
 var stacks *Stacks
 
 var currentId int
-
+var mainEnvs *Environment
 
 func initArgs() {
 	flag.StringVar(&rootFolder, "root", os.TempDir(), "Root stacker folder")
@@ -31,6 +31,9 @@ func main() {
 	currentId = 8000
 	initArgs()
 	flag.Parse()
+	
+	mainEnvs = &Environment{}
+	mainEnvs.Load(rootFolder + "/envs.json")
 	
 	stacks = &Stacks{}
 	
@@ -77,7 +80,7 @@ func StackerHomeHandler(w http.ResponseWriter, r *http.Request) {
 			stack.DataPath = stack_path
 			stack.WebRoot = stack_path + "/csgopool/html/"
 			
-			os.Mkdir(stack.DataPath, 0644)
+			os.Mkdir(stack.DataPath, 0755)
 			
 			stacks.Instances = append(stacks.Instances, stack)
 			
@@ -101,7 +104,6 @@ func StackerHomeHandler(w http.ResponseWriter, r *http.Request) {
 			stack_db.Address = db.Address
 			
 			stack_db.SaveConfig(stack.DataPath + "/db.json")
-			
 			//launch watcher and web service
 			go LaunchStack(stack)
  		}
@@ -111,24 +113,39 @@ func StackerHomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+
+
 func LaunchStack(s *StackInfo) {
+
+	//need to get dependencies first and, set go_path
 	
+	go_path := s.DataPath + "/csgopool/"
 	
-	/*csgoscrapper.NewScrapperState(time.Now().Year())
+	env := &Environment{}
 	
-	csgoscrapper.NewLogger(s.DataPath+"/scrapper.log", 3)
+	for _, e := range mainEnvs.Vars {
+		env.Push(e.Name, e.Value)
+	}
 	
-	watcher := csgopool.NewWatcher(s.DataPath, s.SnapshotUrl, true, false)
-	watcher.RefreshTime = "20m"
-	watcher.LoadData()
-	watcher.NoUpdate = false
-	go watcher.StartBot()
-	//starting web here atm
+	env.Push("GOPATH", go_path)
 	
-	fmt.Println("[CSGOPOOLMAIN] Starting the Web Server")
+	s.Env = env
 	
-	web_log := s.DataPath + "/csgopoolweb.log"
+	for _, depend := range s.Dependencies {
+		
+		cmd := exec.Command("go", "get", depend)
+		s.Env.ApplyToCommand(cmd)
+		//cmd.Run()
+		out, _ := cmd.Output()
+		fmt.Println(string(out))
+	}
 	
-	web := csgopoolweb.NewWebServer(&watcher.Data, &watcher.Users, s.Port, s.WebRoot, web_log)
-	web.Serve()*/
+	cmd := exec.Command("go", "run", "main.go", "-web="+s.WebRoot, "-data="+s.DataPath, fmt.Sprintf("-port=%d",s.Port), "-snapurl="+s.SnapshotUrl)
+	s.Env.ApplyToCommand(cmd)
+	cmd.Dir = go_path + "src/csgopoolmain/"
+	
+	fmt.Printf("Starting a new instance [%s], web server on port %d\n", s.Id, s.Port)
+	
+	out, _ := cmd.CombinedOutput()
+	fmt.Println(string(out))
 }

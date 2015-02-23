@@ -172,6 +172,7 @@ func InitTables(db *sql.DB) {
 	req += "`division_id` int(255) NOT NULL, "
 	req += "`user_id` int(255) NOT NULL, "
 	req += "`player_id` int(255) NOT NULL, "
+	req += "`created_on` DATETIME NOT NULL, "
 	req += "UNIQUE KEY `users_pools_constraint` (`division_id`, `user_id`),"
 	req += "PRIMARY KEY (`pool_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
@@ -193,6 +194,16 @@ func InitTables(db *sql.DB) {
 	req += "`points` int(255) NOT NULL, "
 	req += "UNIQUE KEY `players_points_constraint` (`player_id`, `match_id`),"
 	req += "PRIMARY KEY(`point_id`) " 
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	
+	req = "CREATE TABLE IF NOT EXISTS `monitor_tasks` ( "
+	req += "`task_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`task_type` int(25) NOT NULL, "
+	req += "`task_status` int(25) NOT NULL, "
+	req += "`task_date` DATETIME NOT NULL, "
+	req += "PRIMARY KEY(`task_id`) "
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)

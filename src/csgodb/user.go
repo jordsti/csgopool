@@ -6,18 +6,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"encoding/hex"
 	"crypto/rand"
+	"regexp"
+	"fmt"
 )
 
 const (
 	UserRank = 1
 	PoolMaster = 10
 )
-
-type UserConstraint struct {
-	NameMax int
-	NameMin int
-	PasswordMin int
-}
 
 type User struct {
 	Id int
@@ -27,10 +23,16 @@ type User struct {
 	Rank int
 }
 
-type Users struct {
-	Users []User
-	CurrentId int
-	Constraints UserConstraint
+type UserConstraint struct {
+	NameMax int
+	NameMin int
+	PasswordMin int
+}
+
+func DefaultUserConstraints() *UserConstraint {
+	constraints := &UserConstraint{NameMax: 12, NameMin: 4, PasswordMin: 8}
+	return constraints
+	
 }
 
 func (u *User) IsPoolMaster() bool {
@@ -74,6 +76,22 @@ func Login(db *sql.DB, username string, password string) (*User, error) {
 }
 
 func CreateUser(db *sql.DB, username string, password string, email string, rank int) error {
+	
+	constraints := DefaultUserConstraints()
+	
+	//username regexp check
+	re := regexp.MustCompile(fmt.Sprintf(`^[a-zA-Z0-9\-_]{%d,%d}$`, constraints.NameMin, constraints.NameMax))
+	
+	if !re.MatchString(username) {
+		return errors.New(fmt.Sprintf("Username must only contains alpha-numeric characters and be between %d and %d characters", constraints.NameMin, constraints.NameMax))
+	}
+	
+	re = regexp.MustCompile(fmt.Sprintf(`^.{%d,}$`, constraints.PasswordMin))
+	
+	//password length
+	if !re.MatchString(password) {
+		return errors.New(fmt.Sprintf("Your password must contains at least %d characters", constraints.PasswordMin))
+	}
 	
 	//username unique check
 	user := GetUserByName(db, username)

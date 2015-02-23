@@ -13,7 +13,8 @@ type IndexPage struct {
 	Page
 	LastUpdate string
 	ServerTime string
-	Content template.HTML
+	LastMatch template.HTML
+	Divisions template.HTML
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,8 +78,10 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		for _, s := range stats {
 			pLink := &Link{Caption: s.PlayerName, Url:"/viewplayer/"}
 			pLink.AddInt("id", s.PlayerId)
+			
 			tLink := &Link{Caption: s.TeamName, Url:"/viewteam/"}
 			tLink.AddInt("id", s.TeamId)
+			
 			content += fmt.Sprintf(`<tr>
 				<td>%s</td>
 				<td>%s</td>
@@ -97,7 +100,75 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		content = `<h4>No match found!</h4>`
 	}
 	
+	divisions := csgodb.GetDivisionsPoints(db)
 	db.Close()
+	/*div_html := ""
+	row_html := `<div class="row">%s</div>`
+	nb_div := 1
+	inner_html := ""
+	
+	for _, div := range divisions {
+		
+
+		inner_html += fmt.Sprintf(`<div class="col-md-4"><h4>%s</h4>`, div.Name)
+		
+		for _, p := range div.Players {
+		
+			playerLink := &Link{Caption: p.Name, Url:"/viewplayer/"}
+			playerLink.AddInt("id", p.PlayerId)
+			
+			inner_html += fmt.Sprintf(`%s : %d<br />`, playerLink.GetHTML(), p.Points)
+		}
+		
+		inner_html += `</div>`
+		
+		if nb_div % 3 == 0 && nb_div > 0 {
+			div_html += fmt.Sprintf(row_html, inner_html)
+			inner_html = ""
+		}
+		
+		nb_div++
+		
+	}
+	
+	if len(inner_html) > 0 {
+		div_html += fmt.Sprintf(row_html, inner_html)
+	}*/
+	//transition with built-in HtmlElement
+	
+	html_div := CreateDiv()
+	html_div.SetAttribute("class", "container")
+	nb_div := 0
+	currentRow := CreateDiv()
+	currentRow.SetAttribute("class", "row")
+	html_div.AddChild(currentRow)
+	
+	for _, div := range divisions {
+		
+		inner_div := CreateDiv()
+		inner_div.SetAttribute("class", "col-md-2")
+		
+		title := &HtmlElement{Tag: "h4"}
+		title.InnerText = div.Name
+		
+		inner_div.AddChild(title)
+		
+		for _, p := range div.Players {
+			playerLink := &Link{Caption: p.Name, Url:"/viewplayer/"}
+			playerLink.AddInt("id", p.PlayerId)
+			inner_div.InnerText += fmt.Sprintf(`%s : %d<br />`, playerLink.GetHTML(), p.Points)
+		}
+		
+		if nb_div % 3 == 0 && nb_div > 0 {
+			currentRow = CreateDiv()
+			currentRow.SetAttribute("class", "row")
+			html_div.AddChild(currentRow)
+		}
+		
+		currentRow.AddChild(inner_div)
+		
+		nb_div++
+	}
 	
 	p := &IndexPage{}
 	p.Title = "CS:GO Pool - Home"
@@ -105,7 +176,8 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	p.Menu = template.HTML(m.GetHTML())
 	p.LeftSide = template.HTML(curevent)
 	p.LastUpdate = fmt.Sprintf("%02d:%02d", last_update.Time.Hour(), last_update.Time.Minute())
-	p.Content = template.HTML(content)
+	p.LastMatch = template.HTML(content)
+	p.Divisions = template.HTML(html_div.GetHTML())
 	servertime := time.Now()
 	p.ServerTime = fmt.Sprintf("%02d:%02d", servertime.Hour(), servertime.Minute())
 	

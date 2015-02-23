@@ -45,6 +45,7 @@ type PlayerMatchStat struct {
 	Frags int
 	Headshots int
 	KDRatio float32
+	Points int
 }
 
 func (pl *Player) P() *PlayerWithStat {
@@ -77,19 +78,20 @@ func GetPlayerMatchStats(db *sql.DB, playerId int) []*PlayerMatchStat {
 	stats := []*PlayerMatchStat{}
 	
 	query := "SELECT m.match_id, m.match_date, m.team1_id, t1.team_name, m.team1_score, "
-	query += "m.team2_id, t2.team_name, m.team2_score, ms.frags, ms.headshots, ms.kdratio "
+	query += "m.team2_id, t2.team_name, m.team2_score, ms.frags, ms.headshots, ms.kdratio, pp.points "
 	query += "FROM matches m "
 	query += "JOIN teams t1 ON t1.team_id = m.team1_id "
 	query += "JOIN teams t2 ON t2.team_id = m.team2_id "
 	query += "JOIN matches_stats ms ON ms.match_id = m.match_id "
-	query += "WHERE ms.player_id = ? ORDER BY m.match_date DESC"
+	query += "LEFT JOIN players_points pp ON pp.player_id = ms.player_id AND pp.match_id = ms.match_id "
+	query += "WHERE ms.player_id = ? ORDER BY m.match_date DESC "
 	
 	rows, _ := db.Query(query, playerId)
 	
 	for rows.Next() {
 		stat := &PlayerMatchStat{}
 		
-		rows.Scan(&stat.MatchId, &stat.Date, &stat.Team1.TeamId, &stat.Team1.Name, &stat.TeamScore1, &stat.Team2.TeamId, &stat.Team2.Name, &stat.TeamScore2, &stat.Frags, &stat.Headshots, &stat.KDRatio)
+		rows.Scan(&stat.MatchId, &stat.Date, &stat.Team1.TeamId, &stat.Team1.Name, &stat.TeamScore1, &stat.Team2.TeamId, &stat.Team2.Name, &stat.TeamScore2, &stat.Frags, &stat.Headshots, &stat.KDRatio, &stat.Points)
 		stats = append(stats, stat)
 	}
 	

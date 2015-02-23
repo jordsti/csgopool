@@ -94,13 +94,17 @@ func GetAllMatches(db *sql.DB) []*Match {
 	
 	matches := []*Match{}
 	
-	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status FROM matches"
+	query := `SELECT m.match_id, m.team1_id, t1.team_name, m.team1_score, m.team2_id, t2.team_name, m.team2_score, m.map, m.event_id, m.match_date, m.pool_status 
+			FROM matches m
+			JOIN teams t1 ON t1.team_id = m.team1_id 
+			JOIN teams t2 ON t2.team_id = m.team2_id
+			ORDER BY match_id DESC`
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {
 		m := &Match{}
 		
-		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Score, &m.Map, &m.EventId, &m.Date, &m.PoolStatus)
+		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Name, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Name, &m.Team2.Score, &m.Map, &m.EventId, &m.Date, &m.PoolStatus)
 		matches = append(matches, m)
 	}
 	

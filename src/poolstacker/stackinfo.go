@@ -13,6 +13,8 @@ type StackInfo struct {
 	WebRoot string
 	Id string
 	DbPassword string
+	Dependencies []string
+	Env *Environment
 }
 
 func DefaultPoolStack() *StackInfo {
@@ -21,6 +23,9 @@ func DefaultPoolStack() *StackInfo {
 	stack.GitUrl = "https://github.com/jordsti/csgopool.git"
 	stack.SnapshotUrl = "http://csgopool.com/snapshots/snapshot-current.json"
 	stack.Port = 8000
+	
+	stack.Dependencies = append(stack.Dependencies, "golang.org/x/crypto/bcrypt")
+	stack.Dependencies = append(stack.Dependencies, "github.com/go-sql-driver/mysql")
 	
 	return stack
 }

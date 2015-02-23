@@ -2,7 +2,6 @@ package csgopoolweb
 
 import (
 	"net/http"
-	"csgopool"
 	"csgoscrapper"
 	"html/template"
 	"fmt"
@@ -15,19 +14,15 @@ type WebServerState struct {
 	RootPath string
 	Domain string
 	Log *csgoscrapper.LoggerState
-	Data *csgopool.GameData
 	Sessions *SessionContainer
-	Users *csgopool.Users
 	Port int
 }
 
-func NewWebServer(data *csgopool.GameData, users *csgopool.Users, port int, path string, logPath string) *WebServerState {
+func NewWebServer(port int, path string, logPath string) *WebServerState {
 	rootPath = path
 	state.RootPath = path
-	state.Data = data
 	state.Sessions = &SessionContainer{}
 	state.Domain = "localhost"
-	state.Users = users
 	state.Log = &csgoscrapper.LoggerState{LogPath: logPath, Level: 3}
 	state.Port = port
 	return state

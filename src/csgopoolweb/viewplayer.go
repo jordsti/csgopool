@@ -71,7 +71,7 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 		matchLink := &Link{Caption: fmt.Sprintf("%d-%02d-%02d", ms.Date.Year(), ms.Date.Month(), ms.Date.Day()), Url:"/viewmatch/"}
 		matchLink.AddInt("id", ms.MatchId)
 		
-		matches_html += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%.2f</td></tr>", matchLink.GetHTML(), team1Link.GetHTML(), team2Link.GetHTML(), ms.Frags, ms.Headshots, ms.KDRatio)
+		matches_html += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", matchLink.GetHTML(), team1Link.GetHTML(), team2Link.GetHTML(), ms.Frags, ms.Headshots, ms.KDRatio, ms.Points)
 	}
 	
 	db.Close()

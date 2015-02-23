@@ -2,6 +2,7 @@ package csgodb
 
 import (
 	"database/sql"
+	"time"
 )
 
 type UserPool struct {
@@ -9,6 +10,7 @@ type UserPool struct {
 	DivisionId int
 	UserId int
 	PlayerId int
+	CreatedOn time.Time
 }
 
 type MetaPool struct {
@@ -21,10 +23,12 @@ type MetaPool struct {
 
 func InsertPoolChoices(db *sql.DB, choices []*UserPool) {
 	
-	query := "INSERT INTO users_pools (division_id, user_id, player_id) VALUES (?, ?, ?)"
+	query := "INSERT INTO users_pools (division_id, user_id, player_id, created_on) VALUES (?, ?, ?, ?)"
+	
+	now := time.Now()
 	
 	for _, choice := range choices {
-		db.Exec(query, choice.DivisionId, choice.UserId, choice.PlayerId)
+		db.Exec(query, choice.DivisionId, choice.UserId, choice.PlayerId, now)
 	}
 	
 }

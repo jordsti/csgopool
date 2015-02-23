@@ -239,6 +239,75 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			p.Content = template.HTML(ReadFile("adminpoolsettings.html"))
 		}
+	} else if action == "matches" {
+		db, _ := csgodb.Db.Open()
+		content := `<div class="row">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Date</th>
+					<th>Team 1</th>
+					<th>Team 2</th>
+					<th>Event Id</th>
+					<th>Pool Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				%s
+			</tbody>
+		</table>
+		</div>
+		`
+		
+		matches := csgodb.GetAllMatches(db)
+		db.Close()
+		
+		rows_html := ""
+		
+		for _, m := range matches {
+			
+			matchDate := fmt.Sprintf("%d-%02d-%02d", m.Date.Year(), m.Date.Month(), m.Date.Day())
+			matchLink := &Link{Caption: matchDate, Url: "/viewmatch/"}
+			matchLink.AddInt("id", m.MatchId)
+			
+			t1Link := &Link{Caption: fmt.Sprintf("%s (%d)", m.Team1.Name, m.Team1.Score), Url: "/viewteam/"}
+			t1Link.AddInt("id", m.Team1.TeamId)
+			
+			t2Link := &Link{Caption: fmt.Sprintf("%s (%d)",m.Team2.Name, m.Team2.Score), Url: "/viewteam/"}
+			t2Link.AddInt("id", m.Team2.TeamId)
+			
+			status := "none"
+			
+			if m.PoolStatus == 0 {
+				pLink := &Link{Caption: "Add to pool", Url:"/adminpool/"}
+				pLink.AddParameter("action", "poolmatch")
+				pLink.AddInt("id", m.MatchId)
+				
+				status = fmt.Sprintf("Not Pooled <br /> %s", pLink.GetHTML())
+			} else {
+				pLink := &Link{Caption: "Revoke from pool", Url:"/adminpool/"}
+				pLink.AddParameter("action", "revokematch")
+				pLink.AddInt("id", m.MatchId)
+				
+				status = fmt.Sprintf("Pooled <br /> %s", pLink.GetHTML())
+			}
+			
+			rows_html += fmt.Sprintf(`
+				<tr>
+					<td>%d</td>
+					<td>%s</td>
+					<td>%s</td>
+					<td>%s</td>
+					<td>%d</td>
+					<td>%s</td>
+				</tr>
+			`, 
+			m.MatchId, matchLink.GetHTML(), t1Link.GetHTML(), t2Link.GetHTML(), m.EventId, status)
+		}
+		
+		content = fmt.Sprintf(content, rows_html)
+		p.Content = template.HTML(content)
 	}
 
 	p.Brand = "CS:GO Pool"

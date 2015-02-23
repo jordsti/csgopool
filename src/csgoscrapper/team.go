@@ -112,7 +112,8 @@ func (t *Team) LoadTeam() {
 			log.Info("Error while loading page")
 		}
 		
-		re := regexp.MustCompile("Team stats: ([a-zA-Z0-9 \\-\\.!]+) <span")
+		re := regexp.MustCompile(`Team stats: ([A-Za-z0-9 \-_\.!]+) <span class="tab_spacer">`)
+		//re := regexp.MustCompile("Team stats: (.+) <span")
 		rs := re.FindAllStringSubmatch(page.Content, -1)
 		//ioutil.WriteFile(fmt.Sprintf("team-%d.html", t.TeamId), []byte(page.Content), 0644)
 		t.Name = rs[0][1]

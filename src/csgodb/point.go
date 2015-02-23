@@ -50,13 +50,13 @@ type DivisionPoints struct {
 func GetDivisionsPoints(db *sql.DB) []*DivisionPoints {
 	points := []*DivisionPoints{}
 	
-	query := `SELECT dp.division_id, d.division_name, p.player_name, SUM(pp.points) as points
-		FROM divisions_players dp 
-		JOIN divisions d ON dp.division_id = d.division_id 
-		JOIN players_points pp ON pp.player_id = dp.player_id 
-		JOIN players p ON p.player_id = dp.player_id 
-		GROUP BY pp.player_id 
-		ORDER BY d.division_id `
+	query := `SELECT dp.division_id, d.division_name, p.player_id, p.player_name, SUM(pp.points) as points
+			FROM divisions_players dp 
+			JOIN divisions d ON dp.division_id = d.division_id  
+			JOIN players p ON p.player_id = dp.player_id
+			LEFT JOIN players_points pp ON pp.player_id = dp.player_id
+			GROUP BY dp.player_id
+			ORDER BY d.division_id `
 	
 	rows, _ := db.Query(query)
 	currentDiv := &DivisionPoints{}
@@ -65,7 +65,7 @@ func GetDivisionsPoints(db *sql.DB) []*DivisionPoints {
 		d_id := 0
 		d_name := ""
 		pl := &PlayerDivisionPoints{}
-		rows.Scan(&d_id, &d_name, &pl.Name, &pl.Points)
+		rows.Scan(&d_id, &d_name, &pl.PlayerId, &pl.Name, &pl.Points)
 		
 		if currentDiv.DivisionId != d_id {
 			currentDiv = &DivisionPoints{DivisionId: d_id, Name: d_name}
@@ -102,10 +102,12 @@ func GetPlayersPoint(db *sql.DB) []*PlayerPoints {
 func GetUserPoints(db *sql.DB) []*UserPoints {
 	points := []*UserPoints{}
 	
-	query := `SELECT u.user_id, u.username, SUM(pt.points) as points FROM users_pools up
-				JOIN users u ON u.user_id = up.user_id
-				JOIN players_points pt ON up.player_id = pt.player_id
-				GROUP BY up.user_id ORDER BY points DESC`
+	query := `SELECT u.user_id, u.username, SUM(pt.points) as points FROM users u
+			LEFT JOIN users_pools up ON up.user_id = u.user_id 
+			LEFT JOIN players_points pt ON up.player_id = pt.player_id
+			JOIN matches m ON m.match_id = pt.match_id
+			WHERE (DATE(up.created_on) <= m.match_date)
+			GROUP BY up.user_id ORDER BY points DESC`
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {
@@ -120,14 +122,14 @@ func GetUserPoints(db *sql.DB) []*UserPoints {
 func GetMatchPoints(db *sql.DB, matchId int) []*MatchPointStat {
 	stats := []*MatchPointStat{}
 	
-	query := "SELECT m.match_date, p.player_id, p.player_name, t.team_id, t.team_name, ms.frags, ms.headshots, ms.kdratio, pt.points FROM players_points pt "
-	query += "JOIN matches m ON m.match_id = pt.match_id "
-	query += "JOIN players p ON p.player_id = pt.player_id "
-	query += "JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id "
-	query += "JOIN teams t ON t.team_id = ms.team_id "
-	query += "JOIN `events` e ON e.event_id = m.event_id "
-	query += "WHERE m.match_id = ? "
-	query += "ORDER BY pt.points DESC"
+	query := `SELECT m.match_date, p.player_id, p.player_name, t.team_id, t.team_name, ms.frags, ms.headshots, ms.kdratio, pt.points FROM players_points pt 
+	JOIN matches m ON m.match_id = pt.match_id 
+	JOIN players p ON p.player_id = pt.player_id 
+	JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id 
+	JOIN teams t ON t.team_id = ms.team_id 
+	JOIN events e ON e.event_id = m.event_id 
+	WHERE m.match_id = ? 
+	ORDER BY pt.points DESC`
 	
 	rows, _ := db.Query(query, matchId)
 
@@ -147,16 +149,3 @@ func AddPoint(db *sql.DB, matchId int, playerId int, points int) {
 	query := "INSERT INTO players_points (match_id, player_id, points) VALUES(?, ?, ?) "
 	db.Exec(query, matchId, playerId, points)
 }
-
-/*
-little query
-SELECT * FROM players_points pt
-JOIN matches m ON m.match_id = pt.match_id 
-JOIN players p ON p.player_id = pt.player_id
-JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id
-JOIN teams t ON t.team_id = ms.team_id
-JOIN `events` e ON e.event_id = m.event_id
-WHERE m.match_id = 19161
-ORDER BY m.match_id DESC
-
-*/
