@@ -39,7 +39,8 @@ func (t *Team) GetPlayerById(id int) *Player {
 	//need to add this player to this team
 	pl := Player{PlayerId: id, Name:""}
 	_pl := &pl
-	_pl.LoadStats()
+	_pl.FetchName()
+
 	t.Players = append(t.Players, pl)
 	return _pl	
 }

@@ -253,6 +253,22 @@ func (w *WatcherState) StartBot()  {
 						//importing matches
 						csgodb.ImportMatches(db, new_matches)
 						
+						
+						players = csgodb.GetAllPlayers(db);
+						//last players check with matches stats
+						for _, m := range new_matches {
+							for _,ps := range m.PlayerStats {
+								if !csgodb.IsPlayerIn(players, ps.PlayerId) {
+									
+									npl := csgoscrapper.Player{PlayerId: ps.PlayerId, Name: ps.PlayerName}
+									w.Log.Debug(fmt.Sprintf("%s - %d", npl.Name, npl.PlayerId))
+									csgodb.ImportPlayer(db, npl)
+									csgodb.AddPlayerToTeam(db, ps.TeamId, ps.PlayerId)
+								}
+							}
+						}
+						
+						
 						//if pool is running and auto add matches is on
 						if Pool.Settings.PoolOn && Pool.Settings.AutoAddMatches {
 							for _, m := range new_matches {
@@ -331,6 +347,28 @@ func (w *WatcherState) StartBot()  {
 						//importing matches
 						csgodb.ImportMatches(db, n_matches)
 						
+						
+						players = csgodb.GetAllPlayers(db);
+						//last players check with matches stats
+						for _, m := range n_matches {
+							for _,ps := range m.PlayerStats {
+								if !csgodb.IsPlayerIn(players, ps.PlayerId) {
+									
+									npl := csgoscrapper.Player{PlayerId: ps.PlayerId, Name: ps.PlayerName}
+									csgodb.ImportPlayer(db, npl)
+									csgodb.AddPlayerToTeam(db, ps.TeamId, ps.PlayerId)
+								}
+							}
+						}
+						
+						//if pool is running and auto add matches is on
+						if Pool.Settings.PoolOn && Pool.Settings.AutoAddMatches {
+							for _, m := range n_matches {
+								csgodb.UpdateMatchPoolStatus(db, m.MatchId, 1)
+								//attribute points
+								AttributePoints(db, m.MatchId)
+							}
+						}
 						
 					} else {
 						w.Log.Info("0 matches found, probably a too old event..")

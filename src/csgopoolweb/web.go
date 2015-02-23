@@ -118,6 +118,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/logout/", LogoutHandler)
 	http.HandleFunc("/userpool/", UserPoolHandler)
 	http.HandleFunc("/createpool/", CreatePoolHandler)
+	http.HandleFunc("/ranking/", RankingHandler)
 	
 	
 	//image serving

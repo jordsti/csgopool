@@ -13,6 +13,7 @@ type MatchTeam struct {
 
 type MatchPlayerStat struct {
 	PlayerId int
+	PlayerName string
 	TeamId int
 	Frags int
 	Headshots int
@@ -112,6 +113,7 @@ func (m *Match) GetMatchStats() {
 	for _, s := range rs {
 		
 		p_id, _ := strconv.ParseInt(s[2], 10, 32)
+		p_name := s[3]
 		
 		t_id, _ := strconv.ParseInt(s[4], 10, 32)
 		
@@ -129,7 +131,7 @@ func (m *Match) GetMatchStats() {
 		
 		rating, _ := strconv.ParseFloat(s[15], 32)
 		
-		stat := &MatchPlayerStat{int(p_id), int(t_id), int(frags), int(headshots), int(assists), int(deaths), float32(kdr), int(kdrDelta), float32(rating)}
+		stat := &MatchPlayerStat{int(p_id), p_name, int(t_id), int(frags), int(headshots), int(assists), int(deaths), float32(kdr), int(kdrDelta), float32(rating)}
 		
 		m.PlayerStats = append(m.PlayerStats, stat)
 		

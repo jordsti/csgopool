@@ -49,9 +49,8 @@ func (p PageContent) ParsePlayer() []Player {
 		player := Player{Name: p[2], PlayerId: int(p_id)}
 		
 		if !PlayerExistsIn(players, player.PlayerId) {
-			pl := &player
-			pl.LoadStats()
-			
+			//pl := &player{}
+			//pl.LoadStats()
 			players = append(players, player)
 		} else {
 			log.Info(fmt.Sprintf("Player [%d] already exists, skipping...", player.PlayerId))
@@ -61,7 +60,39 @@ func (p PageContent) ParsePlayer() []Player {
 	return players
 }
 
-func (p *Player) LoadStats() {
+func (p *Player) FetchName() {
+	page := GetPlayerPage(p.PlayerId)
+	content, _ := page.LoadPage()
+	
+	log.Info(fmt.Sprintf("Player [%d], Status [%d]", p.PlayerId, content.Status))
+	
+	if content.Status != 200 {
+		log.Error(fmt.Sprintf("Player[%d] page return status %d, new attempt", p.PlayerId, content.Status))
+		attempts := 0
+		max_attempts := 10 //put this in settings todo
+		
+		for content.Status != 200 {
+			
+			content, _ = page.LoadPage()
+			log.Info(fmt.Sprintf("Player [%d], Status [%d], attempt %d", p.PlayerId, content.Status, attempts))
+			attempts += 1
+			if attempts >= max_attempts {
+				log.Error(fmt.Sprintf("Player[%d] max attemps hit !, skipping", p.PlayerId))
+				return
+			}
+		}
+		
+	}
+	
+	re := regexp.MustCompile(`Player stats: (.+) <span class="tab_spacer">|</span>`)
+	rs := re.FindAllStringSubmatch(content.Content, -1)
+	
+	p.Name = rs[0][1]
+}
+
+func (p *Player) LoadStatsA() {
+	
+	//dont need to fetch each player anymore
 	
 	//generating url
 	page := GetPlayerPage(p.PlayerId)
@@ -86,6 +117,9 @@ func (p *Player) LoadStats() {
 		}
 		
 	}
+	
+	//todo
+	//Edge case with Player : 8772!!
 	
 	if len(p.Name) == 0 {
 		//parsing name too

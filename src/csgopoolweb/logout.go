@@ -13,5 +13,5 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.ClearFields()
 	
 	
-	http.Redirect(w, r, "/", 301)
+	http.Redirect(w, r, "/", 302)
 }

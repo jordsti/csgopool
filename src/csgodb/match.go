@@ -24,6 +24,22 @@ type Match struct {
 	PoolStatus int
 }
 
+func GetLastMatch(db *sql.DB) *Match {
+	
+	match := &Match{MatchId: 0}
+	
+	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status FROM matches ORDER BY match_id DESC LIMIT 1"
+	
+	rows, _ := db.Query(query)
+	
+	for rows.Next() {
+		rows.Scan(&match.MatchId, &match.Team1.TeamId, &match.Team1.Score, &match.Team2.TeamId, &match.Team2.Score, &match.Map, &match.EventId, &match.Date, &match.PoolStatus)
+	}
+	
+	return match
+}
+
+
 func GetMatchById(db *sql.DB, matchId int) *Match {
 	
 	match := &Match{MatchId: 0}
