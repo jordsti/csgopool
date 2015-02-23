@@ -3,7 +3,6 @@ package csgopoolweb
 import (
 	"html/template"
 	"io/ioutil"
-	"fmt"
 )
 
 func MakeTemplate(contentPath string) (*template.Template, error) {
@@ -36,9 +35,8 @@ func GetLoginForm() template.HTML {
 
 func GetUserMenu() template.HTML {
 	
-	mypoolLink := &Link{Caption: "My pool", Url: "/userpool/"}
-	
-	menu := fmt.Sprintf(`<ul><li>%s</li><li>2</li><li>3</li></ul>`, mypoolLink.GetHTML())
-	
+	menu := `<a href="/userpool/" class="btn btn-default">My Pool</a><br />`
+	menu += `<a href="/myaccount/" class="btn btn-default">My Account</a><br />`
+	menu += `<a href="/logout/" class="btn btn-default">Log Out</a><br />`
 	return template.HTML(menu)
 }
