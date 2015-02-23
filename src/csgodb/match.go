@@ -112,13 +112,13 @@ func GetMatchesByEventId(db *sql.DB, eventId int) []*Match {
 	
 	matches := []*Match{}
 	
-	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date FROM matches WHERE event_id = ? ORDER BY match_id DESC"
+	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status FROM matches WHERE event_id = ? ORDER BY match_id DESC"
 	rows, _ := db.Query(query, eventId)
 	
 	for rows.Next() {
 		m := &Match{}
 		
-		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Score, &m.Map, &m.EventId, &m.Date)
+		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Score, &m.Map, &m.EventId, &m.Date, &m.PoolStatus)
 		matches = append(matches, m)
 	}
 	

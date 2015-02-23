@@ -53,7 +53,13 @@ func ViewEventHandler(w http.ResponseWriter, r *http.Request) {
 		t2Link := &Link{Caption: t2cap, Url:"/viewteam/"}
 		t2Link.AddParameter("id", strconv.Itoa(t2.TeamId))
 		
-		matches_html = matches_html + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", mLink.GetHTML() , t1Link.GetHTML(), t2Link.GetHTML(), m.Map)
+		pooled := ""
+		
+		if m.PoolStatus == 1 {
+			pooled = "x"
+		}
+		
+		matches_html = matches_html + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", mLink.GetHTML() , t1Link.GetHTML(), t2Link.GetHTML(), m.Map, pooled)
 		
 	}
 	

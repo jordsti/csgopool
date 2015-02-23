@@ -35,6 +35,50 @@ type UserPoints struct {
 	Points int
 }
 
+type PlayerDivisionPoints struct {
+	PlayerId int
+	Name string
+	Points int
+}
+
+type DivisionPoints struct {
+	Players []*PlayerDivisionPoints
+	DivisionId int
+	Name string
+}
+
+func GetDivisionsPoints(db *sql.DB) []*DivisionPoints {
+	points := []*DivisionPoints{}
+	
+	query := `SELECT dp.division_id, d.division_name, p.player_name, SUM(pp.points) as points
+		FROM divisions_players dp 
+		JOIN divisions d ON dp.division_id = d.division_id 
+		JOIN players_points pp ON pp.player_id = dp.player_id 
+		JOIN players p ON p.player_id = dp.player_id 
+		GROUP BY pp.player_id 
+		ORDER BY d.division_id `
+	
+	rows, _ := db.Query(query)
+	currentDiv := &DivisionPoints{}
+	
+	for rows.Next() {
+		d_id := 0
+		d_name := ""
+		pl := &PlayerDivisionPoints{}
+		rows.Scan(&d_id, &d_name, &pl.Name, &pl.Points)
+		
+		if currentDiv.DivisionId != d_id {
+			currentDiv = &DivisionPoints{DivisionId: d_id, Name: d_name}
+			points = append(points, currentDiv)
+		}
+		
+		currentDiv.Players = append(currentDiv.Players, pl)
+		
+	}
+	
+	return points
+}
+
 func GetPlayersPoint(db *sql.DB) []*PlayerPoints {
 	
 	points := []*PlayerPoints{}
