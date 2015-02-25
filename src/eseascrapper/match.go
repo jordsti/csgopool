@@ -3,7 +3,7 @@ package eseascrapper
 import (
 	"regexp"
 	"strconv"
-	"fmt"
+
 	"github.com/moovweb/gokogiri"
 )
 
@@ -37,6 +37,7 @@ type Match struct {
 	Date MatchDate
 	Team1 MatchTeam
 	Team2 MatchTeam
+	PlayerStats []*PlayerMatchStat
 }
 
 
@@ -100,13 +101,31 @@ func (m *Match) ParseMatch() {
 		links, _  := el.Search("./td/a")
 		
 		plink := links[1]
-		rs := re.FindAllStringSubmatch(plink.Attribute("href").Value(), -1)
-		fmt.Printf("Player Name : %s - %s\n", plink.Content(), rs[0][1])
+		rs := re.FindAllStringSubmatch(plink.Attribute("href").Value(), -1)	
+		playerId, _ := strconv.ParseInt(rs[0][1], 10, 32)
 		
 		stats, _ := el.Search("./td[@class='stat']")
-		for _, s := range stats {
-			fmt.Printf("%s\n", s.Content())
-		}
+		rws, _ := strconv.ParseFloat(stats[0].Content(), 32)
+		frags, _ := strconv.ParseInt(stats[1].Content(), 10, 32)
+		assists, _ := strconv.ParseInt(stats[2].Content(), 10, 32)
+		deaths, _ := strconv.ParseInt(stats[3].Content(), 10, 32)
+		bombPlants, _ := strconv.ParseInt(stats[4].Content(), 10, 32)
+		bombDefusal, _ := strconv.ParseInt(stats[5].Content(), 10, 32)
+		roundPlayed, _ := strconv.ParseInt(stats[6].Content(), 10, 32)
+
+		pstat := &PlayerMatchStat{}
+		pstat.PlayerId = int(playerId)
+		pstat.TeamId = m.Team1.TeamId
+		pstat.Name = plink.Content()
+		pstat.RWS = float32(rws)
+		pstat.Frags = int(frags)
+		pstat.Assists = int(assists)
+		pstat.Deaths = int(deaths)
+		pstat.BombPlants = int(bombPlants)
+		pstat.BombDefusal = int(bombDefusal)
+		pstat.RoundPlayed = int(roundPlayed)
+		
+		m.PlayerStats = append(m.PlayerStats, pstat)
 	}
 	
 	//team2
@@ -117,12 +136,31 @@ func (m *Match) ParseMatch() {
 		
 		plink := links[1]
 		rs := re.FindAllStringSubmatch(plink.Attribute("href").Value(), -1)
-		fmt.Printf("Player Name : %s - %s\n", plink.Content(), rs[0][1])
+		
+		playerId, _ := strconv.ParseInt(rs[0][1], 10, 32)
 		
 		stats, _ := el.Search("./td[@class='stat']")
-		for _, s := range stats {
-			fmt.Printf("%s\n", s.Content())
-		}
+		rws, _ := strconv.ParseFloat(stats[0].Content(), 32)
+		frags, _ := strconv.ParseInt(stats[1].Content(), 10, 32)
+		assists, _ := strconv.ParseInt(stats[2].Content(), 10, 32)
+		deaths, _ := strconv.ParseInt(stats[3].Content(), 10, 32)
+		bombPlants, _ := strconv.ParseInt(stats[4].Content(), 10, 32)
+		bombDefusal, _ := strconv.ParseInt(stats[5].Content(), 10, 32)
+		roundPlayed, _ := strconv.ParseInt(stats[6].Content(), 10, 32)
+
+		pstat := &PlayerMatchStat{}
+		pstat.PlayerId = int(playerId)
+		pstat.TeamId = m.Team2.TeamId
+		pstat.Name = plink.Content()
+		pstat.RWS = float32(rws)
+		pstat.Frags = int(frags)
+		pstat.Assists = int(assists)
+		pstat.Deaths = int(deaths)
+		pstat.BombPlants = int(bombPlants)
+		pstat.BombDefusal = int(bombDefusal)
+		pstat.RoundPlayed = int(roundPlayed)
+		
+		m.PlayerStats = append(m.PlayerStats, pstat)
 	}
 	doc.Free()
 }

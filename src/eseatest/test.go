@@ -20,6 +20,7 @@ func main() {
 		m.ParseMatch()
 		
 		fmt.Printf("Match [%d], Team1 [%d] %d, Team2 [%d] %d\n",m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score)
+		fmt.Printf("%d\n", len(m.PlayerStats))
 	}
 	
 }

@@ -61,6 +61,7 @@ You can specify many settings with application switch
 
 This is the TODO list for the near future
 
+  - ESEA parser
   - Match revoke, add match to pool
   - Points attribution to users when points are added
   - Database configuration interface if none found could be nice
