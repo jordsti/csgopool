@@ -14,7 +14,7 @@ type PlayerPage struct {
 	PlayerName string
 	Matches template.HTML
 	Frags string
-	Headshots string
+	//Headshots string
 	Deaths string
 	KDRatio string
 	MatchesPlayed string
@@ -71,7 +71,7 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 		matchLink := &Link{Caption: fmt.Sprintf("%d-%02d-%02d", ms.Date.Year(), ms.Date.Month(), ms.Date.Day()), Url:"/viewmatch/"}
 		matchLink.AddInt("id", ms.MatchId)
 		
-		matches_html += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", matchLink.GetHTML(), team1Link.GetHTML(), team2Link.GetHTML(), ms.Frags, ms.Headshots, ms.KDRatio, ms.Points)
+		matches_html += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", matchLink.GetHTML(), team1Link.GetHTML(), team2Link.GetHTML(), ms.Frags, ms.KDRatio, ms.Points)
 	}
 	
 	db.Close()
@@ -87,7 +87,7 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	
 	
 	p.Frags = fmt.Sprintf("%d", player.Stat.Frags)
-	p.Headshots = fmt.Sprintf("%d", player.Stat.Headshots)
+	//p.Headshots = fmt.Sprintf("%d", player.Stat.Headshots)
 	p.Deaths = fmt.Sprintf("%d", player.Stat.Deaths)
 	p.KDRatio = fmt.Sprintf("%.2f", player.Stat.AvgKDRatio)
 	p.MatchesPlayed = fmt.Sprintf("%d", player.Stat.MatchesPlayed)

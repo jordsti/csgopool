@@ -18,11 +18,12 @@ type MatchStat struct {
 	TeamId int
 	PlayerId int
 	Frags int
-	Headshots int
 	Assists int
 	Deaths int
 	KDRatio float32
 	KDDelta int
+	Source int
+	SourceId int
 }
 
 type Snapshot struct {
@@ -48,20 +49,20 @@ func GenerateSnapshot(db *sql.DB) *Snapshot {
 	}
 	
 	//players
-	query = "SELECT player_id, player_name FROM players"
+	query = "SELECT player_id, player_name, esea_id, hltv_id FROM players"
 	rows, _ = db.Query(query)
 	for rows.Next() {
 		player := &Player{}
-		rows.Scan(&player.PlayerId, &player.Name)
+		rows.Scan(&player.PlayerId, &player.Name, &player.EseaId, &player.HltvId)
 		snapshot.Players = append(snapshot.Players, player)
 	}
 	
 	//teams
-	query = "SELECT team_id, team_name FROM teams"
+	query = "SELECT team_id, team_name, esea_id, hltv_id FROM teams"
 	rows, _ = db.Query(query)
 	for rows.Next() {
 		team := &Team{}
-		rows.Scan(&team.TeamId, &team.Name)
+		rows.Scan(&team.TeamId, &team.Name, &team.EseaId, &team.HltvId)
 		snapshot.Teams = append(snapshot.Teams, team)
 	}
 	
@@ -75,20 +76,20 @@ func GenerateSnapshot(db *sql.DB) *Snapshot {
 	}
 	
 	//matches
-	query = "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date FROM matches"
+	query = "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, souce_id FROM matches"
 	rows, _ = db.Query(query)
 	for rows.Next() {
 		match := &Match{}
-		rows.Scan(&match.MatchId, &match.Team1.TeamId, &match.Team1.Score, &match.Team2.TeamId, &match.Team2.Score, &match.Map, &match.EventId, &match.Date)
+		rows.Scan(&match.MatchId, &match.Team1.TeamId, &match.Team1.Score, &match.Team2.TeamId, &match.Team2.Score, &match.Map, &match.EventId, &match.Date, &match.Source, &match.SourceId)
 		snapshot.Matches = append(snapshot.Matches, match)
 	}
 	
 	//matches stats
-	query = "SELECT match_id, team_id, player_id, frags, headshots, assists, deaths, kdratio, kddelta FROM matches_stats"
+	query = "SELECT match_id, team_id, player_id, frags, assists, deaths, kdratio, kddelta FROM matches_stats"
 	rows, _ = db.Query(query)
 	for rows.Next() {
 		stat := &MatchStat{}
-		rows.Scan(&stat.MatchId, &stat.TeamId, &stat.PlayerId, &stat.Frags, &stat.Headshots, &stat.Assists, &stat.Deaths, &stat.KDRatio, &stat.KDDelta)
+		rows.Scan(&stat.MatchId, &stat.TeamId, &stat.PlayerId, &stat.Frags, &stat.Assists, &stat.Deaths, &stat.KDRatio, &stat.KDDelta)
 		snapshot.MatchesStats = append(snapshot.MatchesStats, stat)
 	}
 	
@@ -139,14 +140,14 @@ func (s *Snapshot) ImportFromURL(db *sql.DB, url string) {
 func (s *Snapshot) Import(db *sql.DB) {
 	//players
 	for _, pl := range s.Players {
-		query := "INSERT INTO players (player_id, player_name) VALUES (?, ?)"
-		db.Exec(query, pl.PlayerId, pl.Name)
+		query := "INSERT INTO players (player_id, player_name, esea_id, hltv_id) VALUES (?, ?, ?, ?)"
+		db.Exec(query, pl.PlayerId, pl.Name, pl.EseaId, pl.HltvId)
 	}
 	
 	//teams
 	for _, t := range s.Teams {
-		query := "INSERT INTO teams (team_id, team_name) VALUES (?, ?)"
-		db.Exec(query, t.TeamId, t.Name)
+		query := "INSERT INTO teams (team_id, team_name, esea_id, hltv_id) VALUES (?, ?, ?, ?)"
+		db.Exec(query, t.TeamId, t.Name, t.EseaId, t.HltvId)
 	}
 	
 	//players_teams
@@ -163,13 +164,13 @@ func (s *Snapshot) Import(db *sql.DB) {
 	
 	//matches
 	for _, m := range s.Matches {
-		query := "INSERT INTO matches (match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-		db.Exec(query, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.EventId, m.Date)
+		query := "INSERT INTO matches (match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, source_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		db.Exec(query, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.EventId, m.Date, m.Source, m.SourceId)
 	}
 	
 	//match stats
 	for _, ms := range s.MatchesStats {
-		query := "INSERT INTO matches_stats (match_id, team_id, player_id, frags, headshots, assists, deaths, kdratio, kddelta) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-		db.Exec(query, ms.MatchId, ms.TeamId, ms.PlayerId, ms.Frags, ms.Headshots, ms.Assists, ms.Deaths, ms.KDRatio, ms.KDDelta)
+		query := "INSERT INTO matches_stats (match_id, team_id, player_id, frags, assists, deaths, kdratio, kddelta) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+		db.Exec(query, ms.MatchId, ms.TeamId, ms.PlayerId, ms.Frags, ms.Assists, ms.Deaths, ms.KDRatio, ms.KDDelta)
 	}
 }

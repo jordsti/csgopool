@@ -73,16 +73,26 @@ func InitTables(db *sql.DB) {
 	//using HLTV id, no auto_increment
 	//team tables
 	req := "CREATE TABLE IF NOT EXISTS `teams` ("
-	req += "`team_id` int(255) NOT NULL,"
+	req += "`team_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`team_name` varchar(255) NOT NULL,"
+	req += "`hltv_id` int(255) NOT NULL,"
+	req += "`esea_id` int(255) NOT NULL,"
+	req += "UNIQUE KEY `teams_source1_constraint` (`hltv_id`),"
+	req += "UNIQUE KEY `teams_source2_constraint` (`esea_id`),"
+	req += "UNIQUE KEY `teams_constraint` (`team_name`),"
 	req += "PRIMARY KEY (`team_id`)"
 	req +=  ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err := db.Exec(req)
 	
 	req = "CREATE TABLE IF NOT EXISTS `players` ("
-	req += "`player_id` int(255) NOT NULL,"
+	req += "`player_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`player_name` varchar(255) NOT NULL,"
+	req += "`hltv_id` int(255) NOT NULL,"
+	req += "`esea_id` int(255) NOT NULL,"
+	req += "UNIQUE KEY `players_source1_constraint` (`hltv_id`),"
+	req += "UNIQUE KEY `players_source2_constraint` (`esea_id`),"
+	req += "UNIQUE KEY `players_constraint` (`player_name`),"
 	req += "PRIMARY KEY (`player_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
@@ -108,7 +118,7 @@ func InitTables(db *sql.DB) {
 	_, err = db.Exec(req)
 	
 	req = "CREATE TABLE IF NOT EXISTS `matches` ("
-	req += "`match_id` int(255) NOT NULL,"
+	req += "`match_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`team1_id` int(255) NOT NULL,"
 	req += "`team1_score` int(255) NOT NULL,"
 	req += "`team2_id` int(255) NOT NULL,"
@@ -116,7 +126,10 @@ func InitTables(db *sql.DB) {
 	req += "`map` varchar(255) NOT NULL,"
 	req += "`event_id` int(255) NOT NULL,"
 	req += "`match_date` DATE NOT NULL,"
+	req += "`source_id` int(255) NOT NULL,"
+	req += "`source` int(25) NOT NULL,"
 	req += "`pool_status` int(255) NOT NULL, "
+	req += "UNIQUE KEY `matches_constraint` (`source_id`, `source`), "
 	req += "PRIMARY KEY (`match_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
@@ -128,11 +141,12 @@ func InitTables(db *sql.DB) {
 	req += "`team_id` int(255) NOT NULL,"
 	req += "`player_id` int(255) NOT NULL,"
 	req += "`frags` int(255) NOT NULL,"
-	req += "`headshots` int(255) NOT NULL,"
+	//req += "`headshots` int(255) NOT NULL," removed because ESEA doesnt show that stats!
 	req += "`assists` int(255) NOT NULL,"
 	req += "`deaths` int(255) NOT NULL,"
 	req += "`kdratio` float NOT NULL,"
 	req += "`kddelta` int(25) NOT NULL,"
+	req += "UNIQUE KEY `matches_stats_constraint` (`match_id`, `player_id`), "
 	req += "PRIMARY KEY (`match_stat_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	

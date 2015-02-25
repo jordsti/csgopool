@@ -109,7 +109,7 @@ func AttributePoints(db *sql.DB, matchId int) {
 			
 			points := 0
 			
-			points += (ps.Frags * 2 + ps.Headshots * 2 + ps.Assists/2) - ps.Deaths
+			points += (ps.Frags * 2 + ps.Assists/2) - ps.Deaths
 			
 			//kdddelta bonus if positive
 			kddelta := ps.KDDelta * 3

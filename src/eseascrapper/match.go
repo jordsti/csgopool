@@ -3,8 +3,14 @@ package eseascrapper
 import (
 	"regexp"
 	"strconv"
-
+	"fmt"
 	"github.com/moovweb/gokogiri"
+	"strings"
+)
+
+const (
+	Completed = 1
+	Forfeit = 2
 )
 
 type MatchDate struct {
@@ -30,36 +36,80 @@ type PlayerMatchStat struct {
 	BombPlants int
 	BombDefusal int
 	RoundPlayed int
+	
+	KDRatio float32
+	KDDelta int
 }
 
 type Match struct {
 	MatchId int
 	Date MatchDate
-	Team1 MatchTeam
-	Team2 MatchTeam
+	Map string
+	Team1 *MatchTeam
+	Team2 *MatchTeam
 	PlayerStats []*PlayerMatchStat
+	Status int
 }
 
+func (pms *PlayerMatchStat) Player() Player {
+	return Player{PlayerId: pms.PlayerId, Name: pms.Name}
+}
+
+func (mt *MatchTeam) Team() *Team {
+	return &Team{Name: mt.Name, TeamId: mt.TeamId}
+}
 
 func (pc *PageContent) ParseMatches() []*Match {
 	matches := []*Match{}
 	
-	re := regexp.MustCompile(`<a href="/index.php\?s=stats&d=match&id=([0-9]+)">Statistics and Discussion</a>`)
-	rs := re.FindAllStringSubmatch(pc.Content, -1)
+	doc, _ := gokogiri.ParseHtml([]byte(pc.Content))
 	
-	for _, mrs := range rs {
+	nodes, _ := doc.Search("//div[@class='match-container']")
+	
+	re := regexp.MustCompile(`^/index.php\?s=stats&d=match&id=([0-9]+)$`)
+	for _, n := range nodes {
+		
+		nOverview, _ := n.Search("./div[@class='match-overview']")
+		footer, _ := n.Search("./div[@class='match-footer']")
 
-		m := &Match{}
-		_match_id, _ := strconv.ParseInt(mrs[1], 10, 32)
+		innerNodes, _ := nOverview[0].Search("./table/tr/th")
+		status := 0
+		if len(innerNodes) > 0 {
+			matchStatus := strings.TrimSpace(innerNodes[0].Content())
+			fmt.Printf("Match Status : %s\n", matchStatus)
+			if matchStatus == "Completed" {
+				status = Completed
+				
+			} else if matchStatus == "Completed (Forfeit)" {
+				status = Forfeit
+			}
+		}
+
+		if status != 0 {
+			linkNode, _ := nOverview[0].Search("./a")
+			link := linkNode[0].Attribute("href").Value()
+			rs := re.FindStringSubmatch(link)
+			_m_id, _ := strconv.ParseInt(rs[1], 10, 32)
+			matchId := int(_m_id)
+			fmt.Printf("Match Id : %d\n", matchId)
+			
+			data := strings.Split(footer[0].Content(), "/")
+			
+			mapstr := strings.TrimSpace(data[1])
+			
+			m := &Match{}
+			m.Status = status
+			m.MatchId = matchId
+			m.Date.Year = pc.Url.Date.Year()
+			m.Date.Month = int(pc.Url.Date.Month())
+			m.Date.Day = pc.Url.Date.Day()
+			m.Map = mapstr
+			matches = append(matches, m)
+		}
 		
-		m.MatchId = int(_match_id)
-		m.Date.Year = pc.Url.Date.Year()
-		m.Date.Month = int(pc.Url.Date.Month())
-		m.Date.Day = pc.Url.Date.Day()
-		
-		matches = append(matches, m)
 	}
 	
+	doc.Free()
 	return matches
 }
 
@@ -68,31 +118,56 @@ func (m *Match) ParseMatch() {
 	url := GetMatchURL(m.MatchId)
 	pc := url.LoadPage()
 	
-	re := regexp.MustCompile(`<th align="left"><a href="/teams/([0-9]+)">([A-Za-z0-9\-_ \.]+)</a></th>\s+<td class="(ct|t) stat">([0-9]+)</td>\s+<td class="(ct|t) stat">([0-9]+)</td>`)
-	rs := re.FindAllStringSubmatch(pc.Content, -1)
-	iteam := 0
-	for _, mrs := range rs {
-		_team_id, _ := strconv.ParseInt(mrs[1], 10, 32)
-		_team_name := mrs[2]
+	re_teamid := regexp.MustCompile("^/teams/([0-9]+)$")
+	//fmt.Println(pc.Content)
+	
+	//parsing team name
+	doc, _ := gokogiri.ParseHtml([]byte(pc.Content))
+	nodes, _ := doc.Search("//div[@id='body-match-stats']/table[@class='box']")
+	scoresRow, _ := nodes[0].Search("./tr")
+	
+	//row -> 1, Team1
+	//row -> 2, Team2
+	
+	if len(scoresRow) >= 3 {
+		nodes, _ = scoresRow[1].Search("./th[@align='left']/a")
+		team1 := nodes[0]
+		rs := re_teamid.FindStringSubmatch(team1.Attribute("href").Value())
 		
-		_stat_1, _ := strconv.ParseInt(mrs[4], 10, 32)
-		_stat_2, _ := strconv.ParseInt(mrs[6], 10, 32)
+		_team_id, _ := strconv.ParseInt(rs[1], 10, 32)
+		m.Team1.TeamId = int(_team_id)
+		m.Team1.Name = team1.Content()
 		
-		if iteam == 0 {
-			m.Team1.TeamId = int(_team_id)
-			m.Team1.Name = _team_name
-			m.Team1.Score = int(_stat_1 + _stat_2)
-		} else if iteam == 1 {
-			m.Team2.TeamId = int(_team_id)
-			m.Team2.Name = _team_name
-			m.Team2.Score = int(_stat_1 + _stat_2)
-		}
+		//scores parsing
 		
-		iteam++
+		nodes, _ = scoresRow[1].Search("./td[@class='ct stat']")
+		_score, _ := strconv.ParseInt(nodes[0].Content(), 10, 32)
+		m.Team1.Score = int(_score)
+		
+		nodes, _ = scoresRow[1].Search("./td[@class='t stat']")
+		_score, _ = strconv.ParseInt(nodes[0].Content(), 10, 32)
+		m.Team1.Score += int(_score)
+		
+		nodes, _ = scoresRow[2].Search("./th[@align='left']/a")
+		team2 := nodes[0]
+		rs = re_teamid.FindStringSubmatch(team2.Attribute("href").Value())
+		
+		_team_id, _ = strconv.ParseInt(rs[1], 10, 32)
+		m.Team2.TeamId = int(_team_id)
+		m.Team2.Name = team2.Content()
+		
+		//scores parsing
+		
+		nodes, _ = scoresRow[2].Search("./td[@class='ct stat']")
+		_score, _ = strconv.ParseInt(nodes[0].Content(), 10, 32)
+		m.Team2.Score = int(_score)
+		
+		nodes, _ = scoresRow[2].Search("./td[@class='t stat']")
+		_score, _ = strconv.ParseInt(nodes[0].Content(), 10, 32)
+		m.Team2.Score += int(_score)
 	}
 	
-	re = regexp.MustCompile(`^/users/([0-9]+)$`)
-	doc, _ := gokogiri.ParseHtml([]byte(pc.Content))
+	re := regexp.MustCompile(`^/users/([0-9]+)$`)
 	
 	//team1
 	els, _ := doc.Search("//tbody[@id='body-match-total1']/tr")
@@ -124,6 +199,9 @@ func (m *Match) ParseMatch() {
 		pstat.BombPlants = int(bombPlants)
 		pstat.BombDefusal = int(bombDefusal)
 		pstat.RoundPlayed = int(roundPlayed)
+		
+		pstat.KDRatio = float32(pstat.Frags) / float32(pstat.Deaths)
+		pstat.KDDelta = pstat.Frags - pstat.Deaths
 		
 		m.PlayerStats = append(m.PlayerStats, pstat)
 	}
@@ -159,6 +237,9 @@ func (m *Match) ParseMatch() {
 		pstat.BombPlants = int(bombPlants)
 		pstat.BombDefusal = int(bombDefusal)
 		pstat.RoundPlayed = int(roundPlayed)
+		
+		pstat.KDRatio = float32(pstat.Frags) / float32(pstat.Deaths)
+		pstat.KDDelta = pstat.Frags - pstat.Deaths
 		
 		m.PlayerStats = append(m.PlayerStats, pstat)
 	}

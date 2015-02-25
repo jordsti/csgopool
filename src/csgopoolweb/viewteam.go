@@ -47,7 +47,7 @@ func ViewTeamHandler(w http.ResponseWriter, r *http.Request) {
 		playerLink.AddInt("id", pl.PlayerId)
 		//playerLink.AddInt("teamid", team.TeamId)
 		
-		pStats += fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td><td>%.2f</td><td>%.2f</td></tr>", playerLink.GetHTML(), pl.Stat.Frags, pl.Stat.Headshots, pl.Stat.Deaths, pl.Stat.AvgKDRatio, pl.Stat.MatchesPlayed, pl.Stat.AvgFrags, pl.Stat.AvgKDDelta)
+		pStats += fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td><td>%.2f</td><td>%.2f</td></tr>", playerLink.GetHTML(), pl.Stat.Frags, pl.Stat.Deaths, pl.Stat.AvgKDRatio, pl.Stat.MatchesPlayed, pl.Stat.AvgFrags, pl.Stat.AvgKDDelta)
 		
 	}
 	

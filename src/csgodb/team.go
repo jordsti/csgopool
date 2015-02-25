@@ -2,6 +2,7 @@ package csgodb
 
 import (
 	"csgoscrapper"
+	"eseascrapper"
 	"database/sql"
 	"fmt"
 )
@@ -10,6 +11,8 @@ import (
 type Team struct {
 	TeamId int
 	Name string
+	EseaId int
+	HltvId int
 	
 	Players []*Player
 }
@@ -91,24 +94,90 @@ func IsTeamExists(teams []*Team, teamId int) bool {
 func ImportTeams(db *sql.DB, teams []*csgoscrapper.Team) {
 	//this is for initial import only !!
 	
-	for _, team := range teams {
+	/*for _, team := range teams {
 		
-		stmt, _ := db.Prepare("INSERT INTO teams (team_id, team_name) VALUES (?, ?)")
-		stmt.Exec(team.TeamId, team.Name)
-		defer stmt.Close()
-	}
+		//query := "INSERT INTO teams (team_id, team_name, esea_id, hltv_id) VALUES (?, ?, ?, ?)"
+		//todo
+	}*/
 	
 }
+
+func FindTeamByName(teams []*Team, name string) *Team {
+	for _, t := range teams {
+		if t.Name == name {
+			return t
+		}
+	}
+	
+	return nil
+}
+
+func ImportHltvTeam(db *sql.DB, team *csgoscrapper.Team) *Team {
+	query := "INSERT INTO teams (team_name, hltv_id) VALUES (?, ?)"
+	db.Exec(query, team.Name, team.TeamId)
+	return GetTeamByHltvId(db, team.TeamId)
+}
+
+func ImportEseaTeam(db *sql.DB, team *eseascrapper.Team) *Team {
+	query := "INSERT INTO teams (team_name, esea_id) VALUES (?, ?)"
+	db.Exec(query, team.Name, team.TeamId)
+	return GetTeamByEseaId(db, team.TeamId)
+}
+
+func GetTeamByEseaId(db *sql.DB, eseaId int) *Team {
+	team := &Team{}
+	
+	query := "SELECT team_id, team_name, esea_id, hltv_id FROM teams WHERE esea_id = ?"
+	rows, _ := db.Query(query, eseaId)
+	
+	for rows.Next() {
+		rows.Scan(&team.TeamId, &team.Name, &team.EseaId, &team.HltvId)
+	}
+	
+	return team
+}
+
+func GetTeamByHltvId(db *sql.DB, hltvId int) *Team {
+	team := &Team{}
+	
+	query := "SELECT team_id, team_name, esea_id, hltv_id FROM teams WHERE hltv_id = ?"
+	rows, _ := db.Query(query, hltvId)
+	
+	for rows.Next() {
+		rows.Scan(&team.TeamId, &team.Name, &team.EseaId, &team.HltvId)
+	}
+	
+	return team
+}
+
+func GetTeamByName(db *sql.DB, name string) *Team {
+	team := &Team{}
+	
+	query := "SELECT team_id, team_name, esea_id, hltv_id FROM teams WHERE team_name = ?"
+	rows, _ := db.Query(query, name)
+	
+	for rows.Next() {
+		rows.Scan(&team.TeamId, &team.Name, &team.EseaId, &team.HltvId)
+	}
+	
+	return team
+}
+
+func (t *Team) UpdateSourceId(db *sql.DB) {
+	query := "UPDATE teams SET esea_id = ?, hltv_id = ? WHERE team_id = ?"
+	db.Exec(query, t.EseaId, t.HltvId, t.TeamId)
+}
+
 
 func GetAllTeams(db *sql.DB) []*Team {
 	
 	teams := []*Team{}
 	
-	rows, _ := db.Query("SELECT team_id, team_name FROM teams")
+	rows, _ := db.Query("SELECT team_id, team_name, esea_id, hltv_id FROM teams")
 
 	for rows.Next() {
 		team := &Team{}
-		rows.Scan(&team.TeamId, &team.Name)
+		rows.Scan(&team.TeamId, &team.Name, &team.EseaId, &team.HltvId)
 		teams = append(teams, team)
 	}
 	
@@ -119,14 +188,14 @@ func GetTeamById(db *sql.DB, teamId int) Team {
 	
 	team := Team{TeamId: 0, Name:""}
 	
-	rows, err := db.Query("SELECT team_id, team_name FROM teams WHERE team_id = ?", teamId)
+	rows, err := db.Query("SELECT team_id, team_name, esea_id, hltv_id FROM teams WHERE team_id = ?", teamId)
 	
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
 		
 	for rows.Next() {
-		rows.Scan(&team.TeamId, &team.Name)
+		rows.Scan(&team.TeamId, &team.Name, &team.EseaId, &team.HltvId)
 	}
 	
 	return team
