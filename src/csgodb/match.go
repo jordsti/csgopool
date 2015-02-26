@@ -32,7 +32,7 @@ func GetLastMatch(db *sql.DB) *Match {
 	
 	match := &Match{MatchId: 0}
 	
-	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, source_id, pool_status FROM matches ORDER BY match_id DESC LIMIT 1"
+	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, source_id, pool_status FROM matches ORDER BY match_date DESC, match_id DESC LIMIT 1"
 	
 	rows, _ := db.Query(query)
 	
@@ -43,6 +43,22 @@ func GetLastMatch(db *sql.DB) *Match {
 	return match
 }
 
+func GetUnpooledMatchesAfter(db *sql.DB, date time.Time) []int {
+	matches_id := []int{}
+	normDate := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
+	query := "SELECT match_id FROM matches WHERE match_date >= ? AND pool_status = 0"
+	
+	rows, _ := db.Query(query, normDate)
+	
+	for rows.Next() {
+		
+		match_id := 0
+		rows.Scan(&match_id)
+		matches_id = append(matches_id, match_id)
+	}
+	
+	return matches_id
+}
 
 func GetMatchById(db *sql.DB, matchId int) *Match {
 	

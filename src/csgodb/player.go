@@ -6,6 +6,7 @@ import (
 	"eseascrapper"
 	"time"
 	"fmt"
+	"strings"
 )
 
 type GeneralStat struct {
@@ -22,8 +23,10 @@ type GeneralStat struct {
 type Player struct {
 	PlayerId int
 	Name string
+	Alias []string
 	EseaId int
 	HltvId int
+	RawAlias string
 }
 
 type PlayerWithStat struct {
@@ -48,6 +51,72 @@ type PlayerMatchStat struct {
 	Frags int
 	KDRatio float32
 	Points int
+}
+
+func (pl *Player) AddAlias(name string) {
+	
+	for _, a := range pl.Alias {
+		if a == name {
+			return
+		}
+	}
+	
+	pl.Alias = append(pl.Alias, name)
+}
+
+func MergePlayer(db *sql.DB, playerId int, mergerId int) {
+	//must be done before doing the pool
+	player := GetPlayerById(db, playerId)
+	merger := GetPlayerById(db, mergerId)
+
+	if player == nil || merger == nil {
+		fmt.Println("Player merge failed !")
+		return
+	}
+
+	player.AddAlias(merger.Name)
+	
+	if merger.HltvId != 0 {
+		player.HltvId = merger.HltvId
+	}
+	
+	if merger.EseaId != 0 {
+		player.EseaId = merger.EseaId
+	}
+	
+	player.UpdateSourceId(db)
+	player.UpdateAliases(db)
+	
+	//change the id in tables
+	
+	//matches_stats
+	query := "UPDATE matches_stats SET player_id = ? WHERE player_id = ?"
+	db.Exec(query, player.PlayerId, merger.PlayerId)
+	
+	//players_points
+	query = "UPDATE players_points SET player_id = ? WHERE player_id = ?"
+	db.Exec(query, player.PlayerId, merger.PlayerId)
+	
+	//players_teams
+	query = "DELETE FROM players_teams WHERE player_id = ?"
+	db.Exec(query, merger.PlayerId)
+	
+	query = "DELETE FROM players WHERE player_id = ?"
+	db.Exec(query, merger.PlayerId)
+}
+
+func (pl *Player) UpdateAliases(db *sql.DB) {
+	aliases := ""
+	
+	for _, a := range pl.Alias {
+		aliases += a
+		aliases += ","
+	}
+	
+	aliases = strings.Trim(aliases, ",")
+	
+	query := "UPDATE players SET player_alias = ? WHERE player_id = ?"
+	db.Exec(query, aliases, pl.PlayerId)
 }
 
 func (pl *Player) P() *PlayerWithStat {
@@ -159,13 +228,22 @@ func GetAllPlayers(db *sql.DB) []*Player {
 	
 	players := []*Player{}
 	
-	query := "SELECT player_id, player_name, esea_id, hltv_id FROM players ORDER BY player_name"
+	query := "SELECT player_id, player_name, player_alias, esea_id, hltv_id FROM players ORDER BY player_name"
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {
-		
+		aliases := ""
 		player := &Player{}
-		rows.Scan(&player.PlayerId, &player.Name, &player.EseaId, &player.HltvId)
+		rows.Scan(&player.PlayerId, &player.Name, &aliases, &player.EseaId, &player.HltvId)
+		
+		_alias := strings.Split(aliases, ",")
+		
+		for _, alias := range _alias {
+			if len(alias) > 0 {
+				player.Alias = append(player.Alias, alias)
+			}
+		}
+		
 		players = append(players, player)
 	}
 	
@@ -223,6 +301,12 @@ func FindPlayerByName(players []*Player, name string) *Player {
 	for _, pl := range players {
 		if pl.Name == name {
 			return pl
+		} else {
+			for _, a := range pl.Alias {
+				if name == a {
+					return pl
+				}
+			}
 		}
 	}
 	

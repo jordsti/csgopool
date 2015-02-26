@@ -47,11 +47,11 @@ func GenerateSnapshot(db *sql.DB) *Snapshot {
 	}
 	
 	//players
-	query = "SELECT player_id, player_name, esea_id, hltv_id FROM players"
+	query = "SELECT player_id, player_name, esea_id, hltv_id, player_alias FROM players"
 	rows, _ = db.Query(query)
 	for rows.Next() {
 		player := &Player{}
-		rows.Scan(&player.PlayerId, &player.Name, &player.EseaId, &player.HltvId)
+		rows.Scan(&player.PlayerId, &player.Name, &player.EseaId, &player.HltvId, &player.RawAlias)
 		snapshot.Players = append(snapshot.Players, player)
 	}
 	
@@ -138,8 +138,8 @@ func (s *Snapshot) ImportFromURL(db *sql.DB, url string) {
 func (s *Snapshot) Import(db *sql.DB) {
 	//players
 	for _, pl := range s.Players {
-		query := "INSERT INTO players (player_id, player_name, esea_id, hltv_id) VALUES (?, ?, ?, ?)"
-		db.Exec(query, pl.PlayerId, pl.Name, pl.EseaId, pl.HltvId)
+		query := "INSERT INTO players (player_id, player_name, esea_id, hltv_id, player_alias) VALUES (?, ?, ?, ?, ?)"
+		db.Exec(query, pl.PlayerId, pl.Name, pl.EseaId, pl.HltvId, pl.RawAlias)
 	}
 	
 	//teams

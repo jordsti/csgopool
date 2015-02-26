@@ -82,7 +82,7 @@ func GetDivisionsPoints(db *sql.DB) []*DivisionPoints {
 func GetPlayersPoint(db *sql.DB) []*PlayerPoints {
 	
 	points := []*PlayerPoints{}
-	query := `SELECT p.player_id, p.player_name, COUNT(ms.match_stat_id), SUM(ms.frags), SUM(ms.headshots), AVG(ms.kdratio), AVG(ms.kddelta), SUM(pt.points) as points FROM players_points pt
+	query := `SELECT p.player_id, p.player_name, COUNT(ms.match_stat_id), SUM(ms.frags), AVG(ms.kdratio), AVG(ms.kddelta), SUM(pt.points) as points FROM players_points pt
 				JOIN players p ON p.player_id = pt.player_id
 				JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id
 				GROUP BY player_id
@@ -92,7 +92,7 @@ func GetPlayersPoint(db *sql.DB) []*PlayerPoints {
 	
 	for rows.Next() {
 		point := &PlayerPoints{}
-		rows.Scan(&point.PlayerId, &point.Name, &point.Matches, &point.Frags, &point.Headshots, &point.KDRatio, &point.KDDelta, &point.Points)
+		rows.Scan(&point.PlayerId, &point.Name, &point.Matches, &point.Frags, &point.KDRatio, &point.KDDelta, &point.Points)
 		points = append(points, point)
 	}
 	
@@ -127,7 +127,6 @@ func GetMatchPoints(db *sql.DB, matchId int) []*MatchPointStat {
 	JOIN players p ON p.player_id = pt.player_id 
 	JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id 
 	JOIN teams t ON t.team_id = ms.team_id 
-	JOIN events e ON e.event_id = m.event_id 
 	WHERE m.match_id = ? 
 	ORDER BY pt.points DESC`
 	

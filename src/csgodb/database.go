@@ -88,6 +88,7 @@ func InitTables(db *sql.DB) {
 	req = "CREATE TABLE IF NOT EXISTS `players` ("
 	req += "`player_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`player_name` varchar(255) NOT NULL,"
+	req += "`player_alias` varchar(255) NOT NULL,"
 	req += "`hltv_id` int(255) NOT NULL,"
 	req += "`esea_id` int(255) NOT NULL,"
 	req += "UNIQUE KEY `players_constraint` (`player_name`),"

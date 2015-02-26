@@ -146,7 +146,12 @@ func (m *Match) ParseMatch() {
 		ms.Assists = int(assists)
 		ms.Deaths = int(deaths)
 		ms.KDDelta = ms.Frags - ms.Deaths
-		ms.KDRatio = float32(frags) / float32(deaths)
+		
+		if deaths > 0 {
+			ms.KDRatio = float32(frags) / float32(deaths)
+		} else {
+			ms.KDRatio = float32(frags)
+		}
 		
 		m.PlayerStats = append(m.PlayerStats, ms)
 	}	

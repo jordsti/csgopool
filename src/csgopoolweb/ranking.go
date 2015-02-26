@@ -59,7 +59,6 @@ func RankingHandler(w http.ResponseWriter, r *http.Request) {
 			<td>%s</td>
 			<td>%d</td>
 			<td>%d</td>
-			<td>%d</td>
 			<td>%.2f</td>
 			<td>%.2f</td>
 			<td>%d</td>
@@ -69,7 +68,6 @@ func RankingHandler(w http.ResponseWriter, r *http.Request) {
 		playerLink.GetHTML(),
 		pl.Matches,
 		pl.Frags,
-		pl.Headshots,
 		pl.KDRatio,
 		pl.KDDelta,
 		pl.Points)

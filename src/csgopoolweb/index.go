@@ -64,7 +64,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 				<th>Player</th>
 				<th>Team</th>
 				<th>Frags</th>
-				<th>Headshots</th>
 				<th>K/D Ratio</th>
 				<th>Points</th>
 			</tr>
@@ -81,10 +80,9 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 				<td>%s</td>
 				<td>%s</td>
 				<td>%d</td>
-				<td>%d</td>
 				<td>%.2f</td>
 				<td>%d</td>
-			</tr>`, pLink.GetHTML(), tLink.GetHTML(), s.Frags, s.Headshots, s.KDRatio, s.Points)
+			</tr>`, pLink.GetHTML(), tLink.GetHTML(), s.Frags, s.KDRatio, s.Points)
 			
 		}
 		

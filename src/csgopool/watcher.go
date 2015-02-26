@@ -128,7 +128,10 @@ func (w *WatcherState) LoadData() {
 
 func (w *WatcherState) StartBot()  {
 	d, _ := time.ParseDuration(w.RefreshTime)
-
+	//merge for snapshot
+	_db, _ := csgodb.Db.Open()
+	_db.Close()
+	
 	w.Log.Info("Starting watcher Bot")
 	for {
 		if !w.NoUpdate {
@@ -136,7 +139,6 @@ func (w *WatcherState) StartBot()  {
 			w.Running = true
 			db, _ := csgodb.Db.Open()
 			//updating last events
-			
 			//hltv
 			w.UpdateHltv(0)
 			
@@ -150,6 +152,20 @@ func (w *WatcherState) StartBot()  {
 			w.UpdateESEA(dayDelta, "premier", eseascrapper.Europe)
 			
 			//points attribution !
+			if Pool.Settings.AutoAddMatches && Pool.Settings.PoolOn {
+				now := time.Now()
+				
+				date := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+				date = date.AddDate(0, 0, -2)
+				matches_id := csgodb.GetUnpooledMatchesAfter(db, date)
+				
+				for _, match_id := range matches_id {
+					csgodb.UpdateMatchPoolStatus(db, match_id, 1)
+					w.Log.Info(fmt.Sprintf("Points attribution for match [%d]", match_id))
+					AttributePoints(db, match_id)
+				}
+				
+			}
 			
 			csgodb.InsertWatcherUpdate(db)
 			db.Close()

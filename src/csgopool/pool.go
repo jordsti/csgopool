@@ -109,7 +109,7 @@ func AttributePoints(db *sql.DB, matchId int) {
 			
 			points := 0
 			
-			points += (ps.Frags * 2 + ps.Assists/2) - ps.Deaths
+			points += (ps.Frags * 2 + ps.Assists)
 			
 			//kdddelta bonus if positive
 			kddelta := ps.KDDelta * 3
@@ -126,7 +126,7 @@ func AttributePoints(db *sql.DB, matchId int) {
 			if tie {
 				points += 10
 			} else if ps.TeamId == winId {
-				points += 20
+				points += 25
 			}
 			
 			csgodb.AddPoint(db, match.MatchId, ps.PlayerId, points)

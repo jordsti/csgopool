@@ -203,7 +203,11 @@ func (m *Match) ParseMatch() {
 		pstat.BombDefusal = int(bombDefusal)
 		pstat.RoundPlayed = int(roundPlayed)
 		
-		pstat.KDRatio = float32(pstat.Frags) / float32(pstat.Deaths)
+		if deaths > 0 {
+			pstat.KDRatio = float32(pstat.Frags) / float32(pstat.Deaths)
+		} else {
+			pstat.KDRatio = float32(pstat.Frags)
+		}
 		pstat.KDDelta = pstat.Frags - pstat.Deaths
 		
 		m.PlayerStats = append(m.PlayerStats, pstat)

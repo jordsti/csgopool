@@ -15,7 +15,8 @@ The projet is coded in Go langage, so you need to get golang package.
 	
 	- golang.org/x/crypto/bcrypt
 	- github.com/go-sql-driver/mysql
-
+	- github.com/moovweb/gokogiri
+	
 You start the CS:GO Pool by running csgopoolmain. You need to pass two arguments for CSGO Pool to work
 
   -data=/path/to/desired/data/folder
@@ -42,7 +43,9 @@ You can specify many settings with application switch
   - csgopool : This is the Watcher and the module will attribute points to users pool when new match will be added.
   - csgodb : This is the Database persistance module
   - csgopoolweb : This module handle web request
-  - csgopoolscrapper : This module fetch Stats from hltv.org
+  - hltvscrapper : This module fetch Stats from hltv.org
+  - eseascrapper : Fetch stats from ESEA.net
+  - poolstacker : csgopool instance manager
   
 ### What is done
 
@@ -61,6 +64,7 @@ You can specify many settings with application switch
 
 This is the TODO list for the near future
 
+  - player alias, player merge working, need to make a clean snapshot will almost all players merged
   - ESEA parser (nearly done, some errors handling todo)
   - HLTV parser refactor (done, removing events, need to rename package)
   - Create a Logger package, and add some output for ESEA
@@ -76,3 +80,14 @@ This is the TODO list for the near future
   - Handle Orphan player (there is still orphan player in matches_stats (snapshot-current)
   - User Pool Submission
   - User Main page (Dashboard with last matches stats and points attribution)
+
+  
+### Merge
+Notes only
+
+N0thing , 352, 20
+JW , 349, 194
+Maniac, 338, 176
+Gob, 178, 218
+Storm, 432, 40
+mouz, 222, 171

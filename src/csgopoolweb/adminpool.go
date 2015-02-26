@@ -308,6 +308,21 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		
 		content = fmt.Sprintf(content, rows_html)
 		p.Content = template.HTML(content)
+	} else if action == "mergeplayer" {
+		p.Content = template.HTML(ReadFile("adminmergeplayer.html"))
+	} else if action == "merge" {
+		
+		str_playerId := r.FormValue("playerid")
+		str_mergerId := r.FormValue("mergerid")
+		
+		_playerId, _ := strconv.ParseInt(str_playerId, 10, 32)
+		_mergerId, _ := strconv.ParseInt(str_mergerId, 10, 32)
+		
+		db, _ := csgodb.Db.Open()
+		
+		csgodb.MergePlayer(db, int(_playerId), int(_mergerId))
+		
+		db.Close()
 	}
 
 	p.Brand = "CS:GO Pool"
