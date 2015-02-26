@@ -9,8 +9,8 @@ import (
 )
 
 
-func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches []*csgodb.Match, all_teams []*csgodb.Team, all_players []*csgodb.Player, division string) ([]*csgodb.Match,[]*csgodb.Team,[]*csgodb.Player) {
-	url := eseascrapper.GetScheduleURL(date, division, eseascrapper.NorthAmerica)
+func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches []*csgodb.Match, all_teams []*csgodb.Team, all_players []*csgodb.Player, division string, region int) ([]*csgodb.Match,[]*csgodb.Team,[]*csgodb.Player) {
+	url := eseascrapper.GetScheduleURL(date, division, region)
 	
 	page := url.LoadPage()
 	matches := page.ParseMatches()
@@ -20,6 +20,12 @@ func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches
 			//importing matches
 			w.Log.Info(fmt.Sprintf("ESEA Match [%d] not existing, retrieving it", m.MatchId))
 			m.ParseMatch()
+			
+			if len(m.PlayerStats) == 0 {
+				//skip this match
+				w.Log.Info(fmt.Sprintf("No match stats found, skipping [%d]...", m.MatchId))
+				continue
+			}
 			
 			//checking for teams
 			team1 := csgodb.FindTeamByName(all_teams, m.Team1.Name)
@@ -59,7 +65,7 @@ func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches
 					player.EseaId = ms.PlayerId
 					player.UpdateSourceId(db)
 				}
-				w.Log.Debug(fmt.Sprintf("Player Id : %d [%d]", player.PlayerId, len(all_players)))
+				//w.Log.Debug(fmt.Sprintf("Player Id : %d [%d]", player.PlayerId, len(all_players)))
 				ms.PlayerId = player.PlayerId
 				
 				//fixing team id too
@@ -73,7 +79,8 @@ func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches
 			}
 			
 			//match can be imported now !
-			csgodb.ImportEseaMatch(db, m)
+			_match := csgodb.ImportEseaMatch(db, m)
+			all_matches = append(all_matches, _match)
 		}
 		
 	}
@@ -81,7 +88,7 @@ func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches
 	return all_matches, all_teams, all_players
 }
 
-func (w *WatcherState) UpdateESEA(dayDelta int, division string) {
+func (w *WatcherState) UpdateESEA(dayDelta int, division string, region int) {
 	db, _ := csgodb.Db.Open()
 	
 	all_matches := csgodb.GetAllMatches(db)
@@ -93,9 +100,9 @@ func (w *WatcherState) UpdateESEA(dayDelta int, division string) {
 	//fetching yesterday stats
 	for it := dayDelta; it >= 0; it-- {
 		date := today.AddDate(0, 0, -it)
-		fmt.Printf("Checking ESEA Matches [%d-%02d-%02d]\n", date.Year(), date.Month(), date.Day())
-		all_matches, all_teams, all_players = w.FetchAndImportDay(db, date, all_matches, all_teams, all_players, division)
-		fmt.Printf("%d : %d", len(all_teams), len(all_players))
+		w.Log.Info(fmt.Sprintf("Checking ESEA Matches [%d-%02d-%02d]", date.Year(), date.Month(), date.Day()))
+		all_matches, all_teams, all_players = w.FetchAndImportDay(db, date, all_matches, all_teams, all_players, division, region)
+		//fmt.Printf("%d : %d", len(all_teams), len(all_players))
 	}
 	
 	db.Close()

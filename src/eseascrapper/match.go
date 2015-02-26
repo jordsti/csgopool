@@ -3,7 +3,6 @@ package eseascrapper
 import (
 	"regexp"
 	"strconv"
-	"fmt"
 	"github.com/moovweb/gokogiri"
 	"strings"
 )
@@ -76,7 +75,7 @@ func (pc *PageContent) ParseMatches() []*Match {
 		status := 0
 		if len(innerNodes) > 0 {
 			matchStatus := strings.TrimSpace(innerNodes[0].Content())
-			fmt.Printf("Match Status : %s\n", matchStatus)
+			//fmt.Printf("Match Status : %s\n", matchStatus)
 			if matchStatus == "Completed" {
 				status = Completed
 				
@@ -91,7 +90,7 @@ func (pc *PageContent) ParseMatches() []*Match {
 			rs := re.FindStringSubmatch(link)
 			_m_id, _ := strconv.ParseInt(rs[1], 10, 32)
 			matchId := int(_m_id)
-			fmt.Printf("Match Id : %d\n", matchId)
+			//fmt.Printf("Match Id : %d\n", matchId)
 			
 			data := strings.Split(footer[0].Content(), "/")
 			
@@ -178,7 +177,7 @@ func (m *Match) ParseMatch() {
 		plink := links[1]
 		rs := re.FindAllStringSubmatch(plink.Attribute("href").Value(), -1)	
 		playerId, _ := strconv.ParseInt(rs[0][1], 10, 32)
-		fmt.Printf("ESEA Player Id :%d\n", playerId)
+		//fmt.Printf("ESEA Player Id :%d\n", playerId)
 		
 		stats, _ := el.Search("./td[@class='stat']")
 		rws, _ := strconv.ParseFloat(stats[0].Content(), 32)

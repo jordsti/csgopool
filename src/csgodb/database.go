@@ -111,7 +111,9 @@ func InitTables(db *sql.DB) {
 		fmt.Printf("Database Error %v\n", err)
 	}
 	req = "CREATE TABLE IF NOT EXISTS `events` ("
-	req += "`event_id` int(255) NOT NULL,"
+	req += "`event_id` int(255) NOT NULL AUTO_INCREMENT,"
+	req += "`source_id` int(255) NOT NULL, "
+	req += "`source` int(25) NOT NULL,"
 	req += "`event_name` varchar(255) NOT NULL,"
 	req += "`last_change` DATETIME NOT NULL,"
 	req += "PRIMARY KEY (`event_id`)"
@@ -241,7 +243,16 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
+		
+	req = "CREATE TABLE IF NOT EXISTS `sources` ("
+	req += "`source_id` int(255) NOT NULL, "
+	req += "`source_name` varchar(255) NOT NULL, "
+	req += "PRIMARY KEY(`source_id`) "
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	_, err = db.Exec(req)
 	if err != nil {
 		fmt.Printf("Database Error %v\n", err)
 	}

@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"fmt"
 	"csgodb"
-	"strconv"
 	"time"
 )
 
@@ -32,11 +31,10 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	
 	db, _ := csgodb.Db.Open()
 	
-	event := csgodb.GetLastEvent(db)
-	matches := csgodb.GetMatchesByEventId(db, event.EventId)
+	matches := csgodb.GetMatchesByDate(db, time.Now().AddDate(0, 0, -2))
 	last_update := csgodb.GetLastUpdate(db)
 	content := ""
-	if event != nil {
+	if len(matches) > 0 {
 		matches_html := "<ul>"
 		
 		for _, m := range matches {
@@ -48,12 +46,9 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		
 		matches_html = matches_html + "</ul>"
 		
-		evtLink := &Link{Caption:"View Event", Url:"/viewevent/"}
-		evtLink.AddParameter("id", strconv.Itoa(event.EventId))
-		
-		curevent = fmt.Sprintf("<strong>%s</strong><br />%s<br />%s", event.Name, evtLink.GetHTML(), matches_html)
+		curevent = fmt.Sprintf("<strong>%s</strong><br />%s", "Matches of the last days", matches_html)
 	} else {
-		curevent = "<em>No event found !</em>"
+		curevent = "<em>No matches found !</em>"
 	}
 	
 	last_matches := csgodb.GetLastMatch(db)

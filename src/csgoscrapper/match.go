@@ -18,6 +18,7 @@ type MatchPlayerStat struct {
 	PlayerId int
 	PlayerName string
 	TeamId int
+	TeamName string
 	Frags int
 	Headshots int
 	Assists int
@@ -37,14 +38,113 @@ func (md MatchDate) String() string {
 	return fmt.Sprintf("%02d/%02d %d", md.Day, md.Month, md.Year)
 }
 
+type MatchEvent struct {
+	EventId int
+	Name string
+}
+
 type Match struct {
 	MatchId int
 	Date MatchDate
 	Team1 MatchTeam
 	Team2 MatchTeam
 	Map string
-	EventId int
+	Event MatchEvent
 	PlayerStats []*MatchPlayerStat
+}
+
+func (mps *MatchPlayerStat) Player() Player {
+	return Player{Name: mps.PlayerName, PlayerId: mps.PlayerId}
+}
+
+func (m *Match) GetTeam1() *Team {
+	team := &Team{TeamId: m.Team1.TeamId, Name: m.Team1.Name}
+	return team
+}
+
+func (m *Match) GetTeam2() *Team {
+	
+	team := &Team{TeamId: m.Team2.TeamId, Name: m.Team2.Name}
+	return team
+}
+
+func (m *Match) ParseMatch() {
+	
+	fmt.Printf("Parse match [%d] from hltv.org\n", m.MatchId)
+	
+	url := GetMatchPage(m.MatchId)
+	pc, _ := url.LoadPage()
+	//error handling
+	
+	doc, _ := gokogiri.ParseHtml([]byte(pc.Content))
+	
+	//parse map
+	nodes, _ := doc.Search("//div[@class='covSmallHeadline' and @style='font-weight:normal;width:180px;float:left;text-align:right;']")
+	//first node is the map
+	m.Map = strings.TrimSpace(nodes[0].Content())
+	
+	//player and stats
+	
+	nodes, _ = doc.Search("//div[starts-with(@style,'width:606px;height:22px;background-color:')]/div[@style='padding-left:5px;padding-top:5px;']")
+	
+	rePlayerId := regexp.MustCompile(`/\?pageid=173&playerid=([0-9]+)&gameid=2`)
+	reTeamId := regexp.MustCompile(`/\?pageid=179&teamid=([0-9]+)`)
+	rePlayerScore := regexp.MustCompile(`([0-9\-]+) \(([0-9\-]+)\)`)
+	
+	for _, n := range nodes {
+		//fmt.Printf("Id: %d\n%s\n", i, n.String())
+		//player name and id
+		pnames, _ := n.Search("./div[@class='covSmallHeadline' and @style='font-weight:normal;width:20%;float:left;']/a")
+		
+		rs := rePlayerId.FindStringSubmatch(pnames[0].Attribute("href").Value())
+		
+		playerName := strings.TrimSpace(pnames[0].Content())
+		_playerId, _ := strconv.ParseInt(rs[1], 10, 32)
+		
+		//team name and id
+		tnames, _ := n.Search("./div[@class='covSmallHeadline' and @style='font-weight:normal;width:20%;float:left;text-align:center']/a")
+		
+		rs = reTeamId.FindStringSubmatch(tnames[0].Attribute("href").Value())
+		teamName := strings.TrimSpace(tnames[0].Content())
+		_teamId, _ := strconv.ParseInt(rs[1], 10, 32)
+		
+		//stats
+		stats, _ := n.Search("./div[@class='covSmallHeadline' and @style='font-weight:normal;width:10%;float:left;text-align:center']")
+		
+		ms := &MatchPlayerStat{}
+		
+		ms.PlayerId = int(_playerId)
+		ms.PlayerName = playerName
+		ms.TeamId = int(_teamId)
+		ms.TeamName = teamName
+		
+		rs = rePlayerScore.FindStringSubmatch(stats[0].Content())
+		//fmt.Printf("%v\n%s\n", rs, stats[0].String())
+		frags, _ := strconv.ParseInt(rs[1], 10, 32)
+		if rs[1] == "-" {
+			frags = 0
+		}
+		
+		assists := int64(0)
+		
+		if stats[1].Content() != "-" {
+			assists, _ = strconv.ParseInt(stats[1].Content(), 10, 32)
+		}
+		
+		deaths := int64(0)
+		
+		if stats[2].Content() != "-" {
+			deaths, _ = strconv.ParseInt(stats[2].Content(), 10, 32)
+		}
+
+		ms.Frags = int(frags)
+		ms.Assists = int(assists)
+		ms.Deaths = int(deaths)
+		ms.KDDelta = ms.Frags - ms.Deaths
+		ms.KDRatio = float32(frags) / float32(deaths)
+		
+		m.PlayerStats = append(m.PlayerStats, ms)
+	}	
 }
 
 func GetMatches(offset int) []*Match {
@@ -59,9 +159,9 @@ func GetMatches(offset int) []*Match {
 	nodes, _ := doc.Search("//div[@style='padding-left:5px;padding-top:5px;']")
 	
 	reMatchId := regexp.MustCompile(`/\?pageid=188&matchid=([0-9]+)&eventid=0&gameid=2`)
-	reTeam := regexp.MustCompile(`([A-Za-z0-9\.\-_ ]) \(([0-9]+)\)`)
+	reTeam := regexp.MustCompile(`([A-Za-z0-9\.\-_ ]+) \(([0-9]+)\)`)
 	reTeamId := regexp.MustCompile(`/\?pageid=179&teamid=([0-9]+)&eventid=0&gameid=2`)
-	
+	reEventId := regexp.MustCompile(`/\?pageid=188&eventid=([0-9]+)&gameid=2`)
 	for _, n := range nodes {
 		
 		
@@ -89,6 +189,11 @@ func GetMatches(offset int) []*Match {
 		rs = reTeamId.FindStringSubmatch(links[2].Attribute("href").Value())
 		_team2Id, _ := strconv.ParseInt(rs[1], 10, 32)
 		
+		rs = reEventId.FindStringSubmatch(links[3].Attribute("href").Value())
+		_eventId, _ := strconv.ParseInt(rs[1], 10, 32)
+		
+		eventName := strings.TrimSpace(links[3].FirstChild().Content())
+		
 		match := &Match{}
 		match.Date = ParseDate(dateStr)
 		match.MatchId = int(_mId)
@@ -99,6 +204,9 @@ func GetMatches(offset int) []*Match {
 		match.Team2.Name = team2Name
 		match.Team2.Score = int(_team2Score)
 		match.Team2.TeamId = int(_team2Id)
+		
+		match.Event.EventId = int(_eventId)
+		match.Event.Name = eventName
 		
 		matches = append(matches, match)
 	}
@@ -196,7 +304,9 @@ func (m *Match) GetMatchStats() {
 		
 		rating, _ := strconv.ParseFloat(s[15], 32)
 		
-		stat := &MatchPlayerStat{int(p_id), p_name, int(t_id), int(frags), int(headshots), int(assists), int(deaths), float32(kdr), int(kdrDelta), float32(rating)}
+		//stat := &MatchPlayerStat{int(p_id), p_name, int(t_id), int(frags), int(headshots), int(assists), int(deaths), float32(kdr), int(kdrDelta), float32(rating)}
+		
+		stat := &MatchPlayerStat{int(p_id), p_name, int(t_id), "", int(frags), int(headshots), int(assists), int(deaths), float32(kdr), int(kdrDelta), float32(rating)}
 		
 		m.PlayerStats = append(m.PlayerStats, stat)
 		

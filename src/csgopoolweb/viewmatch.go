@@ -15,7 +15,7 @@ type MatchPage struct {
 	PlayerStats template.HTML
 	MatchDate string
 	Score string
-	Event template.HTML
+	Source string
 }
 
 func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -37,8 +37,6 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	
 	match := csgodb.GetMatchById(db, matchId)
 	match.FetchStats(db)
-	
-	event := csgodb.GetEventById(db, match.EventId)
 	
 	t1 := csgodb.GetTeamById(db, match.Team1.TeamId)
 	t2 := csgodb.GetTeamById(db, match.Team2.TeamId)
@@ -68,10 +66,16 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	
 	pStats = pStats + "</tbody></table>"
 	
+	source := "%s : %d"
+	
+	if match.Source == csgodb.EseaSource {
+		source = fmt.Sprintf(source, "ESEA.net", match.SourceId)
+	} else if match.Source == csgodb.HltvSource {
+		source = fmt.Sprintf(source, "HLTV.org", match.SourceId)
+	}
+	
 	db.Close()
 	
-	eventLink := &Link{Caption: event.Name, Url:"/viewevent/"}
-	eventLink.AddInt("id", event.EventId)
 	
 	p := &MatchPage{}
 	
@@ -79,7 +83,7 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 	p.Title = fmt.Sprintf("CS:GO Pool - Match : %s versus %s", t1.Name, t2.Name)
 	p.PlayerStats = template.HTML(pStats)
 	p.Map = match.Map
-	p.Event = template.HTML(eventLink.GetHTML())
+	p.Source = source
 	p.Score = fmt.Sprintf("%s (%d) vs %s (%d)", t1.Name, match.Team1.Score, t2.Name, match.Team2.Score)
 	p.MatchDate = fmt.Sprintf("%d-%02d-%02d", match.Date.Year(), match.Date.Month(), match.Date.Day())
 	p.Menu = template.HTML(GetMenu(session).GetHTML())

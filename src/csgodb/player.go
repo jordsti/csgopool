@@ -61,7 +61,7 @@ func (pl *Player) P() *PlayerWithStat {
 func GetAllPlayersWithStat(db *sql.DB) []*PlayerWithStat {
 	players := []*PlayerWithStat{}
 	
-	query := "SELECT p.player_id, p.player_name, SUM(ms.frags), SUM(ms.deaths), AVG(ms.kdratio), COUNT(ms.match_stat_id) "
+	query := "SELECT p.player_id, p.player_name, p.esea_id, p.hltv_id, SUM(ms.frags), SUM(ms.deaths), AVG(ms.kdratio), COUNT(ms.match_stat_id) "
 	query += "FROM players p "
 	query += "JOIN matches_stats ms ON ms.player_id = p.player_id "
 	query += "GROUP BY player_id ORDER BY p.player_name"
@@ -69,7 +69,7 @@ func GetAllPlayersWithStat(db *sql.DB) []*PlayerWithStat {
 	rows, _ := db.Query(query)
 	for rows.Next() {
 		player := &PlayerWithStat{}
-		rows.Scan(&player.PlayerId, &player.Name, &player.Stat.Frags, &player.Stat.Deaths, &player.Stat.AvgKDRatio, &player.Stat.MatchesPlayed)
+		rows.Scan(&player.PlayerId, &player.Name, &player.EseaId, &player.HltvId, &player.Stat.Frags, &player.Stat.Deaths, &player.Stat.AvgKDRatio, &player.Stat.MatchesPlayed)
 		players = append(players, player)
 	}
 	
@@ -121,7 +121,7 @@ func GetPlayerTeamStats(db *sql.DB, playerId int) []*PlayerTeamStat {
 
 func GetPlayerWithStatById(db *sql.DB, playerId int) *PlayerWithStat {
 	pl := &PlayerWithStat{}
-	query := "SELECT p.player_id, p.player_name, COUNT(ms.match_stat_id), SUM(ms.frags), "
+	query := "SELECT p.player_id, p.player_name, p.esea_id, p.hltv_id, COUNT(ms.match_stat_id), SUM(ms.frags), "
 	query += " SUM(ms.assists), SUM(ms.deaths), AVG(ms.kdratio), AVG(ms.kddelta), AVG(ms.frags)"
 	query += "FROM players p "
 	query += "JOIN players_teams pt ON pt.player_id = p.player_id "
@@ -131,7 +131,7 @@ func GetPlayerWithStatById(db *sql.DB, playerId int) *PlayerWithStat {
 	
 	rows, _ := db.Query(query, playerId)
 	for rows.Next() {
-		rows.Scan(&pl.PlayerId, &pl.Name, &pl.Stat.MatchesPlayed, &pl.Stat.Frags, &pl.Stat.Assists, &pl.Stat.Deaths, &pl.Stat.AvgKDRatio, &pl.Stat.AvgKDDelta, &pl.Stat.AvgFrags)
+		rows.Scan(&pl.PlayerId, &pl.Name, &pl.EseaId, &pl.HltvId, &pl.Stat.MatchesPlayed, &pl.Stat.Frags, &pl.Stat.Assists, &pl.Stat.Deaths, &pl.Stat.AvgKDRatio, &pl.Stat.AvgKDDelta, &pl.Stat.AvgFrags)
 	}
 	
 	return pl

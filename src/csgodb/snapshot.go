@@ -22,8 +22,6 @@ type MatchStat struct {
 	Deaths int
 	KDRatio float32
 	KDDelta int
-	Source int
-	SourceId int
 }
 
 type Snapshot struct {
@@ -76,7 +74,7 @@ func GenerateSnapshot(db *sql.DB) *Snapshot {
 	}
 	
 	//matches
-	query = "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, souce_id FROM matches"
+	query = "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, source_id FROM matches"
 	rows, _ = db.Query(query)
 	for rows.Next() {
 		match := &Match{}

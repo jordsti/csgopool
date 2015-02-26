@@ -14,7 +14,7 @@ type PlayerPage struct {
 	PlayerName string
 	Matches template.HTML
 	Frags string
-	//Headshots string
+	Source string
 	Deaths string
 	KDRatio string
 	MatchesPlayed string
@@ -94,7 +94,7 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	
 	p.AvgFrags = fmt.Sprintf("%.2f", player.Stat.AvgFrags)
 	p.AvgKDDelta = fmt.Sprintf("%.2f", player.Stat.AvgKDDelta)
-	
+	p.Source = fmt.Sprintf("HLTV.org : %d, ESEA.net : %d", player.HltvId, player.EseaId)
 	p.TeamsStats = template.HTML(teams_html)
 	p.GenerateRightSide(session)
 	t.Execute(w, p)

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	//"csgopool"
-	//"csgopoolweb"
+	"csgopool"
+	"csgopoolweb"
 	"csgoscrapper"
 	"os"
 	"flag"
@@ -36,9 +36,7 @@ func main() {
 	initArgs()
 	
 	flag.Parse()
-	matches := csgoscrapper.GetMatches(0)
-	fmt.Printf("%d\n", len(matches))
-	/*
+	
 	fmt.Println("[CSGOPOOLMAIN] CS GO Pool")
 	fmt.Println("[CSGOPOOLMAIN] Setting DataPath as "+datapath)
 	fmt.Println("[CSGOPOOLMAIN] Web Root as " + webroot)
@@ -62,5 +60,5 @@ func main() {
 	web_log := datapath + "/csgopoolweb.log"
 	
 	web := csgopoolweb.NewWebServer(webport, webroot, web_log)
-	web.Serve()*/
+	web.Serve()
 }

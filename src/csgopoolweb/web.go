@@ -69,7 +69,7 @@ func GetMenu(s *Session) Menu {
 	i := MenuItem{MenuId: 0, LinkName: "Home", Link:"/"}
 	m.Items = append(m.Items, i)
 	
-	i = MenuItem{MenuId: 1, LinkName: "Last Events", Link:"/events/"}
+	i = MenuItem{MenuId: 1, LinkName: "Last Matches", Link:"/matches/"}
 	m.Items = append(m.Items, i)
 	
 	i = MenuItem{MenuId: 2, LinkName: "Teams", Link:"/teams/"}
@@ -102,7 +102,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/adminpool/", AdminPoolHandler)
 	http.HandleFunc("/viewmatch/", ViewMatchHandler)
 	http.HandleFunc("/viewplayer/", ViewPlayerHandler)
-	http.HandleFunc("/events/", EventsHandler)
+	http.HandleFunc("/matches/", MatchesHandler)
 	http.HandleFunc("/viewevent/", ViewEventHandler)
 	http.HandleFunc("/teams/", TeamsHandler)
 	http.HandleFunc("/players/", PlayersHandler)

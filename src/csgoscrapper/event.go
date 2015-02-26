@@ -134,7 +134,7 @@ func (p PageContent) ParseMatches() []*Match {
 		
 		gameMap := m[14]
 		
-		match := &Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap, EventId: p.URL.EventId}
+		match := &Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap}
 		
 		match.Team1.TeamId = int(t_1)
 		match.Team1.Score = int(ts_1)
@@ -220,7 +220,7 @@ func (e *Event) UpdateMatches() {
 			
 			gameMap := m[14]
 			
-			match := Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap, EventId: e.EventId}
+			match := Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap}
 			//todo global to edit this
 			if match.Date.Year < State.MinYear {
 				//skipping this match, too old
@@ -276,7 +276,7 @@ func (e *Event) LoadAllMatches() {
 		
 		gameMap := m[14]
 		
-		match := Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap, EventId: e.EventId}
+		match := Match{MatchId: int(m_id), Date: ParseDate(date), Map: gameMap}
 		//todo global to edit this
 		if match.Date.Year < State.MinYear {
 			//skipping this match, too old

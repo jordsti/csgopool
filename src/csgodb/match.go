@@ -25,6 +25,7 @@ type Match struct {
 	Source int
 	SourceId int
 	PoolStatus int
+	SourceName string
 }
 
 func GetLastMatch(db *sql.DB) *Match {
@@ -107,17 +108,18 @@ func GetAllMatches(db *sql.DB) []*Match {
 	
 	matches := []*Match{}
 	
-	query := `SELECT m.match_id, m.team1_id, t1.team_name, m.team1_score, m.team2_id, t2.team_name, m.team2_score, m.map, m.event_id, m.match_date, m.source, m.source_id, m.pool_status 
+	query := `SELECT m.match_id, m.team1_id, t1.team_name, m.team1_score, m.team2_id, t2.team_name, m.team2_score, m.map, m.event_id, m.match_date, m.source, m.source_id, m.pool_status, s.source_name 
 			FROM matches m
 			JOIN teams t1 ON t1.team_id = m.team1_id 
 			JOIN teams t2 ON t2.team_id = m.team2_id
-			ORDER BY match_id DESC`
+			JOIN sources s ON s.source_id = m.source
+			ORDER BY match_date DESC`
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {
 		m := &Match{}
 		
-		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Name, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Name, &m.Team2.Score, &m.Map, &m.EventId, &m.Date, &m.Source, &m.SourceId, &m.PoolStatus)
+		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Name, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Name, &m.Team2.Score, &m.Map, &m.EventId, &m.Date, &m.Source, &m.SourceId, &m.PoolStatus, &m.SourceName)
 		matches = append(matches, m)
 	}
 	
@@ -142,6 +144,23 @@ func GetMatchesByEventId(db *sql.DB, eventId int) []*Match {
 	return matches
 }
 
+func GetMatchesByDate(db *sql.DB, date time.Time) []*Match {
+	
+	matches := []*Match{}
+	
+	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, source_id, pool_status FROM matches WHERE match_date >= ? ORDER BY match_id DESC"
+	rows, _ := db.Query(query, date)
+	
+	for rows.Next() {
+		m := &Match{}
+		
+		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Score, &m.Map, &m.EventId, &m.Date, &m.Source, &m.SourceId, &m.PoolStatus)
+		matches = append(matches, m)
+	}
+	
+	return matches
+}
+
 func GetMatchBySource(db *sql.DB, source int, sourceId int) *Match {
 	m := &Match{}
 	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, source_id, pool_status FROM matches WHERE source = ? AND source_id = ?"
@@ -154,13 +173,16 @@ func GetMatchBySource(db *sql.DB, source int, sourceId int) *Match {
 	return m
 }
 
-func ImportHltvMatch(db *sql.DB, m csgoscrapper.Match) *Match {
+func ImportHltvMatch(db *sql.DB, m *csgoscrapper.Match) *Match {
 	query := "INSERT INTO matches (source, source_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	
 	date := time.Date(m.Date.Year, time.Month(m.Date.Month), m.Date.Day, 0, 0, 0, 0, time.Local)
-	db.Exec(query, HltvSource, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.EventId, date, 0)
+	db.Exec(query, HltvSource, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.Event.EventId, date, 0)
 	
-	return GetMatchBySource(db, HltvSource, m.MatchId)
+	_m := GetMatchBySource(db, HltvSource, m.MatchId)
+	_m.ImportHltvStats(db, m.PlayerStats)
+	
+	return _m
 }
 
 func ImportEseaMatch(db *sql.DB, m *eseascrapper.Match) *Match {
@@ -200,7 +222,7 @@ func ImportMatch(db *sql.DB, m csgoscrapper.Match) {
 	query := "INSERT INTO matches (match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	
 	date := time.Date(m.Date.Year, time.Month(m.Date.Month), m.Date.Day, 0, 0, 0, 0, time.Local)
-	_, _ = db.Exec(query, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.EventId, date, 0)
+	_, _ = db.Exec(query, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.Event.EventId, date, 0)
 	
 	ImportMatchesStats(db, m.MatchId, m.PlayerStats)
 	
@@ -213,7 +235,7 @@ func ImportMatches(db *sql.DB, matches []*csgoscrapper.Match) {
 		query := "INSERT INTO matches (match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 		
 		date := time.Date(m.Date.Year, time.Month(m.Date.Month), m.Date.Day, 0, 0, 0, 0, time.Local)
-		_, _ = db.Exec(query, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.EventId, date, 0)
+		_, _ = db.Exec(query, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, m.Event.EventId, date, 0)
 		
 		ImportMatchesStats(db, m.MatchId, m.PlayerStats)
 	}

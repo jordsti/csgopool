@@ -122,7 +122,7 @@ func GetUserPoints(db *sql.DB) []*UserPoints {
 func GetMatchPoints(db *sql.DB, matchId int) []*MatchPointStat {
 	stats := []*MatchPointStat{}
 	
-	query := `SELECT m.match_date, p.player_id, p.player_name, t.team_id, t.team_name, ms.frags, ms.headshots, ms.kdratio, pt.points FROM players_points pt 
+	query := `SELECT m.match_date, p.player_id, p.player_name, t.team_id, t.team_name, ms.frags, ms.kdratio, pt.points FROM players_points pt 
 	JOIN matches m ON m.match_id = pt.match_id 
 	JOIN players p ON p.player_id = pt.player_id 
 	JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id 
@@ -136,7 +136,7 @@ func GetMatchPoints(db *sql.DB, matchId int) []*MatchPointStat {
 	
 	for rows.Next() {
 		stat := &MatchPointStat{}
-		rows.Scan(&stat.MatchDate, &stat.PlayerId, &stat.PlayerName, &stat.TeamId, &stat.TeamName, &stat.Frags, &stat.Headshots, &stat.KDRatio, &stat.Points)
+		rows.Scan(&stat.MatchDate, &stat.PlayerId, &stat.PlayerName, &stat.TeamId, &stat.TeamName, &stat.Frags, &stat.KDRatio, &stat.Points)
 		
 		stat.MatchId = matchId
 		stats = append(stats, stat)

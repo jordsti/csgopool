@@ -61,7 +61,9 @@ You can specify many settings with application switch
 
 This is the TODO list for the near future
 
-  - ESEA parser
+  - ESEA parser (nearly done, some errors handling todo)
+  - HLTV parser refactor (done, removing events, need to rename package)
+  - Create a Logger package, and add some output for ESEA
   - Match revoke, add match to pool
   - Points attribution to users when points are added
   - Database configuration interface if none found could be nice

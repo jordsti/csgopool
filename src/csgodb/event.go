@@ -9,6 +9,8 @@ import (
 type Event struct {
 	EventId int
 	Name string
+	Source int
+	SourceId int
 	Matches []*Match
 	MatchesCount int
 	LastChange time.Time
@@ -92,21 +94,52 @@ func GetEventById(db *sql.DB, eventId int) *Event {
 	return event
 }
 
+func FindEventByName(events []*Event, name string) *Event {
+	
+	for _, evt := range events {
+		if evt.Name == name {
+			return evt
+		}
+	}
+	
+	return nil
+}
+
 func GetAllEvents(db *sql.DB) []*Event {
 	
 	events := []*Event{}
 	
-	query := "SELECT e.event_id, e.event_name, COUNT(m.match_id) FROM events e JOIN matches m ON m.event_id = e.event_id GROUP BY e.event_id ORDER BY e.last_change DESC, event_id DESC"
+	query := "SELECT e.event_id, e.source, e.source_id, e.event_name, COUNT(m.match_id) FROM events e LEFT JOIN matches m ON m.event_id = e.event_id GROUP BY e.event_id ORDER BY e.last_change DESC, event_id DESC"
 	
 	rows, _ := db.Query(query)
 	
 	for rows.Next() {
 		event := &Event{}
-		rows.Scan(&event.EventId, &event.Name, &event.MatchesCount)
+		rows.Scan(&event.EventId, &event.Source, &event.SourceId, &event.Name, &event.MatchesCount)
 		events = append(events, event)
 	}	
 	
 	return events
+}
+
+func ImportHltvEvent(db *sql.DB, event *csgoscrapper.Event) *Event {
+	
+	query := "INSERT INTO events (source, source_id, event_name) VALUES (?, ?, ?)"
+	db.Exec(query, HltvSource, event.EventId, event.Name)
+	
+	return GetEventBySource(db, HltvSource, event.EventId)
+}
+
+func GetEventBySource(db *sql.DB, source int, sourceId int) *Event {
+	evt := &Event{}
+	query := "SELECT event_id, event_name, source, source_id, last_change FROM events WHERE source = ? AND source_id = ?"
+	
+	rows, _ := db.Query(query, source, sourceId)
+	for rows.Next() {
+		rows.Scan(&evt.EventId, &evt.Name, &evt.Source, &evt.SourceId, &evt.LastChange)
+	}
+	
+	return evt
 }
 
 func ImportEvents(db *sql.DB, events []*csgoscrapper.Event) {
