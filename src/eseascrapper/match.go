@@ -135,8 +135,8 @@ func (m *Match) ParseMatch() {
 		rs := re_teamid.FindStringSubmatch(team1.Attribute("href").Value())
 		
 		_team_id, _ := strconv.ParseInt(rs[1], 10, 32)
-		m.Team1.TeamId = int(_team_id)
-		m.Team1.Name = team1.Content()
+		//fmt.Printf("%v\n", rs[1])
+		m.Team1 = &MatchTeam{TeamId: int(_team_id), Name: team1.Content()}
 		
 		//scores parsing
 		
@@ -153,8 +153,8 @@ func (m *Match) ParseMatch() {
 		rs = re_teamid.FindStringSubmatch(team2.Attribute("href").Value())
 		
 		_team_id, _ = strconv.ParseInt(rs[1], 10, 32)
-		m.Team2.TeamId = int(_team_id)
-		m.Team2.Name = team2.Content()
+		m.Team2 = &MatchTeam{TeamId: int(_team_id), Name: team2.Content()}
+
 		
 		//scores parsing
 		
@@ -178,6 +178,7 @@ func (m *Match) ParseMatch() {
 		plink := links[1]
 		rs := re.FindAllStringSubmatch(plink.Attribute("href").Value(), -1)	
 		playerId, _ := strconv.ParseInt(rs[0][1], 10, 32)
+		fmt.Printf("ESEA Player Id :%d\n", playerId)
 		
 		stats, _ := el.Search("./td[@class='stat']")
 		rws, _ := strconv.ParseFloat(stats[0].Content(), 32)

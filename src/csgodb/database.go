@@ -77,27 +77,27 @@ func InitTables(db *sql.DB) {
 	req += "`team_name` varchar(255) NOT NULL,"
 	req += "`hltv_id` int(255) NOT NULL,"
 	req += "`esea_id` int(255) NOT NULL,"
-	req += "UNIQUE KEY `teams_source1_constraint` (`hltv_id`),"
-	req += "UNIQUE KEY `teams_source2_constraint` (`esea_id`),"
 	req += "UNIQUE KEY `teams_constraint` (`team_name`),"
 	req += "PRIMARY KEY (`team_id`)"
 	req +=  ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err := db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `players` ("
 	req += "`player_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`player_name` varchar(255) NOT NULL,"
 	req += "`hltv_id` int(255) NOT NULL,"
 	req += "`esea_id` int(255) NOT NULL,"
-	req += "UNIQUE KEY `players_source1_constraint` (`hltv_id`),"
-	req += "UNIQUE KEY `players_source2_constraint` (`esea_id`),"
 	req += "UNIQUE KEY `players_constraint` (`player_name`),"
 	req += "PRIMARY KEY (`player_id`)"
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `players_teams` ("
 	req += "`link_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`player_id` int(255) NOT NULL,"
@@ -107,7 +107,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `events` ("
 	req += "`event_id` int(255) NOT NULL,"
 	req += "`event_name` varchar(255) NOT NULL,"
@@ -116,7 +118,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `matches` ("
 	req += "`match_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`team1_id` int(255) NOT NULL,"
@@ -134,7 +138,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `matches_stats` ("
 	req += "`match_stat_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`match_id` int(255) NOT NULL,"
@@ -151,7 +157,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `users` ("
 	req += "`user_id` int(255) NOT NULL AUTO_INCREMENT,"
 	req += "`username` varchar(255) NOT NULL,"
@@ -162,7 +170,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `divisions` ("
 	req += "`division_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`division_name` varchar(255) NOT NULL, "
@@ -170,7 +180,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `divisions_players` ( "
 	req += "`link_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`division_id` int(255) NOT NULL, "
@@ -180,7 +192,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `users_pools` ( "
 	req += "`pool_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`division_id` int(255) NOT NULL, "
@@ -192,7 +206,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `watcher_update` ( "
 	req += "`update_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`update_time` DATETIME NOT NULL, "
@@ -200,7 +216,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `players_points` ( "
 	req += "`point_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`player_id` int(255) NOT NULL, "
@@ -211,7 +229,9 @@ func InitTables(db *sql.DB) {
 	req += ") ENGINE=InnoDB CHARSET=latin1;"
 	
 	_, err = db.Exec(req)
-	
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 	req = "CREATE TABLE IF NOT EXISTS `monitor_tasks` ( "
 	req += "`task_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`task_type` int(25) NOT NULL, "

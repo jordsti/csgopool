@@ -9,8 +9,8 @@ import (
 )
 
 
-func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches []*csgodb.Match, all_teams []*csgodb.Team, all_players []*csgodb.Player) {
-	url := eseascrapper.GetScheduleURL(date, "invite", eseascrapper.NorthAmerica)
+func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches []*csgodb.Match, all_teams []*csgodb.Team, all_players []*csgodb.Player, division string) ([]*csgodb.Match,[]*csgodb.Team,[]*csgodb.Player) {
+	url := eseascrapper.GetScheduleURL(date, division, eseascrapper.NorthAmerica)
 	
 	page := url.LoadPage()
 	matches := page.ParseMatches()
@@ -44,6 +44,9 @@ func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches
 				team2.UpdateSourceId(db)
 			}
 			
+			m.Team1.TeamId = team1.TeamId
+			m.Team2.TeamId = team2.TeamId
+			
 			//players now, must fix match stat to apply mysql id and not esea
 			for _, ms := range m.PlayerStats {
 				player := csgodb.FindPlayerByName(all_players, ms.Name)
@@ -56,7 +59,7 @@ func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches
 					player.EseaId = ms.PlayerId
 					player.UpdateSourceId(db)
 				}
-				
+				w.Log.Debug(fmt.Sprintf("Player Id : %d [%d]", player.PlayerId, len(all_players)))
 				ms.PlayerId = player.PlayerId
 				
 				//fixing team id too
@@ -70,12 +73,15 @@ func (w *WatcherState) FetchAndImportDay(db *sql.DB, date time.Time, all_matches
 			}
 			
 			//match can be imported now !
+			csgodb.ImportEseaMatch(db, m)
 		}
 		
 	}
+	
+	return all_matches, all_teams, all_players
 }
 
-func (w *WatcherState) UpdateESEA() {
+func (w *WatcherState) UpdateESEA(dayDelta int, division string) {
 	db, _ := csgodb.Db.Open()
 	
 	all_matches := csgodb.GetAllMatches(db)
@@ -83,12 +89,14 @@ func (w *WatcherState) UpdateESEA() {
 	all_players := csgodb.GetAllPlayers(db)
 	
 	today := time.Now()
-	yesterday := today.AddDate(0, 0, -1)
-	
+
 	//fetching yesterday stats
-	w.FetchAndImportDay(db, yesterday, all_matches, all_teams, all_players)
-	//fetching today
-	w.FetchAndImportDay(db, today, all_matches, all_teams, all_players)
+	for it := dayDelta; it >= 0; it-- {
+		date := today.AddDate(0, 0, -it)
+		fmt.Printf("Checking ESEA Matches [%d-%02d-%02d]\n", date.Year(), date.Month(), date.Day())
+		all_matches, all_teams, all_players = w.FetchAndImportDay(db, date, all_matches, all_teams, all_players, division)
+		fmt.Printf("%d : %d", len(all_teams), len(all_players))
+	}
 	
 	db.Close()
 }

@@ -4,10 +4,13 @@ import (
 	"regexp"
 	"strconv"
 	"fmt"
+	"github.com/moovweb/gokogiri"
+	"strings"
 )
 
 type MatchTeam struct {
 	TeamId int
+	Name string
 	Score int
 }
 
@@ -42,6 +45,68 @@ type Match struct {
 	Map string
 	EventId int
 	PlayerStats []*MatchPlayerStat
+}
+
+func GetMatches(offset int) []*Match {
+	matches := []*Match{}
+	
+	url := GetMatchesPage(offset)
+	//error handling
+	pc, _ := url.LoadPage()
+	//fmt.Printf(pc.Content)
+	doc, _ := gokogiri.ParseHtml([]byte(pc.Content))
+	
+	nodes, _ := doc.Search("//div[@style='padding-left:5px;padding-top:5px;']")
+	
+	reMatchId := regexp.MustCompile(`/\?pageid=188&matchid=([0-9]+)&eventid=0&gameid=2`)
+	reTeam := regexp.MustCompile(`([A-Za-z0-9\.\-_ ]) \(([0-9]+)\)`)
+	reTeamId := regexp.MustCompile(`/\?pageid=179&teamid=([0-9]+)&eventid=0&gameid=2`)
+	
+	for _, n := range nodes {
+		
+		
+		// 0 -> match_id
+		// 1 -> team 1
+		// 2 -> team 2
+		// 3 -> event
+		links, _ := n.Search("./a")
+		
+		rs := reMatchId.FindStringSubmatch(links[0].Attribute("href").Value())
+		_mId, _ := strconv.ParseInt(rs[1], 10, 32)
+		dateStr := links[0].FirstChild().Content()
+		
+		rs = reTeam.FindStringSubmatch(strings.TrimSpace(links[1].FirstChild().Content()))
+		team1Name := rs[1]
+		_team1Score, _ := strconv.ParseInt(rs[2], 10, 32)
+		
+		rs = reTeamId.FindStringSubmatch(links[1].Attribute("href").Value())
+		_team1Id, _ := strconv.ParseInt(rs[1], 10, 32)
+		
+		rs = reTeam.FindStringSubmatch(strings.TrimSpace(links[2].FirstChild().Content()))
+		team2Name := rs[1]
+		_team2Score, _ := strconv.ParseInt(rs[2], 10, 32)
+		
+		rs = reTeamId.FindStringSubmatch(links[2].Attribute("href").Value())
+		_team2Id, _ := strconv.ParseInt(rs[1], 10, 32)
+		
+		match := &Match{}
+		match.Date = ParseDate(dateStr)
+		match.MatchId = int(_mId)
+		match.Team1.Name = team1Name
+		match.Team1.Score = int(_team1Score)
+		match.Team1.TeamId = int(_team1Id)
+		
+		match.Team2.Name = team2Name
+		match.Team2.Score = int(_team2Score)
+		match.Team2.TeamId = int(_team2Id)
+		
+		matches = append(matches, match)
+	}
+	
+	doc.Free()
+	
+	return matches
+	
 }
 
 func (m *Match) IsPlayerIn(playerId int) bool {

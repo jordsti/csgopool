@@ -48,7 +48,7 @@ func (w *WatcherState) InitialImport(db *sql.DB) {
 	
 	w.Log.Info("Initial import from HLTV.org")
 	
-	teams := InitTeams()
+	/*teams := InitTeams()
 	events := InitEvents()
 	
 	w.Log.Info("Scanning matches for missing team")
@@ -99,8 +99,10 @@ func (w *WatcherState) InitialImport(db *sql.DB) {
 	}
 	
 	w.Log.Info("hltv import terminated")
-	w.Log.Info(fmt.Sprintf("%d teams, %d events imported !", len(teams), len(events)))
-	
+	w.Log.Info(fmt.Sprintf("%d teams, %d events imported !", len(teams), len(events)))*/
+	w.Log.Info("Initial import from HLTV.org")
+
+	db.Close()
 }
 
 func (w *WatcherState) LoadData() {
@@ -139,13 +141,11 @@ func (w *WatcherState) LoadData() {
 		w.Log.Info("No team found !")
 		w.Log.Info("Starting initial import...")
 
-		if w.ImportSnapshot {
-			snapshot := &csgodb.Snapshot{}
-			snapshot.ImportFromURL(db, w.SnapshotUrl)
-		} else {
-			w.InitialImport(db)
-		}
-		
+		dayDelta := 25
+		w.Log.Info(fmt.Sprintf("Importing from ESEA.net, from %d days ago...", dayDelta))
+		w.UpdateESEA(dayDelta, "invite")
+		w.UpdateESEA(dayDelta, "premier")
+		w.UpdateESEA(dayDelta, "main")
 	}
 	
 

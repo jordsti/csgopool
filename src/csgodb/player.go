@@ -5,6 +5,7 @@ import (
 	"csgoscrapper"
 	"eseascrapper"
 	"time"
+	"fmt"
 )
 
 type GeneralStat struct {
@@ -258,7 +259,11 @@ func ImportHltvPlayer(db *sql.DB, player csgoscrapper.Player) *Player {
 func ImportEseaPlayer(db *sql.DB, player eseascrapper.Player) *Player {
 	query := "INSERT INTO players (player_name, esea_id) VALUES (?, ?)"
 	
-	db.Exec(query, player.Name, player.PlayerId)
+	_, err := db.Exec(query, player.Name, player.PlayerId)
+	
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
 	
 	pl := GetPlayerByName(db, player.Name)
 	return pl

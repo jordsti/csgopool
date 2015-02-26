@@ -163,14 +163,18 @@ func ImportHltvMatch(db *sql.DB, m csgoscrapper.Match) *Match {
 	return GetMatchBySource(db, HltvSource, m.MatchId)
 }
 
-func ImportEseaMatch(db *sql.DB, m eseascrapper.Match) *Match {
+func ImportEseaMatch(db *sql.DB, m *eseascrapper.Match) *Match {
 	
 	query := "INSERT INTO matches (source, source_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	
 	date := time.Date(m.Date.Year, time.Month(m.Date.Month), m.Date.Day, 0, 0, 0, 0, time.Local)
 	db.Exec(query, EseaSource, m.MatchId, m.Team1.TeamId, m.Team1.Score, m.Team2.TeamId, m.Team2.Score, m.Map, 0, date, 0)
 	
-	return GetMatchBySource(db, EseaSource, m.MatchId)
+	_m := GetMatchBySource(db, EseaSource, m.MatchId)
+	
+	_m.ImportEseaStats(db, m.PlayerStats)
+	
+	return _m
 }
 
 func (m *Match) ImportHltvStats(db *sql.DB, stats []*csgoscrapper.MatchPlayerStat) {

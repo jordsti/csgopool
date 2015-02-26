@@ -14,6 +14,7 @@ type PageURL struct {
 	TeamId int
 	PlayerId int
 	MatchId int
+	Offset int
 }
 
 type PageContent struct {
@@ -22,33 +23,38 @@ type PageContent struct {
 	Status int
 }
 
+func GetMatchesPage(offset int) PageURL {
+	p := PageURL{"MatchesPage", 188, 0, 2, -1, -1, -1, offset}
+	return p
+}
+
 func GetMatchPage(matchId int) PageURL {
-	p := PageURL {"MatchPage", 188, -1, 2, -1, -1, matchId}
+	p := PageURL {"MatchPage", 188, -1, 2, -1, -1, matchId, 0}
 	return p
 }
 
 func GetTeamsPage() PageURL {
-	p := PageURL{"TeamsPage", 182, 0, 2, -1, -1, -1}
+	p := PageURL{"TeamsPage", 182, 0, 2, -1, -1, -1, 0}
 	return p
 }
 
 func GetTeamPage(teamId int) PageURL {
-	p := PageURL{"TeamPage", 179, 0, 2, teamId, -1, -1}
+	p := PageURL{"TeamPage", 179, 0, 2, teamId, -1, -1, 0}
 	return p
 }
 
 func GetPlayerPage(playerId int) PageURL {
-	p := PageURL{"PlayerPage", 173, 0, 2, -1, playerId, -1}
+	p := PageURL{"PlayerPage", 173, 0, 2, -1, playerId, -1, 0}
 	return p
 }
 
 func GetEventsPage() PageURL {
-	p := PageURL{"EventsPage", 193, -1, 2, -1, -1, -1}
+	p := PageURL{"EventsPage", 193, -1, 2, -1, -1, -1, 0}
 	return p
 }
 
 func GetEventMatches(eventId int) PageURL {
-	p := PageURL{"EventMatchesPage", 188, eventId, 2, -1, -1, -1}
+	p := PageURL{"EventMatchesPage", 188, eventId, 2, -1, -1, -1, 0}
 	return p
 }
 
@@ -70,6 +76,10 @@ func (p PageURL) GenerateURL() string {
 	
 	if p.MatchId != -1 {
 		base_url = base_url + "&matchid=" + strconv.Itoa(p.MatchId)
+	}
+	
+	if p.Offset != 0  {
+		base_url += "&offset=" + strconv.Itoa(p.Offset)
 	}
 	
 	return base_url
