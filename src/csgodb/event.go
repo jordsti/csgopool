@@ -1,7 +1,7 @@
 package csgodb
 import (
 	"database/sql"
-	"csgoscrapper"
+	"hltvscrapper"
 	"fmt"
 	"time"
 )
@@ -122,7 +122,7 @@ func GetAllEvents(db *sql.DB) []*Event {
 	return events
 }
 
-func ImportHltvEvent(db *sql.DB, event *csgoscrapper.Event) *Event {
+func ImportHltvEvent(db *sql.DB, event *hltvscrapper.Event) *Event {
 	
 	query := "INSERT INTO events (source, source_id, event_name) VALUES (?, ?, ?)"
 	db.Exec(query, HltvSource, event.EventId, event.Name)
@@ -142,7 +142,7 @@ func GetEventBySource(db *sql.DB, source int, sourceId int) *Event {
 	return evt
 }
 
-func ImportEvents(db *sql.DB, events []*csgoscrapper.Event) {
+func ImportEvents(db *sql.DB, events []*hltvscrapper.Event) {
 	
 	for _, evt := range events {
 		

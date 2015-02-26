@@ -2,12 +2,11 @@ package csgopool
 
 import (
 	"fmt"
-	"csgoscrapper"
 	"eseascrapper"
 	"csgodb"
 	"time"
 	"os"
-	"database/sql"
+	"logger"
 )
 
 
@@ -23,7 +22,7 @@ type WatcherState struct {
 	GenerateSnapshot bool
 	SnapshotUrl string
 	NoUpdate bool
-	Log *csgoscrapper.LoggerState
+	Log *logger.LoggerState
 }
 
 
@@ -36,7 +35,7 @@ func NewWatcher(dataPath string, snapshotUrl string, importSnapshot bool, genera
 	state.GenerateSnapshot = generateSnapshot
 	state.SnapshotUrl = snapshotUrl
 	state.RefreshTime = "30m"
-	state.Log = &csgoscrapper.LoggerState{LogPath: dataPath+"/watcher.log", Level:3}
+	state.Log = &logger.LoggerState{LogPath: dataPath+"/watcher.log", Level:3}
 	state.NoUpdate = false
 	watcher = state
 	
@@ -45,66 +44,6 @@ func NewWatcher(dataPath string, snapshotUrl string, importSnapshot bool, genera
 	return state
 }
 
-func (w *WatcherState) InitialImport(db *sql.DB) {
-	
-	w.Log.Info("Initial import from HLTV.org")
-	
-	/*teams := InitTeams()
-	events := InitEvents()
-	
-	w.Log.Info("Scanning matches for missing team")
-	for _, evt := range events {
-		for _, m := range evt.Matches {
-			team1 := csgoscrapper.GetTeamById(teams, m.Team1.TeamId)
-			team2 := csgoscrapper.GetTeamById(teams, m.Team2.TeamId)
-			
-			if team1 == nil {
-				w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team1.TeamId))
-				newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team1.TeamId}
-				newTeam.LoadTeam()
-				teams = append(teams, newTeam)	
-			}
-			
-			if team2 == nil {
-				w.Log.Info(fmt.Sprintf("Team [%d] not found, fetching this team", m.Team2.TeamId))
-				newTeam := &csgoscrapper.Team{Name: "NotSet", TeamId: m.Team2.TeamId}
-				newTeam.LoadTeam()
-				teams = append(teams, newTeam)	
-			}
-		}
-	}
-	
-	w.Log.Info("Inserting data into database")
-	
-	csgodb.ImportTeams(db, teams)
-	
-	for _, t := range teams {
-		
-		csgodb.ImportPlayers(db, t.Players)
-		for _, p := range t.Players {
-			csgodb.AddPlayerToTeam(db, t.TeamId, p.PlayerId)
-		}
-		
-	}
-	
-	csgodb.ImportEvents(db, events)
-	
-	for _, evt := range events {
-		if len(evt.Matches) > 0 {
-			
-			for _, m := range evt.Matches {
-				csgodb.ImportMatch(db, m)
-			}
-			
-		}
-	}
-	
-	w.Log.Info("hltv import terminated")
-	w.Log.Info(fmt.Sprintf("%d teams, %d events imported !", len(teams), len(events)))*/
-	w.Log.Info("Initial import from HLTV.org")
-
-	db.Close()
-}
 
 func (w *WatcherState) LoadData() {
 	

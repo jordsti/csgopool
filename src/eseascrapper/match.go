@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"github.com/moovweb/gokogiri"
 	"strings"
+	"fmt"
 )
 
 const (
@@ -81,6 +82,8 @@ func (pc *PageContent) ParseMatches() []*Match {
 				
 			} else if matchStatus == "Completed (Forfeit)" {
 				status = Forfeit
+			} else {
+				log.Debug(fmt.Sprintf("Match Status : %s", matchStatus))
 			}
 		}
 

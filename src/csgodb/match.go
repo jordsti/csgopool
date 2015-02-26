@@ -1,7 +1,7 @@
 package csgodb
 
 import (
-	"csgoscrapper"
+	"hltvscrapper"
 	"eseascrapper"
 	"database/sql"
 	"time"
@@ -173,7 +173,7 @@ func GetMatchBySource(db *sql.DB, source int, sourceId int) *Match {
 	return m
 }
 
-func ImportHltvMatch(db *sql.DB, m *csgoscrapper.Match) *Match {
+func ImportHltvMatch(db *sql.DB, m *hltvscrapper.Match) *Match {
 	query := "INSERT INTO matches (source, source_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	
 	date := time.Date(m.Date.Year, time.Month(m.Date.Month), m.Date.Day, 0, 0, 0, 0, time.Local)
@@ -199,7 +199,7 @@ func ImportEseaMatch(db *sql.DB, m *eseascrapper.Match) *Match {
 	return _m
 }
 
-func (m *Match) ImportHltvStats(db *sql.DB, stats []*csgoscrapper.MatchPlayerStat) {
+func (m *Match) ImportHltvStats(db *sql.DB, stats []*hltvscrapper.MatchPlayerStat) {
 	query := "INSERT INTO matches_stats (match_id, team_id, player_id, frags, assists, deaths, kdratio, kddelta) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 	//team id must be fixed with real id not source
 	//same for player id
@@ -216,7 +216,7 @@ func (m *Match) ImportEseaStats(db *sql.DB, stats []*eseascrapper.PlayerMatchSta
 	}
 }
 
-func ImportMatch(db *sql.DB, m csgoscrapper.Match) {
+func ImportMatch(db *sql.DB, m hltvscrapper.Match) {
 	
 
 	query := "INSERT INTO matches (match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -229,7 +229,7 @@ func ImportMatch(db *sql.DB, m csgoscrapper.Match) {
 }
 
 
-func ImportMatches(db *sql.DB, matches []*csgoscrapper.Match) {
+func ImportMatches(db *sql.DB, matches []*hltvscrapper.Match) {
 	
 	for _, m := range matches {
 		query := "INSERT INTO matches (match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, pool_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -241,7 +241,7 @@ func ImportMatches(db *sql.DB, matches []*csgoscrapper.Match) {
 	}
 }
 
-func ImportMatchesStats(db *sql.DB, matchId int, stats []*csgoscrapper.MatchPlayerStat) {
+func ImportMatchesStats(db *sql.DB, matchId int, stats []*hltvscrapper.MatchPlayerStat) {
 	query := "INSERT INTO matches_stats (match_id, team_id, player_id, frags, headshots, assists, deaths, kdratio, kddelta) VALUES (?, ?, ?, ?, ?, ?,  ?, ?, ?)"
 	for _, s := range stats {
 		

@@ -1,4 +1,4 @@
-package csgoscrapper
+package hltvscrapper
 
 import (
 

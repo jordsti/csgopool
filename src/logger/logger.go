@@ -1,4 +1,4 @@
-package csgoscrapper
+package logger
 
 import (
   "fmt"
@@ -10,19 +10,11 @@ type LoggerState struct {
   LogPath string
 }
 
-var log *LoggerState
-
 //level 0 -> 
 //level 1 -> info
 //level 2 -> debug
 //level 3 -> paranoid
 
-func NewLogger(logPath string, level int) {
-  
-  log = &LoggerState{}
-  log.LogPath = logPath
-  log.Level = level 
-}
 
 func (l *LoggerState) Error(message string) {
 

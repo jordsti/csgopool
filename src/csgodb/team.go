@@ -1,7 +1,7 @@
 package csgodb
 
 import (
-	"csgoscrapper"
+	"hltvscrapper"
 	"eseascrapper"
 	"database/sql"
 	"fmt"
@@ -91,7 +91,7 @@ func IsTeamExists(teams []*Team, teamId int) bool {
 	return false
 }
 
-func ImportTeams(db *sql.DB, teams []*csgoscrapper.Team) {
+func ImportTeams(db *sql.DB, teams []*hltvscrapper.Team) {
 	//this is for initial import only !!
 	
 	/*for _, team := range teams {
@@ -112,7 +112,7 @@ func FindTeamByName(teams []*Team, name string) *Team {
 	return nil
 }
 
-func ImportHltvTeam(db *sql.DB, team *csgoscrapper.Team) *Team {
+func ImportHltvTeam(db *sql.DB, team *hltvscrapper.Team) *Team {
 	query := "INSERT INTO teams (team_name, hltv_id) VALUES (?, ?)"
 	db.Exec(query, team.Name, team.TeamId)
 	return GetTeamByHltvId(db, team.TeamId)

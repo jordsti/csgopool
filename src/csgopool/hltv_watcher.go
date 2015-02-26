@@ -2,14 +2,14 @@ package csgopool
 
 import (
 	"csgodb"
-	"csgoscrapper"
+	"hltvscrapper"
 	"database/sql"
 	"fmt"
 )
 
 func (w *WatcherState) FetchAndImportHltvMatches(db *sql.DB, all_matches []*csgodb.Match, all_teams []*csgodb.Team, all_players []*csgodb.Player, all_events []*csgodb.Event, pageOffset int) ([]*csgodb.Match,[]*csgodb.Team,[]*csgodb.Player, []*csgodb.Event) {
 	
-	matches := csgoscrapper.GetMatches(pageOffset)
+	matches := hltvscrapper.GetMatches(pageOffset)
 	
 	for _, match := range matches {
 		

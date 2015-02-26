@@ -2,7 +2,7 @@ package csgodb
 
 import (
 	"database/sql"
-	"csgoscrapper"
+	"hltvscrapper"
 	"eseascrapper"
 	"time"
 	"fmt"
@@ -247,7 +247,7 @@ func (p *Player) UpdateSourceId(db *sql.DB) {
 }
 
 //need to be sure that this player doesnt exists
-func ImportHltvPlayer(db *sql.DB, player csgoscrapper.Player) *Player {
+func ImportHltvPlayer(db *sql.DB, player hltvscrapper.Player) *Player {
 	query := "INSERT INTO players (player_name, hltv_id) VALUES (?, ?)"
 	
 	db.Exec(query, player.Name, player.PlayerId)
@@ -270,7 +270,7 @@ func ImportEseaPlayer(db *sql.DB, player eseascrapper.Player) *Player {
 }
 
 //this will go deprecated
-func ImportPlayer(db *sql.DB, player csgoscrapper.Player) {
+func ImportPlayer(db *sql.DB, player hltvscrapper.Player) {
 	
 	query := "INSERT INTO players (player_id, player_name) VALUES (?, ?)"
 	
@@ -278,7 +278,7 @@ func ImportPlayer(db *sql.DB, player csgoscrapper.Player) {
 	
 }
 //same as up here
-func ImportPlayers(db *sql.DB, players []csgoscrapper.Player) {
+func ImportPlayers(db *sql.DB, players []hltvscrapper.Player) {
 	
 	query := "INSERT INTO players (player_id, player_name) VALUES (?, ?)"
 	

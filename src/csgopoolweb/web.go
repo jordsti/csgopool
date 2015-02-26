@@ -2,7 +2,7 @@ package csgopoolweb
 
 import (
 	"net/http"
-	"csgoscrapper"
+	"logger"
 	"html/template"
 	"fmt"
 )
@@ -13,7 +13,7 @@ var state = &WebServerState{}
 type WebServerState struct {
 	RootPath string
 	Domain string
-	Log *csgoscrapper.LoggerState
+	Log *logger.LoggerState
 	Sessions *SessionContainer
 	Port int
 }
@@ -23,7 +23,7 @@ func NewWebServer(port int, path string, logPath string) *WebServerState {
 	state.RootPath = path
 	state.Sessions = &SessionContainer{}
 	state.Domain = "localhost"
-	state.Log = &csgoscrapper.LoggerState{LogPath: logPath, Level: 3}
+	state.Log = &logger.LoggerState{LogPath: logPath, Level: 3}
 	state.Port = port
 	return state
 }

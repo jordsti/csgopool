@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"csgopool"
 	"csgopoolweb"
-	"csgoscrapper"
+	"hltvscrapper"
+	"eseascrapper"
 	"os"
 	"flag"
 	"time"
@@ -44,9 +45,10 @@ func main() {
 	fmt.Printf("[CSGOPOOLMAIN] Snapshot Url : %s\n", snapshotUrl)
 	fmt.Printf("[CSGOPOOLMAIN] Minimum Year : %d\n", minYear)
 	
-	csgoscrapper.NewScrapperState(minYear)
+	hltvscrapper.NewScrapperState(minYear)
 	
-	csgoscrapper.NewLogger(datapath+"/scrapper.log", 3)
+	hltvscrapper.NewLogger(datapath+"/hltv.log", 3)
+	eseascrapper.NewLogger(datapath+"/esea.log", 3)
 	
 	watcher := csgopool.NewWatcher(datapath, snapshotUrl, importSnapshot, snapshot)
 	watcher.RefreshTime = refreshTime
