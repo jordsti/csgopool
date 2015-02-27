@@ -14,7 +14,7 @@ type PlayerPage struct {
 	PlayerName string
 	Matches template.HTML
 	Frags string
-	Source string
+	Source template.HTML
 	Deaths string
 	KDRatio string
 	MatchesPlayed string
@@ -54,7 +54,12 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 		teamLink := &Link{Caption:t.Name, Url:"/viewteam/"}
 		teamLink.AddInt("id", t.TeamId)
 		
-		teams_html += fmt.Sprintf("<tr><td>%s</td><td>%d</td></tr>", teamLink.GetHTML(), t.MatchesCount)
+		teams_html += fmt.Sprintf(`<tr>
+								<td>%s</td>
+								<td>%d</td>
+								</tr>`, 
+								teamLink.GetHTML(), 
+								t.MatchesCount)
 	}
 	
 	matchStats := csgodb.GetPlayerMatchStats(db, playerId)
@@ -94,7 +99,7 @@ func ViewPlayerHandler(w http.ResponseWriter, r *http.Request) {
 	
 	p.AvgFrags = fmt.Sprintf("%.2f", player.Stat.AvgFrags)
 	p.AvgKDDelta = fmt.Sprintf("%.2f", player.Stat.AvgKDDelta)
-	p.Source = fmt.Sprintf("HLTV.org : %d, ESEA.net : %d", player.HltvId, player.EseaId)
+	p.Source = template.HTML(GetPlayerLink(&player.Player))
 	p.TeamsStats = template.HTML(teams_html)
 	p.GenerateRightSide(session)
 	t.Execute(w, p)

@@ -36,6 +36,14 @@ type PageContent struct {
 	Status int
 }
 
+func GetPlayerURL(playerId int) string {
+	return fmt.Sprintf(`http://play.esea.net/users/%d`, playerId)
+}
+
+func GetTeamURL(teamId int) string {
+	return fmt.Sprintf(`http://play.esea.net/teams/%d`, teamId)
+}
+
 func GetScheduleURL(date time.Time, division string, region int) *PageURL{
 	
 	url := &PageURL{}

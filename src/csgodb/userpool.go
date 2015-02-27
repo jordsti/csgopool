@@ -35,6 +35,28 @@ func InsertPoolChoices(db *sql.DB, choices []*UserPool) {
 	
 }
 
+
+func GetMetaPoolsByUserWithoutPoints(db *sql.DB, userId int) []*MetaPool {
+	pools := []*MetaPool{}
+	query := `SELECT up.pool_id, up.division_id, up.user_id, up.player_id, u.username, p.player_name, d.division_name 
+		FROM users_pools up 
+		JOIN users u ON u.user_id = up.user_id 
+		JOIN players p ON p.player_id = up.player_id 
+		JOIN divisions d ON d.division_id = up.division_id 
+		WHERE up.user_id = ? `
+	rows, _ := db.Query(query, userId)
+	
+	for rows.Next() {
+		pool := &MetaPool{}
+		rows.Scan(&pool.PoolId, &pool.DivisionId, &pool.UserId, &pool.PlayerId, &pool.Username, &pool.Player.Name, &pool.Division.Name)
+		pool.Player.PlayerId = pool.PlayerId
+		pool.Division.DivisionId = pool.DivisionId
+		pools = append(pools, pool)
+	}
+	
+	return pools
+}
+
 func GetMetaPoolsByUser(db *sql.DB, userId int) []*MetaPool {
 	
 	pools := []*MetaPool{}
@@ -44,10 +66,10 @@ func GetMetaPoolsByUser(db *sql.DB, userId int) []*MetaPool {
 	JOIN users u ON u.user_id = up.user_id 
 	JOIN players p ON p.player_id = up.player_id 
 	JOIN divisions d ON d.division_id = up.division_id 
-	JOIN players_points pp ON pp.player_id = up.player_id 
-	JOIN matches m ON m.match_id = pp.match_id
+	LEFT JOIN players_points pp ON pp.player_id = up.player_id 
+	LEFT JOIN matches m ON m.match_id = pp.match_id
 	WHERE up.user_id = ? AND (DATE(up.created_on) <= m.match_date)
-	GROUP BY player_id 
+	GROUP BY up.pool_id 
 	ORDER BY division_id ASC`
 
 	rows, _ := db.Query(query, userId)

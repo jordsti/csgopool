@@ -120,6 +120,29 @@ func IsSourceMatchIn(matches []*Match, source int, sourceId int) bool {
 	return false
 }
 
+
+func GetMatches(db *sql.DB, start int, count int) []*Match {
+	
+	matches := []*Match{}
+	
+	query := `SELECT m.match_id, m.team1_id, t1.team_name, m.team1_score, m.team2_id, t2.team_name, m.team2_score, m.map, m.event_id, m.match_date, m.source, m.source_id, m.pool_status, s.source_name 
+			FROM matches m
+			JOIN teams t1 ON t1.team_id = m.team1_id 
+			JOIN teams t2 ON t2.team_id = m.team2_id
+			JOIN sources s ON s.source_id = m.source
+			ORDER BY match_date DESC LIMIT ?,?`
+	rows, _ := db.Query(query, start, count)
+	
+	for rows.Next() {
+		m := &Match{}
+		
+		rows.Scan(&m.MatchId, &m.Team1.TeamId, &m.Team1.Name, &m.Team1.Score, &m.Team2.TeamId, &m.Team2.Name, &m.Team2.Score, &m.Map, &m.EventId, &m.Date, &m.Source, &m.SourceId, &m.PoolStatus, &m.SourceName)
+		matches = append(matches, m)
+	}
+	
+	return matches
+}
+
 func GetAllMatches(db *sql.DB) []*Match {
 	
 	matches := []*Match{}

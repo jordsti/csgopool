@@ -12,6 +12,7 @@ type IndexPage struct {
 	Page
 	LastUpdate string
 	ServerTime string
+	News template.HTML
 	LastMatch template.HTML
 	Divisions template.HTML
 }
@@ -30,6 +31,13 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	curevent := ""
 	
 	db, _ := csgodb.Db.Open()
+	news := csgodb.GetLastNews(db)
+	news_html := ""
+	if news.NewsId != 0 {
+		news_html = `<h3>Last News</h3>`
+		news_html += fmt.Sprintf(`<strong>%s</strong><br />`, news.Title)
+		news_html += fmt.Sprintf(`<p>%s<br /><em>Posted on %d-%02d-%02d</em></p>`, news.Text, news.PostedOn.Year(), news.PostedOn.Month(), news.PostedOn.Day())
+	}
 	
 	matches := csgodb.GetMatchesByDate(db, time.Now().AddDate(0, 0, -2))
 	last_update := csgodb.GetLastUpdate(db)
@@ -95,39 +103,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	
 	divisions := csgodb.GetDivisionsPoints(db)
 	db.Close()
-	/*div_html := ""
-	row_html := `<div class="row">%s</div>`
-	nb_div := 1
-	inner_html := ""
-	
-	for _, div := range divisions {
-		
 
-		inner_html += fmt.Sprintf(`<div class="col-md-4"><h4>%s</h4>`, div.Name)
-		
-		for _, p := range div.Players {
-		
-			playerLink := &Link{Caption: p.Name, Url:"/viewplayer/"}
-			playerLink.AddInt("id", p.PlayerId)
-			
-			inner_html += fmt.Sprintf(`%s : %d<br />`, playerLink.GetHTML(), p.Points)
-		}
-		
-		inner_html += `</div>`
-		
-		if nb_div % 3 == 0 && nb_div > 0 {
-			div_html += fmt.Sprintf(row_html, inner_html)
-			inner_html = ""
-		}
-		
-		nb_div++
-		
-	}
-	
-	if len(inner_html) > 0 {
-		div_html += fmt.Sprintf(row_html, inner_html)
-	}*/
-	//transition with built-in HtmlElement
 	
 	html_div := CreateDiv()
 	html_div.SetAttribute("class", "container")
@@ -170,6 +146,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	p.LeftSide = template.HTML(curevent)
 	p.LastUpdate = fmt.Sprintf("%02d:%02d", last_update.Time.Hour(), last_update.Time.Minute())
 	p.LastMatch = template.HTML(content)
+	p.News = template.HTML(news_html)
 	p.Divisions = template.HTML(html_div.GetHTML())
 	servertime := time.Now()
 	p.ServerTime = fmt.Sprintf("%02d:%02d", servertime.Hour(), servertime.Minute())

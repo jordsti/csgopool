@@ -30,7 +30,7 @@ func UserPoolHandler(w http.ResponseWriter, r *http.Request) {
 	
 	db, _ := csgodb.Db.Open()
 	
-	pools := csgodb.GetMetaPoolsByUser(db, session.UserId)
+	pools := csgodb.GetMetaPoolsByUserWithoutPoints(db, session.UserId)
 	
 	divs_html := ""
 	

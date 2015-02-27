@@ -64,14 +64,14 @@ func (pl *Player) AddAlias(name string) {
 	pl.Alias = append(pl.Alias, name)
 }
 
-func MergePlayer(db *sql.DB, playerId int, mergerId int) {
+func MergePlayer(db *sql.DB, playerId int, mergerId int) bool {
 	//must be done before doing the pool
 	player := GetPlayerById(db, playerId)
 	merger := GetPlayerById(db, mergerId)
 
 	if player == nil || merger == nil {
 		fmt.Println("Player merge failed !")
-		return
+		return false
 	}
 
 	player.AddAlias(merger.Name)
@@ -98,11 +98,29 @@ func MergePlayer(db *sql.DB, playerId int, mergerId int) {
 	db.Exec(query, player.PlayerId, merger.PlayerId)
 	
 	//players_teams
+	query = "SELECT team_id FROM players_teams WHERE player_id = ?"
+	rows, _ := db.Query(query, merger.PlayerId)
+	
+	teams_id := []int{}
+	for rows.Next() {
+		team_id := 0
+		rows.Scan(&team_id)
+		teams_id = append(teams_id, team_id)
+	}
+	
+	for _, t := range teams_id {
+		query = "INSERT INTO players_teams (player_id, team_id) VALUES (?, ?)"
+		db.Exec(query, player.PlayerId, t)
+	}
+
+	
 	query = "DELETE FROM players_teams WHERE player_id = ?"
 	db.Exec(query, merger.PlayerId)
 	
 	query = "DELETE FROM players WHERE player_id = ?"
 	db.Exec(query, merger.PlayerId)
+	
+	return true
 }
 
 func (pl *Player) UpdateAliases(db *sql.DB) {
@@ -125,6 +143,24 @@ func (pl *Player) P() *PlayerWithStat {
 	plP.Name = pl.Name
 	
 	return plP
+}
+
+func GetPlayersWithStat(db *sql.DB, start int, count int) []*PlayerWithStat {
+	players := []*PlayerWithStat{}
+	
+	query := "SELECT p.player_id, p.player_name, p.esea_id, p.hltv_id, SUM(ms.frags), SUM(ms.deaths), AVG(ms.kdratio), COUNT(ms.match_stat_id) "
+	query += "FROM players p "
+	query += "JOIN matches_stats ms ON ms.player_id = p.player_id "
+	query += "GROUP BY player_id ORDER BY p.player_name LIMIT ?, ?"
+	
+	rows, _ := db.Query(query, start, count)
+	for rows.Next() {
+		player := &PlayerWithStat{}
+		rows.Scan(&player.PlayerId, &player.Name, &player.EseaId, &player.HltvId, &player.Stat.Frags, &player.Stat.Deaths, &player.Stat.AvgKDRatio, &player.Stat.MatchesPlayed)
+		players = append(players, player)
+	}
+	
+	return players
 }
 
 func GetAllPlayersWithStat(db *sql.DB) []*PlayerWithStat {

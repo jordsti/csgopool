@@ -75,6 +75,25 @@ func Login(db *sql.DB, username string, password string) (*User, error) {
 	
 }
 
+func UpdatePassword(db *sql.DB, userId int, password string) error {
+	constraints := DefaultUserConstraints()
+	re := regexp.MustCompile(fmt.Sprintf(`^.{%d,}$`, constraints.PasswordMin))
+	
+	//password length
+	if !re.MatchString(password) {
+		return errors.New(fmt.Sprintf("Your password must contains at least %d characters", constraints.PasswordMin))
+	}
+	
+	query := "UPDATE users SET password = ? WHERE user_id = ?"
+	
+	pwd, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
+	pw_str := hex.EncodeToString(pwd)
+	
+	db.Exec(query, pw_str, userId)
+	
+	return nil
+}
+
 func GetUserById(db *sql.DB, userId int) *User {
 	user := &User{}
 	

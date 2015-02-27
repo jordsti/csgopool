@@ -14,6 +14,7 @@ type TeamPage struct {
 	TeamName string
 	Players template.HTML
 	Matches template.HTML
+	Source template.HTML
 }
 
 func ViewTeamHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +48,22 @@ func ViewTeamHandler(w http.ResponseWriter, r *http.Request) {
 		playerLink.AddInt("id", pl.PlayerId)
 		//playerLink.AddInt("teamid", team.TeamId)
 		
-		pStats += fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td><td>%.2f</td><td>%.2f</td></tr>", playerLink.GetHTML(), pl.Stat.Frags, pl.Stat.Deaths, pl.Stat.AvgKDRatio, pl.Stat.MatchesPlayed, pl.Stat.AvgFrags, pl.Stat.AvgKDDelta)
+		pStats += fmt.Sprintf(`<tr>
+									<td>%s</td>
+									<td>%d</td>
+									<td>%d</td>
+									<td>%.2f</td>
+									<td>%d</td>
+									<td>%.2f</td>
+									<td>%.2f</td>
+								</tr>`, 
+								playerLink.GetHTML(), 
+								pl.Stat.Frags, 
+								pl.Stat.Deaths, 
+								pl.Stat.AvgKDRatio, 
+								pl.Stat.MatchesPlayed, 
+								pl.Stat.AvgFrags, 
+								pl.Stat.AvgKDDelta)
 		
 	}
 	
@@ -75,6 +91,7 @@ func ViewTeamHandler(w http.ResponseWriter, r *http.Request) {
 	p.Title = fmt.Sprintf("CS:GO Pool - Team : %s", team.Name)
 	p.Players = template.HTML(pStats)
 	p.TeamName = team.Name
+	p.Source = template.HTML(GetTeamLink(&team_))
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Matches = template.HTML(matches_html)
 	p.GenerateRightSide(session)

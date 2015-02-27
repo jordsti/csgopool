@@ -29,7 +29,18 @@ func PlayersHandler(w http.ResponseWriter, r *http.Request) {
 		playerLink := &Link{Caption: pl.Name, Url:"/viewplayer/"}
 		playerLink.AddInt("id", pl.PlayerId)
 		
-		players_html += fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td></tr>", playerLink.GetHTML(), pl.Stat.Frags, pl.Stat.Deaths, pl.Stat.AvgKDRatio, pl.Stat.MatchesPlayed)
+		players_html += fmt.Sprintf(`<tr>
+									<td>%s</td>
+									<td>%d</td>
+									<td>%d</td>
+									<td>%.2f</td>
+									<td>%d</td>
+									</tr>`, 
+									playerLink.GetHTML(), 
+									pl.Stat.Frags, 
+									pl.Stat.Deaths, 
+									pl.Stat.AvgKDRatio, 
+									pl.Stat.MatchesPlayed)
 	}
 	
 	db.Close()

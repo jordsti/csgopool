@@ -60,7 +60,24 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 		playerLink := &Link{Caption:ps.PlayerName, Url:"/viewplayer/"}
 		playerLink.AddParameter("id", strconv.Itoa(ps.PlayerId))
 
-		pStats = pStats + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%.2f</td><td>%d</td><td>%d</td></tr>", playerLink.GetHTML(), teamLink.GetHTML(), ps.Frags, ps.Assists, ps.Deaths, ps.KDRatio, ps.KDDelta, ps.Points)
+		pStats = pStats + fmt.Sprintf(`<tr>
+									<td>%s</td>
+									<td>%s</td>
+									<td>%d</td>
+									<td>%d</td>
+									<td>%d</td>
+									<td>%.2f</td>
+									<td>%d</td>
+									<td>%d</td>
+									</tr>`, 
+									playerLink.GetHTML(), 
+									teamLink.GetHTML(), 
+									ps.Frags, 
+									ps.Assists, 
+									ps.Deaths, 
+									ps.KDRatio, 
+									ps.KDDelta, 
+									ps.Points)
 	
 	}
 	

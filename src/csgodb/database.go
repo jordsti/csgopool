@@ -247,7 +247,21 @@ func InitTables(db *sql.DB) {
 	if err != nil {
 		fmt.Printf("Database Error %v\n", err)
 	}
-		
+	
+	req = "CREATE TABLE IF NOT EXISTS `news` ( "
+	req += "`news_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`news_title` varchar(255) NOT NULL, "
+	req += "`news_text` text NOT NULL, "
+	req += "`author_id` int(255) NOT NULL, "
+	req += "`posted_on` DATETIME NOT NULL, "
+	req += "PRIMARY KEY(`news_id`) "
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
+	
 	req = "CREATE TABLE IF NOT EXISTS `sources` ("
 	req += "`source_id` int(255) NOT NULL, "
 	req += "`source_name` varchar(255) NOT NULL, "

@@ -33,7 +33,15 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 			teamLink := &Link{Caption: t.Name, Url: "/viewteam/"}
 			teamLink.AddInt("id", t.TeamId)
 			
-			teams_html += fmt.Sprintf("<tr><td>%s</td><td>%d</td><td>%d</td></tr>", teamLink.GetHTML(), t.PlayersCount, t.MatchesCount)
+			teams_html += fmt.Sprintf(`
+									<tr>
+										<td>%s</td>
+										<td>%d</td>
+										<td>%d</td>
+									</tr>`, 
+									teamLink.GetHTML(), 
+									t.PlayersCount, 
+									t.MatchesCount)
 		}
 	}
 

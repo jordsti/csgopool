@@ -112,6 +112,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/login/", LoginHandler)
 	http.HandleFunc("/logout/", LogoutHandler)
 	http.HandleFunc("/userpool/", UserPoolHandler)
+	http.HandleFunc("/myaccount/", MyAccountHandler)
 	http.HandleFunc("/createpool/", CreatePoolHandler)
 	http.HandleFunc("/ranking/", RankingHandler)
 	

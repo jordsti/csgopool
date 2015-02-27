@@ -20,6 +20,46 @@ type Link struct {
 	Params []Parameter
 }
 
+func GetTeamLink(t *csgodb.Team) string {
+	html := ""
+	
+	if t.EseaId != 0 {
+		href := eseascrapper.GetTeamURL(t.EseaId)
+		html += fmt.Sprintf(`<a href="%s" target="_blank">%s</a>`, href, "ESEA.net")
+	}
+	
+	if t.HltvId != 0  {
+		if len(html) > 0 {
+			html += " | "
+		}
+		
+		pu := hltvscrapper.GetTeamPage(t.HltvId)
+		href := pu.GenerateURL()
+		html += fmt.Sprintf(`<a href="%s" target="_blank">%s</a>`, href, "HLTV.org")
+	}
+	
+	return html
+}
+
+func GetPlayerLink(p *csgodb.Player) string {
+	html := ""
+	
+	if p.EseaId != 0 {
+		html += fmt.Sprintf(`<a href="%s" target="_blank">%s</a>`, eseascrapper.GetPlayerURL(p.EseaId), "ESEA.net")
+	}
+	
+	if p.HltvId != 0 {
+		p := hltvscrapper.GetPlayerPage(p.HltvId)
+		href := p.GenerateURL()
+		if len(html) > 0 {
+			html += " | "
+		}
+		html += fmt.Sprintf(`<a href="%s" target="_blank">%s</a>`, href, "HLTV.org")
+	}
+	
+	return html	
+}
+
 func GetMatchLink(m *csgodb.Match) string {
 	html := ""
 	href := ""

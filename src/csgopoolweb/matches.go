@@ -10,6 +10,7 @@ import (
 
 type MatchesPage struct {
 	Page
+	PageLinks template.HTML
 	Matches template.HTML
 }
 
@@ -22,13 +23,42 @@ func MatchesHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	
+	count := 25
+	start := 0
+	
+	str_start := r.FormValue("start")
+	
+	if len(str_start) > 0 {
+		_start, _ := strconv.ParseInt(str_start, 10, 32)
+		start = int(_start)
+	}
 	
 	db, _ := csgodb.Db.Open()
 
-	matches := csgodb.GetAllMatches(db)
+	matches := csgodb.GetMatches(db, start, count)
 	
 	//nil checkup todo	
 	matches_html := ""
+	page_links := ""
+	
+
+	nextLink := &Link{Caption: "Next", Url:"/matches/"}
+	nextLink.AddInt("start", start+count)
+	
+	if start == 0 {
+		//only next page
+		page_links = nextLink.GetHTML()
+	} else {
+		prevLink := &Link{Caption: "Previous", Url:"/matches/"}
+		prevLink.AddInt("start", start-count)
+		
+		page_links = prevLink.GetHTML()
+		
+		if len(matches) == count {
+			page_links += " | " + nextLink.GetHTML()
+		}
+	}
+		
 	
 	for _, m := range matches {
 		
@@ -53,7 +83,19 @@ func MatchesHandler(w http.ResponseWriter, r *http.Request) {
 			pooled = "x"
 		}
 		
-		matches_html = matches_html + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", mLink.GetHTML() , t1Link.GetHTML(), t2Link.GetHTML(), m.Map, pooled, GetMatchLink(m))
+		matches_html = matches_html + fmt.Sprintf(`<tr>
+												<td>%s</td>
+												<td>%s</td>
+												<td>%s</td>
+												<td>%s</td>
+												<td>%s</td>
+												<td>%s</td>
+												</tr>`, 
+												mLink.GetHTML() , 
+												t1Link.GetHTML(), 
+												t2Link.GetHTML(), 
+												m.Map, pooled, 
+												GetMatchLink(m))
 		
 	}
 	
@@ -65,6 +107,7 @@ func MatchesHandler(w http.ResponseWriter, r *http.Request) {
 	p.Title = "CS:GO Pool - Last Matches"
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Matches = template.HTML(matches_html)
+	p.PageLinks = template.HTML(page_links)
 	p.GenerateRightSide(session)
 	t.Execute(w, p)
 }
