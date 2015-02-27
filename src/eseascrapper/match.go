@@ -97,7 +97,7 @@ func (pc *PageContent) ParseMatches() []*Match {
 			
 			data := strings.Split(footer[0].Content(), "/")
 			
-			mapstr := strings.TrimSpace(data[1])
+			mapstr := strings.Split(strings.TrimSpace(data[1]), "_")[1]
 			
 			m := &Match{}
 			m.Status = status

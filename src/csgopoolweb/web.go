@@ -103,7 +103,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/viewmatch/", ViewMatchHandler)
 	http.HandleFunc("/viewplayer/", ViewPlayerHandler)
 	http.HandleFunc("/matches/", MatchesHandler)
-	//http.HandleFunc("/viewevent/", ViewEventHandler)
+	http.HandleFunc("/viewuser/", ViewUserHandler)
 	http.HandleFunc("/teams/", TeamsHandler)
 	http.HandleFunc("/players/", PlayersHandler)
 	http.HandleFunc("/viewteam/", ViewTeamHandler)

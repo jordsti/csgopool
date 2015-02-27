@@ -64,12 +64,12 @@ func GetMatchById(db *sql.DB, matchId int) *Match {
 	
 	match := &Match{MatchId: 0}
 	
-	query := "SELECT match_id, team1_id, team1_score, team2_id, team2_score, map, event_id, match_date, source, source_id, pool_status FROM matches WHERE match_id = ?"
+	query := "SELECT m.match_id, m.team1_id, m.team1_score, m.team2_id, m.team2_score, m.map, m.event_id, m.match_date, m.source, m.source_id, m.pool_status, s.source_name FROM matches m JOIN sources s ON s.source_id = m.source WHERE m.match_id = ?"
 	
 	rows, _ := db.Query(query, matchId)
 	
 	for rows.Next() {
-		rows.Scan(&match.MatchId, &match.Team1.TeamId, &match.Team1.Score, &match.Team2.TeamId, &match.Team2.Score, &match.Map, &match.EventId, &match.Date, &match.Source, &match.SourceId, &match.PoolStatus)
+		rows.Scan(&match.MatchId, &match.Team1.TeamId, &match.Team1.Score, &match.Team2.TeamId, &match.Team2.Score, &match.Map, &match.EventId, &match.Date, &match.Source, &match.SourceId, &match.PoolStatus, &match.SourceName)
 	}
 	
 	return match

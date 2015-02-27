@@ -99,6 +99,27 @@ func GetPlayersPoint(db *sql.DB) []*PlayerPoints {
 	return points
 }
 
+func GetUserPoint(db *sql.DB, userId int) *UserPoints {
+	points := &UserPoints{}
+	
+	query := `SELECT u.user_id, u.username, SUM(pt.points) as points FROM users u
+			LEFT JOIN users_pools up ON up.user_id = u.user_id 
+			LEFT JOIN players_points pt ON up.player_id = pt.player_id
+			JOIN matches m ON m.match_id = pt.match_id
+			WHERE (DATE(up.created_on) <= m.match_date) AND up.user_id = ?
+			GROUP BY up.user_id ORDER BY points DESC`
+	rows, _ := db.Query(query, userId)
+	
+	for rows.Next() {
+
+		rows.Scan(&points.UserId, &points.Name, &points.Points)
+
+	}
+	
+	return points
+}
+
+
 func GetUserPoints(db *sql.DB) []*UserPoints {
 	points := []*UserPoints{}
 	

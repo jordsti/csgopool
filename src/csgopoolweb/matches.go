@@ -53,7 +53,7 @@ func MatchesHandler(w http.ResponseWriter, r *http.Request) {
 			pooled = "x"
 		}
 		
-		matches_html = matches_html + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", mLink.GetHTML() , t1Link.GetHTML(), t2Link.GetHTML(), m.Map, pooled, m.SourceName)
+		matches_html = matches_html + fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", mLink.GetHTML() , t1Link.GetHTML(), t2Link.GetHTML(), m.Map, pooled, GetMatchLink(m))
 		
 	}
 	

@@ -13,12 +13,14 @@ type UserPool struct {
 	CreatedOn time.Time
 }
 
+
+
 type MetaPool struct {
 	UserPool
 	Username string
 	Division Division
 	Player Player
-	//points !?
+	Points int
 }
 
 func InsertPoolChoices(db *sql.DB, choices []*UserPool) {
@@ -37,17 +39,22 @@ func GetMetaPoolsByUser(db *sql.DB, userId int) []*MetaPool {
 	
 	pools := []*MetaPool{}
 	
-	query := "SELECT up.pool_id, up.division_id, up.user_id, up.player_id, u.username,  p.player_name, d.division_name "
-	query += "FROM users_pools up "
-	query += "JOIN users u ON u.user_id = up.user_id "
-	query += "JOIN players p ON p.player_id = up.player_id "
-	query += "JOIN divisions d ON d.division_id = up.division_id "
-	query += "WHERE up.user_id = ? "
+	query := `SELECT up.pool_id, up.division_id, up.user_id, up.player_id, u.username,  p.player_name, d.division_name, SUM(pp.points) as points
+	FROM users_pools up 
+	JOIN users u ON u.user_id = up.user_id 
+	JOIN players p ON p.player_id = up.player_id 
+	JOIN divisions d ON d.division_id = up.division_id 
+	JOIN players_points pp ON pp.player_id = up.player_id 
+	JOIN matches m ON m.match_id = pp.match_id
+	WHERE up.user_id = ? AND (DATE(up.created_on) <= m.match_date)
+	GROUP BY player_id 
+	ORDER BY division_id ASC`
+
 	rows, _ := db.Query(query, userId)
 	
 	for rows.Next() {
 		pool := &MetaPool{}
-		rows.Scan(&pool.PoolId, &pool.DivisionId, &pool.UserId, &pool.PlayerId, &pool.Username, &pool.Player.Name, &pool.Division.Name)
+		rows.Scan(&pool.PoolId, &pool.DivisionId, &pool.UserId, &pool.PlayerId, &pool.Username, &pool.Player.Name, &pool.Division.Name, &pool.Points)
 		pool.Player.PlayerId = pool.PlayerId
 		pool.Division.DivisionId = pool.DivisionId
 		pools = append(pools, pool)

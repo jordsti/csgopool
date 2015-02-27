@@ -75,6 +75,19 @@ func Login(db *sql.DB, username string, password string) (*User, error) {
 	
 }
 
+func GetUserById(db *sql.DB, userId int) *User {
+	user := &User{}
+	
+	query := "SELECT user_id, username, email, rank FROM users WHERE user_id = ?"
+	rows, _ := db.Query(query, userId)
+	
+	for rows.Next() {
+		rows.Scan(&user.Id, &user.Name, &user.Email, &user.Rank)
+	}
+	
+	return user
+}
+
 func CreateUser(db *sql.DB, username string, password string, email string, rank int) error {
 	
 	constraints := DefaultUserConstraints()

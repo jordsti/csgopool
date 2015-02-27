@@ -3,6 +3,9 @@ package csgopoolweb
 import (
 	"fmt"
 	"strconv"
+	"csgodb"
+	"hltvscrapper"
+	"eseascrapper"
 )
 
 type Parameter struct {
@@ -15,6 +18,42 @@ type Link struct {
 	Url string
 	Target string
 	Params []Parameter
+}
+
+func GetMatchLink(m *csgodb.Match) string {
+	html := ""
+	href := ""
+	
+	if m.Source == csgodb.HltvSource {
+		
+		p := hltvscrapper.GetMatchPage(m.SourceId)
+		href = p.GenerateURL()
+		
+	} else if m.Source == csgodb.EseaSource {
+		href = eseascrapper.GetMatchURL(m.SourceId).Url()
+	}
+	
+	html = fmt.Sprintf(`<a href="%s" target="_blank">%s</a>`, href, m.SourceName)
+	
+	return html
+}
+
+func GetMatchLinkCaption(m *csgodb.Match, caption string) string {
+	html := ""
+	href := ""
+	
+	if m.Source == csgodb.HltvSource {
+		
+		p := hltvscrapper.GetMatchPage(m.SourceId)
+		href = p.GenerateURL()
+		
+	} else if m.Source == csgodb.EseaSource {
+		href = eseascrapper.GetMatchURL(m.SourceId).Url()
+	}
+	
+	html = fmt.Sprintf(`<a href="%s" target="_blank">%s</a>`, href, caption)
+	
+	return html
 }
 
 func (l *Link) AddParameter(name string, value string) {
