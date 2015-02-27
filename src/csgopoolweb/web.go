@@ -5,6 +5,7 @@ import (
 	"logger"
 	"html/template"
 	"fmt"
+	"csgopool"
 )
 
 var rootPath = ""
@@ -35,6 +36,7 @@ type Page struct {
 	LeftSide template.HTML
 	Menu template.HTML
 	Message template.HTML
+	Version string
 }
 
 
@@ -60,7 +62,9 @@ func (p *Page) GenerateRightSide(s *Session) {
 		
 		p.AddLogin(s)
 	}
-	
+
+
+	p.Version = csgopool.CurrentVersion.String()	
 }
 
 func GetMenu(s *Session) Menu {
