@@ -22,7 +22,7 @@ You start the CS:GO Pool by running csgopoolmain. You need to pass two arguments
   -data=/path/to/desired/data/folder
   -web=/path/to/html/file
  
-If it's the first run time, csgopool will fetch the current default Snapshot that is located in the repository. But you can specified the SnapÅ�hot URL if you want a custom Snapshot.
+If it's the first run time, csgopool will fetch the current default Snapshot that is located in the repository. But you can specified the Snapshot URL if you want a custom Snapshot.
 
 ### csgopoolmain
 This is the launcher of the csgopool.
@@ -50,44 +50,24 @@ You can specify many settings with application switch
 ### What is done
 
   - HLTV Stats parsing
-  - Events parsing
+  - ESEA Stats parsing
+  - Events parsing (will be removed)
   - Matches parsing
   - Teams parsing
-  
-  - HLTV Watcher, to get new matches and events
-
-  - Web Interface login
-  - Information page
-  - Users creation
+  - News
+  - Auto Pool Creation
   
 ### To Do
 
 This is the TODO list for the near future
 
-  - player alias, player merge working, need to make a clean snapshot will almost all players merged
   - ESEA parser (nearly done, some errors handling todo)
-  - HLTV parser refactor (done, removing events, need to rename package)
-  - Create a Logger package, and add some output for ESEA
+  - HLTV parser refactor (done, removing events, errors handling)
   - Match revoke, add match to pool
-  - Points attribution to users when points are added
   - Database configuration interface if none found could be nice
-  - User password modification
   - User constraint serialization and implementation (password min char, username min and max)
   - Maybe a settings file could be nice
-  - Pool
-    - Player selection (How player will be selected and constraint)
-    - Points attribution per game performance
-  - Handle Orphan player (there is still orphan player in matches_stats (snapshot-current)
   - User Pool Submission
   - User Main page (Dashboard with last matches stats and points attribution)
 
   
-### Merge
-Notes only
-
-N0thing , 352, 20
-JW , 349, 194
-Maniac, 338, 176
-Gob, 178, 218
-Storm, 432, 40
-mouz, 222, 171

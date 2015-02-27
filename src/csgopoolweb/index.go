@@ -35,8 +35,16 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	news_html := ""
 	if news.NewsId != 0 {
 		news_html = `<h3>Last News</h3>`
-		news_html += fmt.Sprintf(`<strong>%s</strong><br />`, news.Title)
-		news_html += fmt.Sprintf(`<p>%s<br /><em>Posted on %d-%02d-%02d</em></p>`, news.Text, news.PostedOn.Year(), news.PostedOn.Month(), news.PostedOn.Day())
+		news_html += fmt.Sprintf(`<div class="col-sm-6">
+									<strong>%s</strong>
+									<p>%s</p>
+									<em>Posted on %d-%02d-%02d</em>
+								  </div>`, 
+								  news.Title,
+								  news.Text, 
+								  news.PostedOn.Year(), 
+								  news.PostedOn.Month(), 
+								  news.PostedOn.Day())
 	}
 	
 	matches := csgodb.GetMatchesByDate(db, time.Now().AddDate(0, 0, -2))
