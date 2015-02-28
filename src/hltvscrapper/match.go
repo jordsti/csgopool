@@ -92,8 +92,8 @@ func (m *Match) ParseMatch() {
 	
 	nodes, _ = doc.Search("//div[starts-with(@style,'width:606px;height:22px;background-color:')]/div[@style='padding-left:5px;padding-top:5px;']")
 	
-	rePlayerId := regexp.MustCompile(`/\?pageid=173&playerid=([0-9]+)&gameid=2`)
-	reTeamId := regexp.MustCompile(`/\?pageid=179&teamid=([0-9]+)`)
+	rePlayerId := regexp.MustCompile(`playerid=([0-9]+)`)
+	reTeamId := regexp.MustCompile(`teamid=([0-9]+)`)
 	rePlayerScore := regexp.MustCompile(`([0-9\-]+) \(([0-9\-]+)\)`)
 	
 	for _, n := range nodes {
@@ -173,10 +173,10 @@ func GetMatches(offset int) []*Match {
 	
 	nodes, _ := doc.Search("//div[@style='padding-left:5px;padding-top:5px;']")
 	
-	reMatchId := regexp.MustCompile(`/\?pageid=188&matchid=([0-9]+)&eventid=0&gameid=2`)
+	reMatchId := regexp.MustCompile(`matchid=([0-9]+)`)
 	reTeam := regexp.MustCompile(`([A-Za-z0-9\.\-_ ]+) \(([0-9]+)\)`)
-	reTeamId := regexp.MustCompile(`/\?pageid=179&teamid=([0-9]+)&eventid=0&gameid=2`)
-	reEventId := regexp.MustCompile(`/\?pageid=188&eventid=([0-9]+)&gameid=2`)
+	reTeamId := regexp.MustCompile(`teamid=([0-9]+)`)
+	reEventId := regexp.MustCompile(`eventid=([0-9]+)`)
 	for _, n := range nodes {
 		
 		
@@ -185,8 +185,9 @@ func GetMatches(offset int) []*Match {
 		// 2 -> team 2
 		// 3 -> event
 		links, _ := n.Search("./a")
-		
+
 		rs := reMatchId.FindStringSubmatch(links[0].Attribute("href").Value())
+
 		_mId, _ := strconv.ParseInt(rs[1], 10, 32)
 		dateStr := links[0].FirstChild().Content()
 		
