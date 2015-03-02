@@ -271,4 +271,16 @@ func InitTables(db *sql.DB) {
 	if err != nil {
 		fmt.Printf("Database Error %v\n", err)
 	}
+	
+	req = "CREATE TABLE IF NOT EXISTS `openid_stores` ("
+	req += "`store_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`user_id` int(255) NOT NULL, "
+	req += "`nonce_time` DATETIME NOT NULL, "
+	req += "`nonce` TEXT NOT NULL, "
+	req += "PRIMARY KEY(`store_id`) "
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	_, err = db.Exec(req)
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 }

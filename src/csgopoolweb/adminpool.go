@@ -9,6 +9,7 @@ import (
 	"strings"
 	"csgodb"
 	"csgopool"
+	//"github.com/akavel/go-openid"
 	
 )
 
@@ -348,6 +349,11 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		db.Close()
 		
 		p.Content = template.HTML(`<h4>News posted !</h4>`)
+	} else if action == "steamlogin" {
+		
+		
+	} else if action == "logincheck" {
+		
 	}
 
 	p.Brand = "CS:GO Pool"
