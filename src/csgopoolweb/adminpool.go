@@ -232,7 +232,7 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 			//persist setting and parse form here
 			csgopool.Pool.Settings.PoolOn = ParseBool(r.FormValue("pool_on"))
 			csgopool.Pool.Settings.AutoAddMatches = ParseBool(r.FormValue("autoadd"))
-			
+			csgopool.Pool.Settings.SteamKey = r.FormValue("steamkey")
 			csgopool.Pool.SaveSetting(csgopool.Pool.Path)
 			
 			p.Content = template.HTML(`<h4>Settings saved!</h4>`)

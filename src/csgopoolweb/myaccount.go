@@ -4,11 +4,14 @@ import (
 	"html/template"
 	"net/http"
 	"csgodb"
+	"strconv"
 	"fmt"
 )
 
 type MyAccountPage struct {
 	Page
+	SteamID string
+	Credit string
 	Email string
 }
 
@@ -20,7 +23,7 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", 302)
 	}
 	
-	
+	db, _ := csgodb.Db.Open()
 	action := r.FormValue("action")
 	if action == "chpwd" {
 		//changing password
@@ -32,8 +35,6 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 		if password != password2 {
 			session.SetField("message", "Password mismatch")
 		} else {
-			
-			db, _ := csgodb.Db.Open()
 			
 			_, err := csgodb.Login(db, session.User.Name, curpass)
 			
@@ -50,12 +51,27 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				session.SetField("message", "This is not your current password")
 			}
-			
-			db.Close()
-			
 		}
 		
-	} 
+	} else if action == "steamid" {
+		sid := r.FormValue("steamid")
+		steamid := csgodb.GetSteamIDByUser(db, session.UserId)
+		if len(sid) > 0 {
+			_sid, _ := strconv.ParseInt(sid, 10, 64)
+			
+			if steamid.LinkId == 0 {
+				csgodb.SaveSteamID(db, session.UserId, int64(_sid))
+			} else {
+				steamid.SteamId = int64(_sid)
+				steamid.UpdateSteamID(db)
+			}
+		} 
+	}
+	
+	steamid := csgodb.GetSteamIDByUser(db, session.UserId)
+	credit := csgodb.GetCreditByUser(db, session.UserId)
+	
+	db.Close()
 	
 	msgHtml := ""
 	if session.IsFieldExists("message") {
@@ -70,8 +86,15 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 	
 	p := &MyAccountPage{}
 	
+	if steamid.LinkId == 0 {
+		p.SteamID = "NOT SET"
+	} else {
+		p.SteamID = fmt.Sprintf("%d", steamid.SteamId)
+	}
+	
 	p.Brand = "CS:GO Pool"
 	p.Title = "CS:GO Pool - My Account"
+	p.Credit = fmt.Sprintf(`%.2f`, credit.Amount)
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Message = template.HTML(msgHtml)
 	p.Email = session.User.Email

@@ -135,6 +135,7 @@ func (w *WatcherState) StartBot()  {
 	
 	w.Log.Info("Starting watcher Bot")
 	for {
+		
 		if !w.NoUpdate {
 				
 			w.Running = true
@@ -172,8 +173,17 @@ func (w *WatcherState) StartBot()  {
 			db.Close()
 			w.Running = false
 		}
+		
+		
 		w.Log.Info(fmt.Sprintf("Sleeping %f minutes...", d.Minutes()))
-		time.Sleep(d)
+		
+		//watching trade at each minutes
+		wait, _ := time.ParseDuration("1m")
+		for it := 0; it < int(d.Minutes()); it++ {
+			w.Log.Info("Wathing Incoming Stream trade")
+			w.WatchIncomingTrades()
+			time.Sleep(wait)
+		}
 	}
 	
 }

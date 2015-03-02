@@ -272,7 +272,7 @@ func InitTables(db *sql.DB) {
 		fmt.Printf("Database Error %v\n", err)
 	}
 	
-	req = "CREATE TABLE IF NOT EXISTS `openid_stores` ("
+	/*req = "CREATE TABLE IF NOT EXISTS `openid_stores` ("
 	req += "`store_id` int(255) NOT NULL AUTO_INCREMENT, "
 	req += "`user_id` int(255) NOT NULL, "
 	req += "`nonce_time` DATETIME NOT NULL, "
@@ -282,5 +282,33 @@ func InitTables(db *sql.DB) {
 	_, err = db.Exec(req)
 	if err != nil {
 		fmt.Printf("Database Error %v\n", err)
+	}*/
+	
+	req = "CREATE TABLE IF NOT EXISTS `steams_id` ("
+	req += "`link_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`user_id` int(255) NOT NULL, "
+	req += "`steam_id` int(255) NOT NULL, "
+	req += "UNIQUE KEY `steam_id_constraint` (`user_id`), "
+	req += "UNIQUE KEY `steam_id_constraint2` (`steam_id`), "
+	req += "PRIMARY KEY (`link_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
 	}
+	
+	req = "CREATE TABLE IF NOT EXISTS `users_credit` ("
+	req += "`credit_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`user_id` int(255) NOT NULL, "
+	req += "`credit` DECIMAL(11, 4) NOT NULL, "
+	req += "UNIQUE KEY `credit_id_constraint` (`user_id`), "
+	req += "PRIMARY KEY (`credit_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
+	
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"csgopool"
 	"csgopoolweb"
+	"steamapi"
 	"hltvscrapper"
 	"eseascrapper"
 	"os"
@@ -44,6 +45,15 @@ func main() {
 	fmt.Printf("[CSGOPOOLMAIN] Web Service Port : %d\n", webport)
 	fmt.Printf("[CSGOPOOLMAIN] Snapshot Url : %s\n", snapshotUrl)
 	fmt.Printf("[CSGOPOOLMAIN] Minimum Year : %d\n", minYear)
+	
+	//steam connection here !
+	steamapi.NewClient(datapath)
+	steamapi.Steam.Connect()
+	
+	if !steamapi.Steam.Connected {
+		fmt.Println("Invalid steam credentials, please update steam.json")
+		os.Exit(-1)
+	}
 	
 	hltvscrapper.NewScrapperState(minYear)
 	

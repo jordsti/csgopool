@@ -12,6 +12,7 @@ import (
 type PoolSetting struct {
 	PoolOn bool
 	AutoAddMatches bool
+	SteamKey string
 }
 
 

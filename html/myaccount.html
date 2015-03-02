@@ -17,5 +17,17 @@
 		</form>
 		<div class="col-md-4">
 		<br />
+		<strong>My Credit</strong> {{.Credit}} <br />
 		<strong>Email : </strong> {{.Email}} <br />
+		
+		<h3>Steam Account</h3>
+			<form method="POST" action="/myaccount/?action=steamid">
+				<div class="form-group">
+					<label for="steamid">SteamID</label>
+					<input class="form-control" type="text" name="steamid" id="steamid" value="{{.SteamID}}" />
+				</div>
+				
+				<button type="submit" class="btn btn-default">Save</button><br />
+			</form>
 		</div>
+		
