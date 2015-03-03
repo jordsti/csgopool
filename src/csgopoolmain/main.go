@@ -45,15 +45,7 @@ func main() {
 	fmt.Printf("[CSGOPOOLMAIN] Web Service Port : %d\n", webport)
 	fmt.Printf("[CSGOPOOLMAIN] Snapshot Url : %s\n", snapshotUrl)
 	fmt.Printf("[CSGOPOOLMAIN] Minimum Year : %d\n", minYear)
-	
-	//steam connection here !
-	steamapi.NewClient(datapath)
-	steamapi.Steam.Connect()
-	
-	if !steamapi.Steam.Connected {
-		fmt.Println("Invalid steam credentials, please update steam.json")
-		os.Exit(-1)
-	}
+
 	
 	hltvscrapper.NewScrapperState(minYear)
 	
@@ -62,6 +54,20 @@ func main() {
 	
 	watcher := csgopool.NewWatcher(datapath, snapshotUrl, importSnapshot, snapshot)
 	watcher.RefreshTime = refreshTime
+	
+	//steam connection here !
+	steamapi.NewClient(datapath)
+	
+	if csgopool.Pool.Settings.SteamBot {
+
+		steamapi.Steam.Connect()
+	
+		if !steamapi.Steam.Connected {
+			fmt.Println("Invalid steam credentials, please update steam.json")
+			os.Exit(-1)
+		}
+	}
+	
 	watcher.LoadData()
 	watcher.NoUpdate = noUpdate
 	go watcher.StartBot()

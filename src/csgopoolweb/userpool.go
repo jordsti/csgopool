@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"fmt"
 	"csgodb"
+	"csgopool"
 )
 
 type UserPoolPage struct {
@@ -31,10 +32,16 @@ func UserPoolHandler(w http.ResponseWriter, r *http.Request) {
 	db, _ := csgodb.Db.Open()
 	
 	pools := csgodb.GetMetaPoolsByUserWithoutPoints(db, session.UserId)
-	
+	credit := csgodb.GetCreditByUser(db, session.UserId)
 	divs_html := ""
 	
 	if len(pools) == 0 {
+		
+		if credit.Amount < csgopool.Pool.Settings.PoolCost {
+			divs_html = `<h3>You need more credit to enter the pool</h3>`
+			divs_html += fmt.Sprintf(`<p>Price is <strong>%.2f</strong>, and you have <strong></strong>%.2f</p>`, csgopool.Pool.Settings.PoolCost, credit.Amount)
+		}
+		
 		createLink := &Link{Caption:"Create your pool", Url:"/createpool/"}
 		createLink.AddParameter("action", "form")
 		divs_html = fmt.Sprintf(`<h4>No pool found for you !</h4><p>You need to create your pool, %s</p>`, createLink.GetHTML())

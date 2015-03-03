@@ -180,8 +180,11 @@ func (w *WatcherState) StartBot()  {
 		//watching trade at each minutes
 		wait, _ := time.ParseDuration("1m")
 		for it := 0; it < int(d.Minutes()); it++ {
-			w.Log.Info("Wathing Incoming Stream trade")
-			w.WatchIncomingTrades()
+			
+			if Pool.Settings.SteamBot {
+				w.Log.Info("Wathing Incoming Stream trade")
+				w.WatchIncomingTrades()
+			}
 			time.Sleep(wait)
 		}
 	}

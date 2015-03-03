@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"fmt"
 	"csgodb"
+	"csgopool"
 	"strconv"
 )
 
@@ -36,10 +37,9 @@ func CreatePoolHandler(w http.ResponseWriter, r *http.Request) {
 	
 	form_html := ""
 	divisions := csgodb.GetAllDivisionsWithPlayer(db)
-	
+	credit := csgodb.GetCreditByUser(db, session.UserId)
 	if len(action) == 0 || action == "form" {
 		
-	
 		if len(pools) == 0 {
 			
 			form_html = `<form method="POST" action="/createpool/?action=submit">`
@@ -111,11 +111,20 @@ func CreatePoolHandler(w http.ResponseWriter, r *http.Request) {
 					state.Log.Info(fmt.Sprintf("User [%d] try to insert a player [%d] that doesn't belong to this division [%d]", session.UserId, d_value, div.DivisionId))
 				}
 				
-				if len(choices) == len(divisions) {
+				if credit.Amount >= csgopool.Pool.Settings.PoolCost && credit.UserId != 0 {
+					
+					credit.Substract(csgopool.Pool.Settings.PoolCost)
+					credit.UpdateCredit(db)
+					
+					if len(choices) == len(divisions) {
 					csgodb.InsertPoolChoices(db, choices)
 					form_html = `<h4>Pool submitted with success!</h4>`
+					} else {
+						form_html = `<h4>Incorrect pool choice</h4>`
+					}
 				} else {
-					form_html = `<h4>Incorrect pool choice</h4>`
+					form_html = `<h3>You need more credit to enter the pool</h3>`
+					form_html += fmt.Sprintf(`<p>Price is <strong>%.2f</strong>, and you have <strong></strong>%.2f</p>`, csgopool.Pool.Settings.PoolCost, credit.Amount)
 				}
 				
 			}

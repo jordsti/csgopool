@@ -13,6 +13,8 @@ type PoolSetting struct {
 	PoolOn bool
 	AutoAddMatches bool
 	SteamKey string
+	SteamBot bool
+	PoolCost float32
 }
 
 
@@ -29,6 +31,8 @@ func NewPoolState(settingPath string) {
 	Pool = &PoolState{}
 	Pool.Settings.PoolOn = false
 	Pool.Settings.AutoAddMatches = false
+	Pool.Settings.SteamBot = false
+	Pool.Settings.PoolCost = float32(0.00)
 	
 	Pool.LoadSetting(settingPath)
 	
