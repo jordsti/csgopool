@@ -27,3 +27,8 @@ func BoolToString(val bool) string {
 func FloatToString(val float32) string {
   return fmt.Sprintf("%.2f", val)
 }
+
+func ParseInt(val string) int {
+	_int, _ := strconv.ParseInt(val, 10, 32)
+	return int(_int)
+}

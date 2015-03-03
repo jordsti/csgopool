@@ -16,11 +16,6 @@ import (
 type AdminPoolPage struct {
 	Page
 	Content template.HTML
-	PoolOn string
-	PoolCost string
-	SteamBot string
-	SteamKey string
-	AutoAdd string
 }
 
 func ReadFile(relpath string) string {
@@ -239,6 +234,14 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 			csgopool.Pool.Settings.SteamBot = ParseBool(r.FormValue("autoadd"))
 			csgopool.Pool.Settings.PoolCost = ParseFloat(r.FormValue("poolcost"))
 			csgopool.Pool.Settings.SteamKey = r.FormValue("steamkey")
+			csgopool.Pool.Settings.MailVerification = ParseBool(r.FormValue("mailverification"))
+			
+			csgopool.Pool.Settings.Mail.Address = r.FormValue("address")
+			csgopool.Pool.Settings.Mail.Port = ParseInt(r.FormValue("mailport"))
+			csgopool.Pool.Settings.Mail.Username = r.FormValue("mailuser")
+			csgopool.Pool.Settings.Mail.Password = r.FormValue("mailpassword")
+			csgopool.Pool.Settings.Mail.Email = r.FormValue("email")
+			
 			csgopool.Pool.SaveSetting(csgopool.Pool.Path)
 			
 			p.Content = template.HTML(`<h4>Settings saved!</h4>`)
@@ -250,6 +253,12 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 			content = strings.Replace(content, "{{.SteamBot}}", BoolToString(csgopool.Pool.Settings.SteamBot), 1)
 			content = strings.Replace(content, "{{.AutoAdd}}", BoolToString(csgopool.Pool.Settings.AutoAddMatches), 1)
 			content = strings.Replace(content, "{{.PoolCost}}", FloatToString(csgopool.Pool.Settings.PoolCost), 1)
+			content = strings.Replace(content, "{{.MailVerification}}", BoolToString(csgopool.Pool.Settings.MailVerification), 1)
+			content = strings.Replace(content, "{{.MailAddress}}", csgopool.Pool.Settings.Mail.Address, 1)
+			content = strings.Replace(content, "{{.MailPort}}", fmt.Sprintf("%d", csgopool.Pool.Settings.Mail.Port), 1)
+			content = strings.Replace(content, "{{.MailUser}}", csgopool.Pool.Settings.Mail.Username, 1)
+			content = strings.Replace(content, "{{.MailPassword}}", csgopool.Pool.Settings.Mail.Password, 1)
+			content = strings.Replace(content, "{{.Email}}", csgopool.Pool.Settings.Mail.Email, 1)
 			p.Content = template.HTML(content)
 		}
 		

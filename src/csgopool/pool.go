@@ -22,7 +22,8 @@ type PoolSetting struct {
 	SteamKey string
 	SteamBot bool
 	PoolCost float32
-	Mail *MailSetting
+	MailVerification bool
+	Mail MailSetting
 }
 
 
@@ -34,7 +35,7 @@ type PoolState struct {
 
 var Pool *PoolState
 
-func (ms *MailSetting) Host() string {
+func (ms MailSetting) Host() string {
 	return fmt.Sprintf("%s:%d", ms.Address, ms.Port)
 }
 
@@ -45,7 +46,7 @@ func NewPoolState(settingPath string) {
 	Pool.Settings.AutoAddMatches = false
 	Pool.Settings.SteamBot = false
 	Pool.Settings.PoolCost = float32(0.00)
-	
+	Pool.Settings.MailVerification = false
 	Pool.LoadSetting(settingPath)
 	
 } 
