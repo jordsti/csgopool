@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"csgodb"
+	"csgopool"
 	"strconv"
 	"fmt"
 )
@@ -13,6 +14,7 @@ type MyAccountPage struct {
 	SteamID string
 	Credit string
 	Email string
+	Transactions template.HTML
 }
 
 func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +26,7 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	db, _ := csgodb.Db.Open()
+	
 	action := r.FormValue("action")
 	if action == "chpwd" {
 		//changing password
@@ -70,6 +73,7 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 	
 	steamid := csgodb.GetSteamIDByUser(db, session.UserId)
 	credit := csgodb.GetCreditByUser(db, session.UserId)
+	transactions := csgodb.GetTransactionsByUser(db, session.UserId)
 	
 	db.Close()
 	
@@ -82,6 +86,35 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := MakeTemplate("myaccount.html")
 	if err != nil {
 		state.Log.Error(fmt.Sprintf("%s", err))
+	}
+	
+	transactions_html := ""
+	
+	for _, ts := range transactions {
+		
+		str_amount := ""
+		if ts.Amount > 0 {
+			str_amount = fmt.Sprintf("+%.2f", ts.Amount)
+		} else {
+			str_amount = fmt.Sprintf("%.2f", ts.Amount)
+		}
+		
+		tsLink := &Link{Caption: "View", Url:"/viewtransaction/"}
+		tsLink.AddInt("id", ts.TransactionId)
+		
+		date_str := fmt.Sprintf("%d-%02d-%02d %02d:%02d", 
+			ts.Timestamp.Year(), ts.Timestamp.Month(), ts.Timestamp.Day(), ts.Timestamp.Hour(), ts.Timestamp.Minute())
+		
+		transactions_html += fmt.Sprintf(`
+		<tr>
+			<td>%d</td>
+			<td>%s</td>
+			<td>%s</td>
+			<td>%s</td>
+			<td>%s</td>
+		</tr>
+		`, ts.TransactionId, ts.Description, str_amount, date_str, tsLink.GetHTML())
+		
 	}
 	
 	p := &MyAccountPage{}
@@ -97,6 +130,8 @@ func MyAccountHandler(w http.ResponseWriter, r *http.Request) {
 	p.Credit = fmt.Sprintf(`%.2f`, credit.Amount)
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Message = template.HTML(msgHtml)
+	p.Version = csgopool.CurrentVersion.String()
+	p.Transactions = template.HTML(transactions_html)
 	p.Email = session.User.Email
 	t.Execute(w, p)
 }

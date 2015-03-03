@@ -79,7 +79,7 @@ func GetDivisionsPoints(db *sql.DB) []*DivisionPoints {
 	return points
 }
 
-func GetPlayersPoint(db *sql.DB) []*PlayerPoints {
+func GetAllPlayersPoint(db *sql.DB) []*PlayerPoints {
 	
 	points := []*PlayerPoints{}
 	query := `SELECT p.player_id, p.player_name, COUNT(ms.match_stat_id), SUM(ms.frags), AVG(ms.kdratio), AVG(ms.kddelta), SUM(pt.points) as points FROM players_points pt
@@ -89,6 +89,48 @@ func GetPlayersPoint(db *sql.DB) []*PlayerPoints {
 				ORDER BY points DESC`
 	
 	rows, _ := db.Query(query)
+	
+	for rows.Next() {
+		point := &PlayerPoints{}
+		rows.Scan(&point.PlayerId, &point.Name, &point.Matches, &point.Frags, &point.KDRatio, &point.KDDelta, &point.Points)
+		points = append(points, point)
+	}
+	
+	return points
+}
+
+func GetAllPlayersPointInRange(db *sql.DB, startDate time.Time, endDate time.Time) []*PlayerPoints {
+	
+	points := []*PlayerPoints{}
+	query := `SELECT p.player_id, p.player_name, COUNT(ms.match_stat_id), SUM(ms.frags), AVG(ms.kdratio), AVG(ms.kddelta), SUM(pt.points) as points FROM players_points pt
+				JOIN players p ON p.player_id = pt.player_id
+				JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id
+				JOIN matches m ON m.match_id = ms.match_id 
+				WHERE m.match_date >= DATE(?) AND m.match_date <= DATE(?) 
+				GROUP BY player_id
+				ORDER BY points DESC`
+	
+	rows, _ := db.Query(query, startDate, endDate)
+	
+	for rows.Next() {
+		point := &PlayerPoints{}
+		rows.Scan(&point.PlayerId, &point.Name, &point.Matches, &point.Frags, &point.KDRatio, &point.KDDelta, &point.Points)
+		points = append(points, point)
+	}
+	
+	return points
+}
+
+func GetPlayersPoint(db *sql.DB, start int, end int) []*PlayerPoints {
+	
+	points := []*PlayerPoints{}
+	query := `SELECT p.player_id, p.player_name, COUNT(ms.match_stat_id), SUM(ms.frags), AVG(ms.kdratio), AVG(ms.kddelta), SUM(pt.points) as points FROM players_points pt
+				JOIN players p ON p.player_id = pt.player_id
+				JOIN matches_stats ms ON ms.match_id = pt.match_id AND ms.player_id = pt.player_id
+				GROUP BY player_id
+				ORDER BY points DESC LIMIT ?, ?`
+	
+	rows, _ := db.Query(query, start, end)
 	
 	for rows.Next() {
 		point := &PlayerPoints{}
@@ -120,6 +162,26 @@ func GetUserPoint(db *sql.DB, userId int) *UserPoints {
 }
 
 
+func GetUserPointInRange(db *sql.DB, userId int) *UserPoints {
+	points := &UserPoints{}
+	
+	query := `SELECT u.user_id, u.username, SUM(pt.points) as points FROM users u
+			LEFT JOIN users_pools up ON up.user_id = u.user_id 
+			LEFT JOIN players_points pt ON up.player_id = pt.player_id
+			JOIN matches m ON m.match_id = pt.match_id
+			WHERE (DATE(up.created_on) <= m.match_date) AND up.user_id = ?
+			GROUP BY up.user_id ORDER BY points DESC`
+	rows, _ := db.Query(query, userId)
+	
+	for rows.Next() {
+
+		rows.Scan(&points.UserId, &points.Name, &points.Points)
+
+	}
+	
+	return points
+}
+
 func GetUserPoints(db *sql.DB) []*UserPoints {
 	points := []*UserPoints{}
 	
@@ -130,6 +192,26 @@ func GetUserPoints(db *sql.DB) []*UserPoints {
 			WHERE (DATE(up.created_on) <= m.match_date)
 			GROUP BY up.user_id ORDER BY points DESC`
 	rows, _ := db.Query(query)
+	
+	for rows.Next() {
+		point := &UserPoints{}
+		rows.Scan(&point.UserId, &point.Name, &point.Points)
+		points = append(points, point)
+	}
+	
+	return points
+}
+
+func GetUserPointsInRange(db *sql.DB, startDate time.Time, endDate time.Time, count int) []*UserPoints {
+	points := []*UserPoints{}
+	
+	query := `SELECT u.user_id, u.username, SUM(pt.points) as points FROM users u
+			LEFT JOIN users_pools up ON up.user_id = u.user_id 
+			LEFT JOIN players_points pt ON up.player_id = pt.player_id
+			JOIN matches m ON m.match_id = pt.match_id
+			WHERE (DATE(up.created_on) <= m.match_date) AND (m.match_date >= DATE(?) AND m.match_date <= DATE(?))
+			GROUP BY up.user_id ORDER BY points DESC LIMIT ?`
+	rows, _ := db.Query(query, startDate, endDate, count)
 	
 	for rows.Next() {
 		point := &UserPoints{}

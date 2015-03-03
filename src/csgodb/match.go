@@ -121,7 +121,7 @@ func IsSourceMatchIn(matches []*Match, source int, sourceId int) bool {
 }
 
 
-func GetMatches(db *sql.DB, start int, count int) []*Match {
+func GetMatches(db *sql.DB, start int, end int) []*Match {
 	
 	matches := []*Match{}
 	
@@ -131,7 +131,7 @@ func GetMatches(db *sql.DB, start int, count int) []*Match {
 			JOIN teams t2 ON t2.team_id = m.team2_id
 			JOIN sources s ON s.source_id = m.source
 			ORDER BY match_date DESC LIMIT ?,?`
-	rows, _ := db.Query(query, start, count)
+	rows, _ := db.Query(query, start, end)
 	
 	for rows.Next() {
 		m := &Match{}

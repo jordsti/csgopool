@@ -33,6 +33,7 @@ func (w *WatcherState) WatchIncomingTrades() {
 					//accept this trade and add lowest value to credit
 					tradeId, _ := strconv.ParseUint(trade.TradeOfferId, 10, 64)
 					total := float32(0.00)
+					transactions := []*csgodb.Transaction{}
 					//computing trade sums
 					for _, i := range trade.ItemsToReceive {
 						classid := []string{i.ClassId}
@@ -41,6 +42,19 @@ func (w *WatcherState) WatchIncomingTrades() {
 						for _, ai := range rs.AssetInfos {
 							p := ai.GetPrice(steamapi.USCurrency, "US")
 							total += p.LowestPrice
+							
+							ts := &csgodb.Transaction{}
+							ts.UserId = user.Id
+							ts.Amount = p.LowestPrice
+							ts.Description = "Steam Market Item Given"
+							
+							td := &csgodb.TransactionData{}
+							td.Item.ClassId = ai.ClassId
+							td.Item.HashName = ai.MarketHashName
+							
+							ts.SetData(td)
+							
+							transactions = append(transactions, ts)
 						}
 					}
 					
@@ -59,6 +73,10 @@ func (w *WatcherState) WatchIncomingTrades() {
 						} else {
 							credit.Add(total)
 							credit.UpdateCredit(db)
+						}
+						
+						for _, ts := range transactions {
+						    ts.Insert(db)
 						}
 					}
 					

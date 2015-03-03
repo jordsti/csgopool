@@ -184,6 +184,21 @@ func GetAllTeams(db *sql.DB) []*Team {
 	return teams
 }
 
+func GetTeams(db *sql.DB, start int, end int) []*Team {
+	
+	teams := []*Team{}
+	
+	rows, _ := db.Query("SELECT team_id, team_name, esea_id, hltv_id FROM teams LIMIT ?, ?", start, end)
+
+	for rows.Next() {
+		team := &Team{}
+		rows.Scan(&team.TeamId, &team.Name, &team.EseaId, &team.HltvId)
+		teams = append(teams, team)
+	}
+	
+	return teams
+}
+
 func GetTeamById(db *sql.DB, teamId int) Team {
 	
 	team := Team{TeamId: 0, Name:""}

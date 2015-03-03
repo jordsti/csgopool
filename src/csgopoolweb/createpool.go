@@ -112,19 +112,24 @@ func CreatePoolHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				
 				if credit.Amount >= csgopool.Pool.Settings.PoolCost && credit.UserId != 0 {
-					
-					credit.Substract(csgopool.Pool.Settings.PoolCost)
-					credit.UpdateCredit(db)
-					
 					if len(choices) == len(divisions) {
-					csgodb.InsertPoolChoices(db, choices)
-					form_html = `<h4>Pool submitted with success!</h4>`
+						credit.Substract(csgopool.Pool.Settings.PoolCost)
+						credit.UpdateCredit(db)
+						
+						//transaction
+						transaction := &csgodb.Transaction{}
+						transaction.UserId = session.UserId
+						transaction.Amount = -csgopool.Pool.Settings.PoolCost
+						transaction.Description = "Pool Fee (Creation)"
+						transaction.Insert(db)
+						csgodb.InsertPoolChoices(db, choices)
+						form_html = `<h4>Pool submitted with success!</h4>`
 					} else {
 						form_html = `<h4>Incorrect pool choice</h4>`
 					}
 				} else {
 					form_html = `<h3>You need more credit to enter the pool</h3>`
-					form_html += fmt.Sprintf(`<p>Price is <strong>%.2f</strong>, and you have <strong></strong>%.2f</p>`, csgopool.Pool.Settings.PoolCost, credit.Amount)
+					form_html += fmt.Sprintf(`<p>Price is <strong>%.2f</strong>, and you have <strong>%.2f</strong></p>`, csgopool.Pool.Settings.PoolCost, credit.Amount)
 				}
 				
 			}

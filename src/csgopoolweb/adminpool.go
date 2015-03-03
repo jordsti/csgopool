@@ -16,6 +16,11 @@ import (
 type AdminPoolPage struct {
 	Page
 	Content template.HTML
+	PoolOn string
+	PoolCost string
+	SteamBot string
+	SteamKey string
+	AutoAdd string
 }
 
 func ReadFile(relpath string) string {
@@ -227,19 +232,28 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		p.Content = "<p>Pool generated with success !</p>"
 	} else if action == "settings" {
 		save := r.FormValue("save")
-		
 		if save == "yes" {
 			//persist setting and parse form here
-			csgopool.Pool.Settings.PoolOn = ParseBool(r.FormValue("pool_on"))
+			csgopool.Pool.Settings.PoolOn = ParseBool(r.FormValue("poolon"))
 			csgopool.Pool.Settings.AutoAddMatches = ParseBool(r.FormValue("autoadd"))
+			csgopool.Pool.Settings.SteamBot = ParseBool(r.FormValue("autoadd"))
+			csgopool.Pool.Settings.PoolCost = ParseFloat(r.FormValue("poolcost"))
 			csgopool.Pool.Settings.SteamKey = r.FormValue("steamkey")
 			csgopool.Pool.SaveSetting(csgopool.Pool.Path)
 			
 			p.Content = template.HTML(`<h4>Settings saved!</h4>`)
 			
 		} else {
-			p.Content = template.HTML(ReadFile("adminpoolsettings.html"))
+			content := ReadFile("adminpoolsettings.html")
+			content = strings.Replace(content, "{{.PoolOn}}", BoolToString(csgopool.Pool.Settings.PoolOn), 1)
+			content = strings.Replace(content, "{{.SteamKey}}", csgopool.Pool.Settings.SteamKey, 1)
+			content = strings.Replace(content, "{{.SteamBot}}", BoolToString(csgopool.Pool.Settings.SteamBot), 1)
+			content = strings.Replace(content, "{{.AutoAdd}}", BoolToString(csgopool.Pool.Settings.AutoAddMatches), 1)
+			content = strings.Replace(content, "{{.PoolCost}}", FloatToString(csgopool.Pool.Settings.PoolCost), 1)
+			p.Content = template.HTML(content)
 		}
+		
+		
 	} else if action == "matches" {
 		db, _ := csgodb.Db.Open()
 		content := `<div class="row">
@@ -361,11 +375,4 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Message = template.HTML(msgHtml)
 	t.Execute(w, p)
-}
-
-func ParseBool(str string) bool {
-	if str == "true" {
-		return true
-	}
-	return false
 }

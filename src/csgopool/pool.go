@@ -8,6 +8,13 @@ import (
 	"database/sql"
 )
 
+type MailSetting struct {
+	Address string
+	Port int
+	Username string
+	Password string
+	Email string
+}
 
 type PoolSetting struct {
 	PoolOn bool
@@ -15,6 +22,7 @@ type PoolSetting struct {
 	SteamKey string
 	SteamBot bool
 	PoolCost float32
+	Mail *MailSetting
 }
 
 
@@ -25,6 +33,10 @@ type PoolState struct {
 
 
 var Pool *PoolState
+
+func (ms *MailSetting) Host() string {
+	return fmt.Sprintf("%s:%d", ms.Address, ms.Port)
+}
 
 func NewPoolState(settingPath string) {
 	

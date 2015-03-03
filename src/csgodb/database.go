@@ -311,4 +311,19 @@ func InitTables(db *sql.DB) {
 		fmt.Printf("Database Error %v\n", err)
 	}
 	
+	req = "CREATE TABLE IF NOT EXISTS `transactions` ("
+	req += "`transaction_id` int(255) NOT NULL AUTO_INCREMENT, "
+	req += "`user_id` int(255) NOT NULL, "
+	req += "`timestamp` DATETIME NOT NULL, "
+	req += "`description` VARCHAR(255) NOT NULL, "
+	req += "`data` TEXT NOT NULL, "
+	req += "`amount` DECIMAL(11, 4) NOT NULL, "
+	req += "PRIMARY KEY (`transaction_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
+	
 }

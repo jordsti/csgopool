@@ -1,33 +1,25 @@
 <div class="container">
 	<form method="POST" action="/adminpool/?action=settings&save=yes">
 		<h4>Pool Settings</h4>
-		<div class="radio">
-			<label>
-			<input type="radio" name="pool_on" id="pool_on" value="false">
-			Pool Off
-			</label>
+		<div class="form-group">
+			<label for="poolon">Pool On (true | false)</label>
+			<input type="text" name="poolon" id="poolon" class="form-control" value="{{.PoolOn}}"/>
 		</div>
-		<div class="radio">
-			<label>
-			<input type="radio" name="pool_on" id="pool_on" value="true">
-			Pool On
-			</label>
+		<div class="form-group">
+			<label for="autoadd">Auto Add Matches (true | false)</label>
+			<input type="text" name="autoadd" id="autoadd" class="form-control" value="{{.AutoAdd}}"/>
 		</div>
-		<div class="radio">
-			<label>
-			<input type="radio" name="autoadd" id="autoadd" value="true">
-			Auto Add Matches to pool
-			</label>
+		<div class="form-group">
+			<label for="autoadd">Pool Cost</label>
+			<input type="text" name="poolcost" id="poolcost" class="form-control" value="{{.PoolCost}}"/>
 		</div>
-		<div class="radio">
-			<label>
-			<input type="radio" name="autoadd" id="autoadd" value="false">
-			Manual matches selection
-			</label>
+		<div class="form-group">
+			<label for="steambot">Steam Bot (true | false)</label>
+			<input type="text" name="steambot" id="steambot" class="form-control" value="{{.SteamBot}}"/>
 		</div>
 		<div class="form-group">
 			<label for="steamkey">Steam Key</label>
-			<input type="text" name="steamkey" id="steamkey" class="form-control" />
+			<input type="text" name="steamkey" id="steamkey" class="form-control" value="{{.SteamKey}}"/>
 		</div>
 		<button type="submit" class="btn btn-default">Save</button>
 	</form>

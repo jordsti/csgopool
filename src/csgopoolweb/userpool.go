@@ -18,7 +18,7 @@ func UserPoolHandler(w http.ResponseWriter, r *http.Request) {
 	session := state.HandleSession(w, r)
 
 	if !session.IsLogged() {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/", 302)
 	}
 
 	t, err := MakeTemplate("userpool.html")
@@ -39,12 +39,12 @@ func UserPoolHandler(w http.ResponseWriter, r *http.Request) {
 		
 		if credit.Amount < csgopool.Pool.Settings.PoolCost {
 			divs_html = `<h3>You need more credit to enter the pool</h3>`
-			divs_html += fmt.Sprintf(`<p>Price is <strong>%.2f</strong>, and you have <strong></strong>%.2f</p>`, csgopool.Pool.Settings.PoolCost, credit.Amount)
+			divs_html += fmt.Sprintf(`<p>Price is <strong>%.2f</strong>, and you have <strong>%.2f</strong></p>`, csgopool.Pool.Settings.PoolCost, credit.Amount)
+		} else {
+			createLink := &Link{Caption:"Create your pool", Url:"/createpool/"}
+			createLink.AddParameter("action", "form")
+			divs_html = fmt.Sprintf(`<h4>No pool found for you !</h4><p>You need to create your pool, %s <br /> Pool fee is <strong>%.2f</strong></p>`, createLink.GetHTML(), csgopool.Pool.Settings.PoolCost)
 		}
-		
-		createLink := &Link{Caption:"Create your pool", Url:"/createpool/"}
-		createLink.AddParameter("action", "form")
-		divs_html = fmt.Sprintf(`<h4>No pool found for you !</h4><p>You need to create your pool, %s</p>`, createLink.GetHTML())
 	} else {
 		
 		nb_div := 1

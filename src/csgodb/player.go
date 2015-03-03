@@ -145,7 +145,7 @@ func (pl *Player) P() *PlayerWithStat {
 	return plP
 }
 
-func GetPlayersWithStat(db *sql.DB, start int, count int) []*PlayerWithStat {
+func GetPlayersWithStat(db *sql.DB, start int, end int) []*PlayerWithStat {
 	players := []*PlayerWithStat{}
 	
 	query := "SELECT p.player_id, p.player_name, p.esea_id, p.hltv_id, SUM(ms.frags), SUM(ms.deaths), AVG(ms.kdratio), COUNT(ms.match_stat_id) "
@@ -153,7 +153,7 @@ func GetPlayersWithStat(db *sql.DB, start int, count int) []*PlayerWithStat {
 	query += "JOIN matches_stats ms ON ms.player_id = p.player_id "
 	query += "GROUP BY player_id ORDER BY p.player_name LIMIT ?, ?"
 	
-	rows, _ := db.Query(query, start, count)
+	rows, _ := db.Query(query, start, end)
 	for rows.Next() {
 		player := &PlayerWithStat{}
 		rows.Scan(&player.PlayerId, &player.Name, &player.EseaId, &player.HltvId, &player.Stat.Frags, &player.Stat.Deaths, &player.Stat.AvgKDRatio, &player.Stat.MatchesPlayed)
