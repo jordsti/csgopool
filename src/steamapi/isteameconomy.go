@@ -15,6 +15,9 @@ const (
 	EuroCurrency = 3
 	
 	CSGOAppId = 730
+	
+	RarityCategory = "Rarity"
+	QualityCategory = "Quality"
 )
 
 type ISteamEconomyResult struct {	
@@ -30,6 +33,20 @@ type MarketPrice struct {
 	MedianPrice float32
 	
 	Volume string `json:"volume"`
+}
+
+type AssetTag struct {
+	InternalName string `json:"internal_name"`
+	Name string `json:"name"`
+	Category string `json:"category"`
+	CategoryName string `json:"category_name"`
+}
+
+type DescriptionField struct {
+	Type string `json:"type"`
+	Value string `json:"value"`
+	Color string `json:"color"`
+	AppDate []*json.RawMessage `json:"app_data"`
 }
 
 type AssetInfo struct {
@@ -49,8 +66,60 @@ type AssetInfo struct {
 	FraudWarnings string `json:"fraudwarnings"`
 	JSONDescriptions map[string]*json.RawMessage `json:"descriptions"`
 	OwnerDescriptions string `json:"owner_descriptions"`
-	JSONTags map[string]*json.RawMessage `json;"tags"`
+	JSONTags map[string]*json.RawMessage `json:"tags"`
 	ClassId string `json:"classid"`
+	
+	Tags []AssetTag
+	Descriptions []DescriptionField
+}
+
+func (ai AssetInfo) GetTagByCategory(category string) *AssetTag {
+    
+  for _, tag := range ai.Tags {
+      if tag.Category == category {
+	 return &tag
+      }
+  }
+  return nil
+}
+
+func (ai AssetInfo) GetCategories() []string {
+    cats := []string{}
+    
+    for _, tag := range ai.Tags {
+    
+      cats = append(cats, tag.Category)
+    }
+    return cats
+}
+
+func (ai AssetInfo) ParseTags() {
+	
+	for _, dt := range ai.JSONTags {
+		
+		tag := AssetTag{}
+		err := json.Unmarshal(*dt, &tag)
+		
+		if err != nil {
+			fmt.Printf("JSON Error %v\n", err)
+		}
+		
+		ai.Tags = append(ai.Tags, tag)		
+	}
+}
+
+func (ai AssetInfo) ParseDescriptions() {
+	
+	for _, dt := range ai.JSONDescriptions {
+		desc := DescriptionField{}
+		err := json.Unmarshal(*dt, &desc)
+		
+		if err != nil {
+			fmt.Printf("JSON Error %v\n", err)
+		}
+		
+		ai.Descriptions = append(ai.Descriptions, desc)
+	}
 }
 
 func (mp *MarketPrice) ParseJSON() {
@@ -67,6 +136,38 @@ func (mp *MarketPrice) ParseJSON() {
 	_price, _ = strconv.ParseFloat(rs[1], 32)
 	
 	mp.MedianPrice = float32(_price)
+}
+
+func GetPrice(appId int, hashName string, currency int, country string) *MarketPrice { 
+	//building url
+	url := fmt.Sprintf(`http://steamcommunity.com/market/priceoverview/?country=%s&currency=%d&appid=%d&market_hash_name=%s`,
+		country, currency, appId, url.QueryEscape(hashName))
+	
+	resp, err := http.Get(url)
+	
+	if err != nil {
+		fmt.Printf("HTTP Error : %v\n", err)
+	}
+	
+	defer resp.Body.Close()
+	
+	body, err := ioutil.ReadAll(resp.Body)
+	
+	if err != nil {
+		fmt.Printf("IO Error : %v\n", err)
+	}
+
+	price := &MarketPrice{}
+	
+	err = json.Unmarshal(body, price)
+	
+	if err != nil {
+		fmt.Printf("Error [JSON]: %v\n", err)
+	}
+	
+	price.ParseJSON()
+	
+	return price	
 }
 
 func (a AssetInfo) GetPrice(currency int, country string) *MarketPrice {
@@ -143,7 +244,8 @@ func GetAssetClassInfo(appId int, classIds []string, key string) *ISteamEconomyR
 			if err != nil {
 				fmt.Printf("Error [JSON]: %v\n", err)
 			}
-			
+			ai.ParseTags()
+			ai.ParseDescriptions()
 			results.AssetInfos = append(results.AssetInfos, ai)
 		}
 	}

@@ -73,7 +73,7 @@ func (r *JSONResponse) Parse(data []byte) {
 
 func GetTradeOffers(key string) IConServiceResponse {
 	
-	url := fmt.Sprintf(`https://api.steampowered.com/IEconService/GetTradeOffers/v1/?key=%s&format=json&input_json={"get_received_offers":true}`, key)
+	url := fmt.Sprintf(`https://api.steampowered.com/IEconService/GetTradeOffers/v1/?key=%s&format=json&input_json={"get_received_offers":true,"active_only":true}`, key)
 	
 	resp, err := http.Get(url)
 	if err != nil {

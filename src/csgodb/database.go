@@ -326,4 +326,19 @@ func InitTables(db *sql.DB) {
 		fmt.Printf("Database Error %v\n", err)
 	}
 	
+	req = "CREATE TABLE IF NOT EXISTS `local_assets` ("
+	req += "`asset_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, "
+	req += "`class_id` BIGINT UNSIGNED NOT NULL, "
+	req += "`asset_name` VARCHAR(255) NOT NULL, "
+	req += "`market_name` VARCHAR(255) NOT NULL, "
+	req += "`market_hash_name` VARCHAR(255) NOT NULL, "
+	req += "`asset_type` VARCHAR(255) NOT NULL, "
+	req += "`icon_url` TEXT NOT NULL, "
+	req += "PRIMARY KEY (`asset_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+
+	_, err = db.Exec(req)
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}	
 }
