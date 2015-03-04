@@ -88,6 +88,22 @@ func (p *PoolState) LoadSetting(path string) {
 	
 }
 
+func RemovePoints(db *sql.DB, matchId int) {
+	match := csgodb.GetMatchById(db, matchId)
+	
+	if match != nil {
+		
+		if match.PoolStatus == 1 {
+			
+			query := "DELETE FROM players_points WHERE match_id = ?"
+			db.Exec(query, matchId)
+			
+		}
+		
+		csgodb.UpdateMatchPoolStatus(db, matchId, 0)
+	}
+}
+
 func AttributePoints(db *sql.DB, matchId int) {
 	
 	match := csgodb.GetMatchById(db, matchId)
@@ -149,6 +165,8 @@ func AttributePoints(db *sql.DB, matchId int) {
 			
 			csgodb.AddPoint(db, match.MatchId, ps.PlayerId, points)
 		}
+		
+		csgodb.UpdateMatchPoolStatus(db, matchId, 1)
 	}
 	
 }

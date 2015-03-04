@@ -119,7 +119,7 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/myaccount/", MyAccountHandler)
 	http.HandleFunc("/createpool/", CreatePoolHandler)
 	http.HandleFunc("/ranking/", RankingHandler)
-	
+	http.HandleFunc("/json/", JSONHandler)
 	
 	//image serving
 	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir(rootPath + "/images/"))))

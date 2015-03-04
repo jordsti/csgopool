@@ -54,6 +54,20 @@ func UsersCount(db *sql.DB) int {
 	return count
 }
 
+func GetAllUsers(db *sql.DB) []*User {
+	users := []*User{}
+	query := "SELECT user_id, username, email, rank FROM users ORDER BY user_id"
+	
+	rows, _ := db.Query(query)
+	for rows.Next() {
+		user := &User{}
+		rows.Scan(&user.Id, &user.Name, &user.Email, &user.Rank)
+		users = append(users, user)
+	}
+	
+	return users
+}
+
 func Login(db *sql.DB, username string, password string) (*User, error) {
 	
 	user := GetUserByName(db, username)

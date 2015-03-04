@@ -111,7 +111,7 @@ func CreatePoolHandler(w http.ResponseWriter, r *http.Request) {
 					state.Log.Info(fmt.Sprintf("User [%d] try to insert a player [%d] that doesn't belong to this division [%d]", session.UserId, d_value, div.DivisionId))
 				}
 				
-				if credit.Amount >= csgopool.Pool.Settings.PoolCost && credit.UserId != 0 {
+				if credit.Amount >= csgopool.Pool.Settings.PoolCost {
 					if len(choices) == len(divisions) {
 						credit.Substract(csgopool.Pool.Settings.PoolCost)
 						credit.UpdateCredit(db)

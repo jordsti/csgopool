@@ -9,7 +9,6 @@ import (
 	"strings"
 	"csgodb"
 	"csgopool"
-	//"github.com/akavel/go-openid"
 	
 )
 
@@ -332,6 +331,32 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		
 		content = fmt.Sprintf(content, rows_html)
 		p.Content = template.HTML(content)
+	} else if action == "poolmatch" {
+		db, _ := csgodb.Db.Open()
+		m_id := ParseInt(r.FormValue("id"))
+		match := csgodb.GetMatchById(db, m_id)
+		
+		if match.PoolStatus == 0 {
+			//pooling
+			csgopool.AttributePoints(db, match.MatchId)
+			p.Content = template.HTML(fmt.Sprintf(`<h4>Match [%d] Added to pool!</h4>`, match.MatchId))
+		}
+		
+		db.Close()
+		
+	} else if action == "revokematch" {
+		db, _ := csgodb.Db.Open()
+	    m_id := ParseInt(r.FormValue("id"))
+	    match := csgodb.GetMatchById(db, m_id)
+	    
+	    if match.PoolStatus == 1 {
+	    	//revoking
+	    	csgopool.RemovePoints(db, match.MatchId)
+	    	p.Content = template.HTML(fmt.Sprintf(`<h4>Match [%d] removed from pool!</h4>`, match.MatchId))
+	    }
+	    
+	    db.Close()
+		 
 	} else if action == "mergeplayer" {
 		p.Content = template.HTML(ReadFile("adminmergeplayer.html"))
 	} else if action == "merge" {
@@ -372,15 +397,49 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		db.Close()
 		
 		p.Content = template.HTML(`<h4>News posted !</h4>`)
-	} else if action == "steamlogin" {
+	} else if action == "users" {
 		
+		db, _ := csgodb.Db.Open()
 		
-	} else if action == "logincheck" {
+		users := csgodb.GetAllUsers(db)
 		
+		content := `<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Name</th>
+					<th>Email</th>
+					<th>Rank</th>
+					<th>-</th>
+				</tr>
+			</thead>
+			<tbody>`
+		
+		for _, u := range users {
+			
+			uLink := &Link{Caption: "Edit", Url:"/adminpool/"}
+			uLink.AddParameter("action", "edituser")
+			uLink.AddInt("id", u.Id)
+			
+			content += fmt.Sprintf(`
+			<tr>
+				<td>%d</td>
+				<td>%s</td>
+				<td>%s</td>
+				<td>%d</td>
+				<td>%s</td>
+			</tr>
+			`, u.Id, u.Name, u.Email, u.Rank, uLink.GetHTML())
+		}
+		
+		content += `</tbody></table>`
+		db.Close()
+		
+		p.Content = template.HTML(content)
 	}
-
 	p.Brand = "CS:GO Pool"
 	p.Title = "CS:GO Pool - Pool Administration"
+	p.Version = csgopool.CurrentVersion.String()
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.Message = template.HTML(msgHtml)
 	t.Execute(w, p)
