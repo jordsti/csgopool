@@ -1,4 +1,4 @@
-<div class="container">
+<div class="col-md-8">
 	<form method="POST" action="/sendmsg/?action=send&recipient_id={{.RecipientId}}">
 		<h4>Write a message</h4>
 		<p>{{.Message}}</p>
@@ -11,7 +11,7 @@
 			<input class="form-control" type="text" name="title" id="title">
 		</div>
 		<div class="form-group">
-			<label for="text">Text</label>
+			<label for="text">Text</label> <br />
 			<textarea name="text" id="text"></textarea>
 		</div>
 		<button type="submit" class="btn btn-default">Send</button>
