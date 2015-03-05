@@ -70,7 +70,7 @@ func (m *Match) GetTeam2() *Team {
 
 func (m *Match) ParseMatch() {
 	
-	fmt.Printf("Parse match [%d] from hltv.org\n", m.MatchId)
+	//fmt.Printf("Parse match [%d] from hltv.org\n", m.MatchId)
 	
 	url := GetMatchPage(m.MatchId)
 	pc, _ := url.LoadPage()

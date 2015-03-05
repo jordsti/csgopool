@@ -10,6 +10,7 @@ import (
 type ItemInfo struct {
     HashName string
     ClassId string
+    LocalId uint64
 }
 
 type TransactionData struct {

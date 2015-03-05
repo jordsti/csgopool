@@ -29,7 +29,7 @@ type WatcherState struct {
 
 func NewWatcher(dataPath string, snapshotUrl string, importSnapshot bool, generateSnapshot bool) *WatcherState {
 	
-	CurrentVersion = &Version{ Version:0, Major:1, Minor:2, CodeName:"Alpha"}
+	CurrentVersion = &Version{ Version:0, Major:1, Minor:3, CodeName:"Alpha"}
 	state := &WatcherState{DataPath: dataPath}
 	state.Running = false
 	state.ImportSnapshot = importSnapshot

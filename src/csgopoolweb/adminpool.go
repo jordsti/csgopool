@@ -436,7 +436,24 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		db.Close()
 		
 		p.Content = template.HTML(content)
+	} else if action == "edituser" {
+		
+		userId := ParseInt(r.FormValue("id"))
+		
+		db, _ := csgodb.Db.Open()
+		
+		user := csgodb.GetUserById(db, userId)
+		
+		content := ReadFile("adminedituser.html")
+		
+		content = strings.Replace(content, "{{.Id}}", fmt.Sprintf("%d", user.Id), 1)
+		content = strings.Replace(content, "{{.Username}}", user.Name, 1)
+		content = strings.Replace(content, "{{.Email}}", user.Email, 1)
+		content = strings.Replace(content, "{{.Rank}}", fmt.Sprintf("%d", user.Rank), 1)
+		
+		p.Content = template.HTML(content)
 	}
+	
 	p.Brand = "CS:GO Pool"
 	p.Title = "CS:GO Pool - Pool Administration"
 	p.Version = csgopool.CurrentVersion.String()

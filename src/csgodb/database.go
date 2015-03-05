@@ -340,5 +340,21 @@ func InitTables(db *sql.DB) {
 	_, err = db.Exec(req)
 	if err != nil {
 		fmt.Printf("Database Error %v\n", err)
-	}	
+	}
+	
+	req = "CREATE TABLE IF NOT EXISTS `private_messages` ("
+	req += "`message_id` INT(255) NOT NULL AUTO_INCREMENT, "
+	req += "`message_status` INT(2) NOT NULL, "
+	req += "`sender_id` INT(255) NOT NULL, "
+	req += "`recipient_id` INT(255) NOT NULL, "
+	req += "`message_title` TEXT NOT NULL, "
+	req += "`message_text` TEXT NOT NULL, "
+	req += "`sended_on` DATETIME NOT NULL, "	
+	req += "PRIMARY KEY (`message_id`)"
+	req += ") ENGINE=InnoDB CHARSET=latin1;"
+	
+	_, err = db.Exec(req)
+	if err != nil {
+		fmt.Printf("Database Error %v\n", err)
+	}
 }

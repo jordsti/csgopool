@@ -7,6 +7,46 @@ import (
 	"csgodb"
 )
 
+type JSONArgs struct {
+	Name string
+	Description string
+}
+
+type JSONFunc struct {
+	Action string
+	Description string
+	Args []*JSONArgs
+}
+
+type JSONService struct {
+	Actions []*JSONFunc
+	Name string
+	Version string
+}
+
+func GetFuncTable() *JSONService {
+	service := &JSONService { Name:"CS:GO Pool", Version:"v0001"}
+	
+	funcs := []*JSONFunc{}
+	
+	f := &JSONFunc { Action: "ranking", Description: "Return the current User ranking with points" }
+	funcs = append(funcs, f)
+	
+	f = &JSONFunc { Action: "matches", Description: "Return all matches played" }
+	funcs = append(funcs, f)
+	
+	f = &JSONFunc { Action: "players", Description: "Return all players with their points" }
+	funcs = append(funcs, f)
+	
+	f = &JSONFunc { Action: "match", Description: "Return match information and stats" }
+	arg0 := &JSONArgs { Name:"id", Description:"Match Id" }
+	f.Args = append(f.Args, arg0)
+	funcs = append(funcs, f)
+	
+	service.Actions = funcs
+	return service
+	
+}
 
 
 func JSONHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,14 +74,17 @@ func JSONHandler(w http.ResponseWriter, r *http.Request) {
 		match.FetchStats(db)
 		b, _ := json.MarshalIndent(match, "", "	")
 		json_data = string(b)
+	} else if data == "players" {
+		players := csgodb.GetAllPlayersPoint(db)
+		b, _ := json.MarshalIndent(players, "", "	")
+		json_data = string(b)
 	} else {
-		//default behaviour
-		//send available options
+		funcs := GetFuncTable()
+		b, _ := json.MarshalIndent(funcs, "", "	")
+		json_data = string(b)
 	}
 	
 	db.Close()
-	
-	fmt.Printf("URL : %v\n", r.URL.Path[1:])
 	
 	fmt.Fprintf(w, json_data)
 }

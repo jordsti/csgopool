@@ -14,6 +14,7 @@ type ViewUserPage struct {
 	UserName string
 	Pools template.HTML
 	Points string
+	PM template.HTML
 }
 
 func ViewUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,10 +37,16 @@ func ViewUserHandler(w http.ResponseWriter, r *http.Request) {
 	user := csgodb.GetUserById(db, userId)
 	points := csgodb.GetUserPoint(db, userId)
 	divs_html := ""
+	pm_link := ""
 	if user.Id != 0 {
 		
+		if session.IsLogged() {
+			pmLink := &Link{Caption: "Write a message", Url:"/sendmsg/"}
+			pmLink.AddInt("recipient_id", user.Id)
+			pm_link = pmLink.GetHTML()
+		}
+		
 		pools := csgodb.GetMetaPoolsByUser(db, user.Id)
-
 		if len(pools) == 0 {
 
 			divs_html = fmt.Sprintf(`<h4>No pools for this user</h4>`)
@@ -76,6 +83,7 @@ func ViewUserHandler(w http.ResponseWriter, r *http.Request) {
 	p.Pools = template.HTML(divs_html)
 	p.Menu = template.HTML(GetMenu(session).GetHTML())
 	p.GenerateRightSide(session)
+	p.PM = template.HTML(pm_link)
 	t.Execute(w, p)
 
 

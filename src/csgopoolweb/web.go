@@ -119,6 +119,8 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/myaccount/", MyAccountHandler)
 	http.HandleFunc("/createpool/", CreatePoolHandler)
 	http.HandleFunc("/ranking/", RankingHandler)
+	http.HandleFunc("/inbox/", InboxHandler)
+	http.HandleFunc("/sendmsg/", WriteMessageHandler)
 	http.HandleFunc("/json/", JSONHandler)
 	
 	//image serving

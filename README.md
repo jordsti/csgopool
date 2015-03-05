@@ -16,6 +16,7 @@ The projet is coded in Go langage, so you need to get golang package.
 	- golang.org/x/crypto/bcrypt
 	- github.com/go-sql-driver/mysql
 	- github.com/moovweb/gokogiri
+	- github.com/Philipp15b/go-steam
 	
 You start the CS:GO Pool by running csgopoolmain. You need to pass two arguments for CSGO Pool to work
 
@@ -46,6 +47,7 @@ You can specify many settings with application switch
   - hltvscrapper : This module fetch Stats from hltv.org
   - eseascrapper : Fetch stats from ESEA.net
   - poolstacker : csgopool instance manager
+  - steamapi : Steam API to retrieve pending trade and accepting item as payment for pool fee
   
 ### What is done
 

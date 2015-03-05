@@ -48,9 +48,13 @@ func (w *WatcherState) WatchIncomingTrades() {
 							ts.Amount = p.LowestPrice
 							ts.Description = "Steam Market Item Given"
 							
+							//importing into local db
+							localAsset := csgodb.ImportAsset(db, ai)
+							
 							td := &csgodb.TransactionData{}
 							td.Item.ClassId = ai.ClassId
 							td.Item.HashName = ai.MarketHashName
+							td.Item.LocalId = localAsset.AssetId
 							
 							ts.SetData(td)
 							

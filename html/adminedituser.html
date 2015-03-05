@@ -1,0 +1,25 @@
+<div class="container">
+	<form method="POST" action="/adminpool/?action=saveuser&id={{.UserId}}">
+		<h4>Write a news</h4>
+		<div class="form-group">
+			<label for="id">Id</label>
+			{{.Id}}
+		</div>
+		
+		<div class="form-group">
+			<label for="username">Username</label>
+			{{.Username}}
+		</div>
+		<div class="form-group">
+			<label for="email">Email</label>
+			{{.Email}}
+		</div>
+		
+		<div class="form-group">
+			<label for="rank">Rank</label>
+			<input type="text" class="form-control" name="rank" id="rank" value="{{.Rank}}" />
+		</div>
+		
+		<button type="submit" class="btn btn-default">Save</button>
+	</form>
+</div>
