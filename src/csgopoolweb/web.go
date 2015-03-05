@@ -121,11 +121,15 @@ func (w *WebServerState) Serve() {
 	http.HandleFunc("/ranking/", RankingHandler)
 	http.HandleFunc("/inbox/", InboxHandler)
 	http.HandleFunc("/sendmsg/", WriteMessageHandler)
+	http.HandleFunc("/viewmsg/", ViewMessageHandler)
 	http.HandleFunc("/json/", JSONHandler)
 	
 	//image serving
 	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir(rootPath + "/images/"))))
-
+	//css file
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir(rootPath + "/css/"))))
+	//js
+	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir(rootPath + "/js/"))))
 	
 	http.ListenAndServe(fmt.Sprintf(":%d", w.Port), nil)
 }

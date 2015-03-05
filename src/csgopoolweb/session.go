@@ -8,6 +8,7 @@ import (
 	"csgodb"
 	"strconv"
 	"fmt"
+	"time"
 )
 
 type SessionField struct {
@@ -20,6 +21,7 @@ type Session struct {
 	UserId int
 	User *csgodb.User
 	Fields []*SessionField
+	LastTick time.Time
 }
 
 type SessionContainer struct {
@@ -30,7 +32,7 @@ func (sc *SessionContainer) NewSession(userId int) *Session {
 	//new session id
 	
 	sess := &Session{UserId: userId, Id:GenerateSessionKey()}
-	
+	sess.Tick()
 	sc.Sessions = append(sc.Sessions, sess)
 	
 	return sess
@@ -45,6 +47,10 @@ func (sc *SessionContainer) GetSession(id string) *Session {
 	}
 	
 	return nil
+}
+
+func (s *Session) Tick() {
+	s.LastTick = time.Now()
 }
 
 func (s *Session) ClearFields() {
@@ -181,6 +187,7 @@ func (ws *WebServerState) HandleSession(w http.ResponseWriter, r *http.Request) 
 			sess := ws.Sessions.GetSession(sessId)
 			
 			if sess != nil {
+				sess.Tick()
 				return sess
 			}
 		}
