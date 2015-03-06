@@ -131,5 +131,7 @@ func (w *WebServerState) Serve() {
 	//js
 	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir(rootPath + "/js/"))))
 	
+	http.Handle("/snapshots/", http.StripPrefix("/snapshots/", http.FileServer(http.Dir(rootPath + "/snapshots/"))))
+	
 	http.ListenAndServe(fmt.Sprintf(":%d", w.Port), nil)
 }

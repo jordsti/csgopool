@@ -9,6 +9,7 @@ import (
 	"strings"
 	"csgodb"
 	"csgopool"
+	"time"
 	
 )
 
@@ -32,11 +33,11 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 	session := state.HandleSession(w, r)
 	
 	if !session.IsLogged() {
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/", 302)
 	} else {
 		if !session.User.IsPoolMaster() {
 			state.Log.Debug("Not PoolMaster!")
-			http.Redirect(w, r, "/", 301)
+			http.Redirect(w, r, "/", 302)
 		}
 	}
 	
@@ -452,6 +453,19 @@ func AdminPoolHandler(w http.ResponseWriter, r *http.Request) {
 		content = strings.Replace(content, "{{.Rank}}", fmt.Sprintf("%d", user.Rank), 1)
 		
 		p.Content = template.HTML(content)
+	} else if action == "snapshot" {
+		
+		db, _ := csgodb.Db.Open()
+		state.Log.Info("Generating a snapshot...")
+		snapshot := csgodb.GenerateSnapshot(db)
+		now := time.Now()
+		name := fmt.Sprintf("snapshot-%d-%02d-%02d_%02dh%02dm.json", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute())
+		
+		snapshot.Save(state.RootPath + "/snapshots/"+name)
+		
+		db.Close()
+		
+		http.Redirect(w, r, "/snapshots/"+name, 302)
 	}
 	
 	p.Brand = "CS:GO Pool"
