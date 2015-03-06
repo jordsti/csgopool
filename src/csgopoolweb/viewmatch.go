@@ -59,7 +59,15 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 
 		playerLink := &Link{Caption:ps.PlayerName, Url:"/viewplayer/"}
 		playerLink.AddParameter("id", strconv.Itoa(ps.PlayerId))
-
+		
+		kddelta_class := "kddelta-neutral"
+		
+		if ps.KDDelta < 0 {
+			kddelta_class = "kddelta-negative"
+		} else if ps.KDDelta > 0 {
+			kddelta_class = "kddelta-positive"
+		}
+		
 		pStats = pStats + fmt.Sprintf(`<tr>
 									<td>%s</td>
 									<td>%s</td>
@@ -67,7 +75,7 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 									<td>%d</td>
 									<td>%d</td>
 									<td>%.2f</td>
-									<td>%d</td>
+									<td><span class="%s">%d</span></td>
 									<td>%d</td>
 									</tr>`, 
 									playerLink.GetHTML(), 
@@ -75,7 +83,8 @@ func ViewMatchHandler(w http.ResponseWriter, r *http.Request) {
 									ps.Frags, 
 									ps.Assists, 
 									ps.Deaths, 
-									ps.KDRatio, 
+									ps.KDRatio,
+									kddelta_class, 
 									ps.KDDelta, 
 									ps.Points)
 	

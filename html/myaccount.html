@@ -21,8 +21,12 @@
 		
 		<h3>Steam Account</h3>
 		<form method="POST" action="/myaccount/?action=steamid">
+			<div class="alert alert-info help-div" role="alert" id="steam_account_help">
+			  <button type="button" aria-label="Close" class="close" onclick="closeHelp('steam_account_help');"><span aria-hidden="true">&times;</span></button>
+			<strong>SteamID Information</strong><br />
+			Your Steam ID will be used to recognize item that you send by trade. The lowest price of this item will be added to your credit. To find your SteamID you can use this website : <a href="http://steamidfinder.com/" target="_blank">steamidfinder.com</a>. You Steam Id will begin with STEAM_0:1:&#35;, you Id is the number represented by &#35;</div>
 			<div class="form-group">
-				<label for="steamid">SteamID</label>
+				<label for="steamid">SteamID</label> <button type="button" class="button help-link" onclick="showHelp('steam_account_help');">?</button>
 				<input class="form-control" type="text" name="steamid" id="steamid" value="{{.SteamID}}" />
 			</div>
 			

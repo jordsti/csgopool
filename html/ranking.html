@@ -1,13 +1,23 @@
 <div class="container">
 <div class="col-sm-8">
-<h4>This week Top 10</h4>
-
+<h4>This Week Top 10</h4>
+<div class="alert alert-info help-div" id="help_week_points">
+<button type="button" aria-label="Close" class="close" onclick="closeHelp('help_week_points');"><span aria-hidden="true">&times;</span></button>
+<strong>How Points works ?</strong><br />
+Points are calculated with the player match performance. Each matches played during the pool are calculated and added into player points. The points are calculted this way : <br />
+<ul>
+  <li>25 Points if his team win or 10 points if it's a tie</li>
+  <li>2 Points per Frags and 1 Points per Assist</li>
+  <li>Bonus are added if Kill/Death Delta is greater than 0, each positive difference of kill versus death give 3 Points</li>
+</ul>
+This is the sum of points per User for the last 7 days.
+</div>
 <table class="table table-striped">
 	<thead>
 		<tr>
 			<th>#</th>
 			<th>Name</th>
-			<th>Total Points</th>
+			<th>Total Points <button type="button" class="button help-link" onclick="showHelp('help_week_points');">?</button></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -16,13 +26,22 @@
 </table>
 
 <h4>Users Ranking</h4>
-
+<div class="alert alert-info help-div" id="help_points">
+<button type="button" aria-label="Close" class="close" onclick="closeHelp('help_points');"><span aria-hidden="true">&times;</span></button>
+<strong>How Points works ?</strong><br />
+Points are calculated with the player match performance. Each matches played during the pool are calculated and added into player points. The points are calculted this way : <br />
+<ul>
+  <li>25 Points if his team win or 10 points if it's a tie</li>
+  <li>2 Points per Frags and 1 Points per Assist</li>
+  <li>Bonus are added if Kill/Death Delta is greater than 0, each positive difference of kill versus death give 3 Points</li>
+</ul>
+</div>
 <table class="table table-striped">
 	<thead>
 		<tr>
 			<th>#</th>
 			<th>Name</th>
-			<th>Total Points</th>
+			<th>Total Points <button type="button" class="button help-link" onclick="showHelp('help_points');">?</button></th>
 		</tr>
 	</thead>
 	<tbody>

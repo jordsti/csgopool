@@ -35,9 +35,9 @@ func GetLoginForm() template.HTML {
 
 func GetUserMenu() template.HTML {
 	
-	menu := `<a href="/inbox/" class="btn btn-default">Inbox</a><br />`
-	menu += `<a href="/userpool/" class="btn btn-default">My Pool</a><br />`
-	menu += `<a href="/myaccount/" class="btn btn-default">My Account</a><br />`
-	menu += `<a href="/logout/" class="btn btn-default">Log Out</a><br />`
+	menu := `<a href="/inbox/" class="btn btn-default user-menu">Inbox</a><br />`
+	menu += `<a href="/userpool/" class="btn btn-default user-menu">My Pool</a><br />`
+	menu += `<a href="/myaccount/" class="btn btn-default user-menu">My Account</a><br />`
+	menu += `<a href="/logout/" class="btn btn-default user-menu">Log Out</a><br />`
 	return template.HTML(menu)
 }

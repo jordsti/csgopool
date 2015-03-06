@@ -39,8 +39,8 @@ func CreatePoolHandler(w http.ResponseWriter, r *http.Request) {
 	divisions := csgodb.GetAllDivisionsWithPlayer(db)
 	credit := csgodb.GetCreditByUser(db, session.UserId)
 	if len(action) == 0 || action == "form" {
-		
-		if len(pools) == 0 {
+
+		if len(pools) == 0 && len(divisions) > 0 {
 			
 			form_html = `<form method="POST" action="/createpool/?action=submit">`
 			
@@ -48,7 +48,7 @@ func CreatePoolHandler(w http.ResponseWriter, r *http.Request) {
 			it := 1
 			for _, div := range divisions {
 				
-				inner_html += `<div class="col-sm-2">`
+				inner_html += `<div class="col-md-2 player-division">`
 				inner_html += fmt.Sprintf(`<h4>%s</h4>`, div.Name)
 				
 				id_div := fmt.Sprintf(`division_%d`, div.DivisionId)
@@ -82,6 +82,8 @@ func CreatePoolHandler(w http.ResponseWriter, r *http.Request) {
 			form_html += `<button type="submit" class="btn btn-default">Create my pool</button>`
 			form_html += `</form>`
 			
+		} else if len(divisions) == 0 {
+			form_html = `<div class="alert alert-error" role="alert"><strong>Error!</strong><br />Pool divisions are not created at this moment !</div>`
 		} else {
 			form_html = `<h4>You already got a pool !</h4>`
 		}

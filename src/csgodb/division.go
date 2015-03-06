@@ -101,7 +101,7 @@ func GetAllDivisionsWithPlayer(db *sql.DB) []*Division {
 	currentDiv := &Division{DivisionId: 0}
 	
 	divs = append(divs, currentDiv)
-	
+	it := 0
 	for rows.Next() {
 		d_id := 0
 		d_name := ""
@@ -123,7 +123,11 @@ func GetAllDivisionsWithPlayer(db *sql.DB) []*Division {
 		}
 		
 		currentDiv.Players = append(currentDiv.Players, pl)
-		
+		it++
+	}
+	
+	if it == 0 {
+		divs = []*Division{}
 	}
 	
 	return divs

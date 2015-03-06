@@ -1,0 +1,81 @@
+
+.help-div {
+  visibility: hidden;
+  display: none;
+}
+
+.help-link {
+  color: black;
+  background-color: #99d6ff;
+  border: 1px solid #99d6ff;
+  padding-left: 3px;
+  padding-right: 3px;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.login-form {
+  border:1px solid #F2F0F2;
+  background-color: #FAF7FA;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.user-menu {
+  margin-bottom: 5px;
+  width: 100px;
+}
+
+.recent-matches-title {
+  margin-bottom: 2px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.side-match-link {
+ color: #E32E24; 
+}
+
+.side-match-link:hover {
+ color: #F29D68; 
+}
+
+.recent-matches {
+ background-color: #E6F0F5;
+ padding: 10px;
+ border-radius: 10px; 
+ border: 1px solid #ABAEF5;
+}
+
+.side-match {
+ margin-bottom: 5px;
+}
+
+.footer-link {
+ color: black;
+ font-size: 10px;
+}
+
+.kddelta-positive {
+  font-weight: bold;
+  color: green;
+}
+
+.kddelta-negative {
+  font-weight: bold;
+  color: red;
+}
+
+.player-division {
+  background-color: #E6F0F5;
+  border-radius: 10px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ABAEF5;
+  
+}
+
+.player-division a {
+  color: red;
+  
+}

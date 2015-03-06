@@ -51,18 +51,16 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	last_update := csgodb.GetLastUpdate(db)
 	content := ""
 	if len(matches) > 0 {
-		matches_html := "<ul>"
+		matches_html := ""
 		
 		for _, m := range matches {
 			t1 := csgodb.GetTeamById(db, m.Team1.TeamId)
 			t2 := csgodb.GetTeamById(db, m.Team2.TeamId)
 			
-			matches_html = matches_html + fmt.Sprintf("<li><a href=\"/viewmatch/?id=%d\">(%d) %s vs (%d) %s</a></li>", m.MatchId, m.Team1.Score, t1.Name, m.Team2.Score, t2.Name)
+			matches_html = matches_html + fmt.Sprintf(`<div class="side-match"><a href="/viewmatch/?id=%d" class="side-match-link">(%d) %s vs (%d) %s</a></div>`, m.MatchId, m.Team1.Score, t1.Name, m.Team2.Score, t2.Name)
 		}
 		
-		matches_html = matches_html + "</ul>"
-		
-		curevent = fmt.Sprintf("<strong>%s</strong><br />%s", "Matches of the last days", matches_html)
+		curevent = fmt.Sprintf(`<div class="recent-matches"><div class="recent-matches-title">%s</div>%s</div>`, "Matches of the last days", matches_html)
 	} else {
 		curevent = "<em>No matches found !</em>"
 	}
@@ -123,7 +121,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	for _, div := range divisions {
 		
 		inner_div := CreateDiv()
-		inner_div.SetAttribute("class", "col-md-2")
+		inner_div.SetAttribute("class", "col-md-2 player-division")
 		
 		title := &HtmlElement{Tag: "h4"}
 		title.InnerText = div.Name
