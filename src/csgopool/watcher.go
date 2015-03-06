@@ -132,7 +132,7 @@ func (w *WatcherState) StartBot()  {
 	//merge for snapshot
 	_db, _ := csgodb.Db.Open()
 	_db.Close()
-	
+
 	w.Log.Info("Starting watcher Bot")
 	for {
 		

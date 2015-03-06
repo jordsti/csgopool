@@ -23,7 +23,7 @@
 
 .user-menu {
   margin-bottom: 5px;
-  width: 100px;
+  width: 120px;
 }
 
 .recent-matches-title {
@@ -77,5 +77,19 @@
 
 .player-division a {
   color: red;
-  
+}
+
+.home-header {
+  border:1px solid #F2F0F2;
+  background-color: #FAF7FA;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.home-header p {
+  font-size: 15px; 
+}
+
+.server-info {
+ font-size: 10px; 
 }

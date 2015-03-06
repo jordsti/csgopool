@@ -2,6 +2,7 @@ package csgopool
 
 import (
 	"net/smtp"
+	"fmt"
 )
 
 const (
@@ -21,7 +22,21 @@ type Email struct {
 func (e *Email) Body() []byte {
 	//todo
 	//construct mail here
-	return []byte(e.Message)
+	email := ""
+	email += fmt.Sprintf("From: %s\r\n", e.From)
+	
+	to_str := ""
+	
+	for _, d := range e.Destination {
+		to_str += d + ", "
+	}
+	
+	email += fmt.Sprintf("To: %s\r\n", to_str)
+	email += fmt.Sprintf("Subject: %s\r\n", e.Subject)
+	
+	email = fmt.Sprintf("%s\r\n%s", email, e.Message)
+
+	return []byte(email)
 }
 
 func (e *Email) Send() {
