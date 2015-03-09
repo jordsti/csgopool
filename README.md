@@ -53,7 +53,6 @@ You can specify many settings with application switch
 
   - HLTV Stats parsing
   - ESEA Stats parsing
-  - Events parsing (will be removed)
   - Matches parsing
   - Teams parsing
   - News
@@ -63,13 +62,7 @@ You can specify many settings with application switch
 
 This is the TODO list for the near future
 
-  - ESEA parser (nearly done, some errors handling todo)
-  - HLTV parser refactor (done, removing events, errors handling)
-  - Match revoke, add match to pool
   - Database configuration interface if none found could be nice
   - User constraint serialization and implementation (password min char, username min and max)
-  - Maybe a settings file could be nice
-  - User Pool Submission
-  - User Main page (Dashboard with last matches stats and points attribution)
 
   
