@@ -6,8 +6,8 @@
 
 .help-link {
   color: black;
-  background-color: #99d6ff;
-  border: 1px solid #99d6ff;
+  background-color: #f7f6f2;
+  border: 1px solid #e8e3da;
   padding-left: 3px;
   padding-right: 3px;
   font-weight: bold;
@@ -41,7 +41,7 @@
 }
 
 .recent-matches {
- background-color: #E6F0F5;
+ background-color: #F2F8FA;
  padding: 10px;
  border-radius: 10px; 
  border: 1px solid #ABAEF5;
@@ -67,7 +67,7 @@
 }
 
 .player-division {
-  background-color: #E6F0F5;
+  background-color: #F2F8FA;
   border-radius: 10px;
   margin-left: 10px;
   margin-bottom: 10px;
@@ -92,4 +92,17 @@
 
 .server-info {
  font-size: 10px; 
+}
+
+.error-div {
+	visibility: hidden;
+	display: none;
+}
+
+.page-nav {
+	border: 1px solid #e8e3da;
+	border-radius: 10px;
+	width: 120px;
+	padding: 5px;
+	padding-left: 10px;
 }
