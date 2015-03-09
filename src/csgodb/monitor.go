@@ -5,6 +5,12 @@ import (
 	"database/sql"
 )
 
+const (
+	DoneTask = 2
+	OngoingTask = 1
+	PendingTask = 0
+)
+
 type MonitorTask struct {
 	TaskId int
 	Type int
@@ -26,15 +32,15 @@ func (mt *MonitorTask) Update(db *sql.DB) {
 }
 
 func (mt *MonitorTask) IsDone() bool {
-	return (mt.Status == 2)
+	return (mt.Status == DoneTask)
 }
 
 func (mt *MonitorTask) IsOngoing() bool {
-	return (mt.Status == 1)
+	return (mt.Status == OngoingTask)
 }
 
 func (mt *MonitorTask) IsPending() bool {
-	return (mt.Status == 0)
+	return (mt.Status == PendingTask)
 }
 
 func GetUndoneTasks(db *sql.DB) []*MonitorTask {

@@ -1,38 +1,44 @@
 		<h3>Create an account</h3>
-			<script type="text/javascript">
-				var passwordMinChar = {{.PasswordMinChar}};
-				var usernameMinChar = {{.UsernameMinChar}};
-				var usernameMaxChar = {{.UsernameMaxChar}};
-			</script>
-			<form method="POST" action="/createaccount/" id="createaccount">
-				<div id="username_error" class="alert alert-danger error-div" role="alert">
-					Your username must be between {{.UsernameMinChar}} and {{.UsernameMaxChar}} characters !
-				</div>
-			   <div class="form-group" id="username_group">
-					<label for="username">Username</label>
-					<input class="form-control" type="text" name="username" id="username" />
-				</div>
-				<div id="password_error" class="alert alert-danger error-div" role="alert">
-					Your password must contains at least {{.PasswordMinChar}} characters !
-				</div>
-				<div id="password_mismatch_error" class="alert alert-danger error-div" role="alert">
-					Your two passwords aren't the same !
-				</div>
-				<div class="form-group" id="password_group">
-					<label for="password">Password</label>
-					<input class="form-control" type="password" name="password" id="password" />
-				</div>
-				<div class="form-group" id="password2_group">
-					<label for="password2">Password (Confirm)</label>
-					<input class="form-control" type="password" name="password2" id="password2" />
-				</div>				
-				<div class="form-group" id="email_group">
-					<label for="email">Email</label>
-					<input type="text" name="email" id="email" class="form-control" />
-					<div id="email_error" class="alert alert-danger error-div" role="alert">
-					You need to enter a valid email address
+			<div class="container">
+				<div class="row">
+					<div class="col-md-4">
+						<script type="text/javascript">
+							var passwordMinChar = {{.PasswordMinChar}};
+							var usernameMinChar = {{.UsernameMinChar}};
+							var usernameMaxChar = {{.UsernameMaxChar}};
+						</script>
+						<form method="POST" action="/createaccount/" id="createaccount">
+							<div id="username_error" class="alert alert-danger error-div" role="alert">
+								Your username must be between {{.UsernameMinChar}} and {{.UsernameMaxChar}} characters !
+							</div>
+						   <div class="form-group" id="username_group">
+								<label for="username">Username</label>
+								<input class="form-control" type="text" name="username" id="username" />
+							</div>
+							<div id="password_error" class="alert alert-danger error-div" role="alert">
+								Your password must contains at least {{.PasswordMinChar}} characters !
+							</div>
+							<div id="password_mismatch_error" class="alert alert-danger error-div" role="alert">
+								Your two passwords aren't the same !
+							</div>
+							<div class="form-group" id="password_group">
+								<label for="password">Password</label>
+								<input class="form-control" type="password" name="password" id="password" />
+							</div>
+							<div class="form-group" id="password2_group">
+								<label for="password2">Password (Confirm)</label>
+								<input class="form-control" type="password" name="password2" id="password2" />
+							</div>				
+							<div class="form-group" id="email_group">
+								<label for="email">Email</label>
+								<input type="text" name="email" id="email" class="form-control" />
+								<div id="email_error" class="alert alert-danger error-div" role="alert">
+								You need to enter a valid email address
+								</div>
+							</div>
+							<button type="button" class="btn btn-default" onclick="checkAccountForm();">Sign up</button><br />
+						</form>
 					</div>
 				</div>
-				<button type="button" class="btn btn-default" onclick="checkAccountForm();">Sign up</button><br />
-			</form>
+			</div>
 

@@ -61,7 +61,7 @@ You can specify many settings with application switch
 ### To Do
 
 This is the TODO list for the near future
-
+  - add some stat tracking, IP, user-agent, consulted URI
   - Database configuration interface if none found could be nice
   - User constraint serialization and implementation (password min char, username min and max)
 

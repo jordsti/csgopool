@@ -19,7 +19,7 @@ type PrivateMessage struct {
 	Status int
 	Title string
 	Text string
-	SendedOn time.Time
+	SentOn time.Time
 }
 
 func GetMessageById(db *sql.DB, messageId int) *PrivateMessage {
@@ -32,10 +32,15 @@ func GetMessageById(db *sql.DB, messageId int) *PrivateMessage {
 	
 	rows, _ := db.Query(query, messageId)
 	for rows.Next() {
-		rows.Scan(&msg.MessageId, &msg.SenderId, &msg.SenderName, &msg.RecipientId, &msg.RecipientName, &msg.Status, &msg.Title, &msg.Text, &msg.SendedOn)
+		rows.Scan(&msg.MessageId, &msg.SenderId, &msg.SenderName, &msg.RecipientId, &msg.RecipientName, &msg.Status, &msg.Title, &msg.Text, &msg.SentOn)
 	}
 	
 	return msg
+}
+
+func DeleteMessage(db *sql.DB, messageId int) {
+	query := "DELETE FROM private_messages WHERE message_id = ?"
+	db.Exec(query, messageId)
 }
 
 //title and text must be html escaped!
@@ -58,7 +63,7 @@ func GetUserMessages(db *sql.DB, userId int, start int, end int) []*PrivateMessa
 	rows, _ := db.Query(query, userId, start, end)
 	for rows.Next() {
 		msg := &PrivateMessage{}
-		rows.Scan(&msg.MessageId, &msg.SenderId, &msg.SenderName, &msg.RecipientId, &msg.RecipientName, &msg.Status, &msg.Title, &msg.Text, &msg.SendedOn)
+		rows.Scan(&msg.MessageId, &msg.SenderId, &msg.SenderName, &msg.RecipientId, &msg.RecipientName, &msg.Status, &msg.Title, &msg.Text, &msg.SentOn)
 		
 		messages = append(messages, msg)
 	}

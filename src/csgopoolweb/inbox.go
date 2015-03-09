@@ -25,12 +25,29 @@ func InboxHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	
+	action := r.FormValue("action")
+	db, _ := csgodb.Db.Open()
+	if action == "delete" {
+		
+		m_id := ParseInt(r.FormValue("id"))
+		
+		message := csgodb.GetMessageById(db, m_id)
+		
+		if message.MessageId != 0 {
+			if message.RecipientId == session.UserId {
+				//this can be deleted by this user
+				csgodb.DeleteMessage(db, m_id)
+			}
+		}
+		
+	}
+	
 	start := 0
 	count := 50
 	
 	m := GetMenu(session)
 	messages_html := ""
-	db, _ := csgodb.Db.Open()
+	
 	
 	messages := csgodb.GetUserMessages(db, session.UserId, start, start + count)
 	

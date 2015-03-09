@@ -33,11 +33,14 @@ func (e *Email) Body() []byte {
 	
 	email += fmt.Sprintf("To: %s\r\n", to_str)
 	email += fmt.Sprintf("Subject: %s\r\n", e.Subject)
-	
+	email += `Content-type: text/plain; charset="utf-8"\r\n`
+	email += `MIME-Version: 1.0\r\n`
+	//email += `Content-Transfer-Encoding: base64\r\n`
 	email = fmt.Sprintf("%s\r\n%s", email, e.Message)
 
 	return []byte(email)
 }
+
 
 func (e *Email) Send() {
 	

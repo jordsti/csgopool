@@ -1,19 +1,21 @@
-<div class="col-md-8">
-	<div class="container">
-		<div class="row">
-			<div class="col-md-2">
-			From : {{.Sender}}
-			</div>
-			<div class="col-md-8">
-			{{.MessageTitle}}
-			</div>
+<div class="container message-container">
+	<div class="row">
+		<div class="col-md-3">
+		From : {{.Sender}}
 		</div>
-		<div class="row">
-			<div class="col-md-10">
-			{{.Text}}
-			</div>
+		<div class="col-md-9 message-title">
+		Title : {{.MessageTitle}}
 		</div>
-		<div class="row">
+	</div>
+	<div class="row">
+		<div class="col-md-12 message-text">
+		{{.Text}}
+		<br />
+		<span class="message-date">{{.SentOn}}</span>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 message-links">
 		{{.Links}}
 		</div>
 	</div>

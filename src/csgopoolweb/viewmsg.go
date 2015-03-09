@@ -10,6 +10,7 @@ import (
 type ViewMessagePage struct {
 	Page
 	Sender template.HTML
+	SentOn string
 	MessageTitle string
 	Text string
 	Links template.HTML
@@ -49,7 +50,11 @@ func ViewMessageHandler(w http.ResponseWriter, r *http.Request) {
 		link := &Link{Caption: "Reply", Url:"/sendmsg/"}
 		link.AddInt("recipient_id", message.SenderId)
 		
-		p.Links = template.HTML(link.GetHTML())
+		deleteLink := &Link{Caption: "Delete", Url:"/inbox/"}
+		deleteLink.AddParameter("action", "delete")
+		deleteLink.AddInt("id", message.MessageId)
+		
+		p.Links = template.HTML(fmt.Sprintf("%s | %s", link.GetHTML(), deleteLink.GetHTML()))
 		
 		//update message status
 		
@@ -67,7 +72,13 @@ func ViewMessageHandler(w http.ResponseWriter, r *http.Request) {
 	p.Menu = template.HTML(m.GetHTML())
 	//p.LeftSide = template.HTML(curevent)
 	p.GenerateRightSide(session)
-
+	p.SentOn = fmt.Sprintf("%d-%02d-%02d %02d:%02d", 
+		message.SentOn.Year(), 
+		message.SentOn.Month(), 
+		message.SentOn.Day(), 
+		message.SentOn.Hour(), 
+		message.SentOn.Minute())
+	
 	t.Execute(w, p)
 	
 }

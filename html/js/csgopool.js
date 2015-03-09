@@ -46,6 +46,11 @@ function checkAccountForm() {
 		return;
 	}
 	
+	if (email.value.indexOf("@") != -1) {
+		showHelp('email_error');
+		addClass('email', 'has-error');
+	}
+	
 	form.submit()
 }
 

@@ -106,3 +106,32 @@
 	padding: 5px;
 	padding-left: 10px;
 }
+
+.message-container {
+	border-radius: 20px;
+	border: 1px solid #e8e3da;
+	background-color: #f7f6f2;
+	width: 100%;
+	padding: 10px;
+}
+
+.message-title {
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.message-text {
+	margin-top: 5px;
+	margin-left: 20px;
+	margin-bottom: 10px;
+}
+
+.message-date {
+	margin-left: 15px;
+	font-size: 12px;
+	font-style: italic;
+}
+
+.message-links {
+	margin-left: 10px;
+}
